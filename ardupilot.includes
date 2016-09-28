@@ -275,11 +275,6 @@ modules/PX4Firmware/src/examples/subscriber
 modules/PX4Firmware/src/include
 modules/PX4Firmware/src/lib
 modules/PX4Firmware/src/lib/conversion
-modules/PX4Firmware/src/lib/DriverFramework/dspal/include
-modules/PX4Firmware/src/lib/DriverFramework/dspal/include/machine
-modules/PX4Firmware/src/lib/DriverFramework/dspal/include/sys
-modules/PX4Firmware/src/lib/DriverFramework/dspal/test/dspal_tester/apps_proc
-modules/PX4Firmware/src/lib/DriverFramework/dspal/test/dspal_tester/include
 modules/PX4Firmware/src/lib/DriverFramework/framework/include
 modules/PX4Firmware/src/lib/ecl
 modules/PX4Firmware/src/lib/ecl/attitude_fw

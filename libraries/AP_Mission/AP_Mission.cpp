@@ -22,6 +22,27 @@ const AP_Param::GroupInfo AP_Mission::var_info[] = {
     // @Values: 0:Resume Mission, 1:Restart Mission
     AP_GROUPINFO("RESTART",  1, AP_Mission, _restart, AP_MISSION_RESTART_DEFAULT),
 
+    // @Param: ATOB_ALT
+    // @DisplayName: Point AToB altitude
+    // @Description: Point A to B flight mode altitude
+    // @Values: Default 5(m)
+    // @User: Enigma
+    AP_GROUPINFO("ATOB_ALT", 2, AP_Mission, _point_atob_altitude, 5),
+
+    // @Param ATOB_INT
+    // @DisplayName: Point AToB interval
+    // @Description: Point A to B flight mode lateral interval
+    // @Values: Default 5(m)
+    // @User: Enigma
+    AP_GROUPINFO("ATOB_INT", 3, AP_Mission, _point_atob_interval, 5),
+
+    // @Param ATOB_DIR
+    // @DisplayName: Point AToB direction
+    // @Description: Point A to B flight mode turn direction
+    // @Values: 0:Left,1:Right
+    // @User: Enigma
+    AP_GROUPINFO("ATOB_DIR", 4, AP_Mission, _point_atob_direction, 1),
+
     AP_GROUPEND
 };
 

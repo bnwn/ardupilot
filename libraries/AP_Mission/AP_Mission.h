@@ -450,7 +450,7 @@ private:
         uint8_t turn_direction  : 1; // true if vehicle flight direction turn to right, else turn to left
         uint8_t current_seq     : 1; // true if lateral movement need to increasing
         float bearing;
-        uint32_t lateral_movement;   // vehicle lateral movement multiple in point A to B flight mode
+        uint32_t lateral_movement;   // vehicle lateral movement times in point A to B flight mode
         float interval;              // vehicle move distance in lateral once
         float flight_alt;            // vehicle flight alttitude in point A to B flight mode
     } _point_flags;
@@ -507,7 +507,10 @@ private:
 
     // parameters
     AP_Int16                _cmd_total;  // total number of commands in the mission
-    AP_Int8                 _restart;   // controls mission starting point when entering Auto mode (either restart from beginning of mission or resume from last command run)
+    AP_Int8                 _restart;   // controls mission starting point when entering Auto mode (either restart from beginning of mission or resume from last command run)  
+    AP_Float                _point_atob_altitude;
+    AP_Float                _point_atob_interval;
+    AP_Int8                 _point_atob_direction;
 
     // pointer to main program functions
     mission_cmd_fn_t        _cmd_start_fn;  // pointer to function which will be called when a new command is started
