@@ -283,6 +283,13 @@ public:
         _flags.state = MISSION_STOPPED;
         _flags.nav_cmd_loaded = false;
         _flags.do_cmd_loaded = false;
+
+        // need to initialise point flags
+        _point_flags.state = MISSION_STOPPED;
+        _point_flags.nav_cmd_loaded = false;
+        _point_flags.turn_direction = true;
+        _point_flags.interval = 5;
+        _point_flags.flight_alt = 5;
     }
 
     ///
@@ -436,6 +443,17 @@ private:
         uint8_t do_cmd_loaded   : 1; // true if a "do"/"conditional" command has been loaded into _do_cmd
         uint8_t do_cmd_all_done : 1; // true if all "do"/"conditional" commands have been completed (stops unnecessary searching through eeprom for do commands)
     } _flags;
+
+    struct PointAToB_Flags {
+        mission_state state;
+        uint8_t nav_cmd_loaded  : 1; // true if a "navigation" command has been loaded into _nav_cmd
+        uint8_t turn_direction  : 1; // true if vehicle flight direction turn to right, else turn to left
+        uint8_t current_seq     : 1; // true if lateral movement need to increasing
+        float bearing;
+        uint32_t lateral_movement;   // vehicle lateral movement multiple in point A to B flight mode
+        float interval;              // vehicle move distance in lateral once
+        float flight_alt;            // vehicle flight alttitude in point A to B flight mode
+    } _point_flags;
 
     ///
     /// private methods
