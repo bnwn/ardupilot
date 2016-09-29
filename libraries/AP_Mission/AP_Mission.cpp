@@ -579,7 +579,7 @@ bool AP_Mission::set_current_cmd(uint16_t index)
 
 /// load_cmd_from_storage - load command from storage
 ///     true is return if successful
-bool AP_Mission::read_cmd_from_storage(uint16_t index, Mission_Command& cmd, uint8_t mission_type) const
+bool AP_Mission::read_cmd_from_storage(uint16_t index, Mission_Command& cmd, uint8_t mission_type = AP_MISSION_AUTO_RUNNING) const
 {
     // exit immediately if index is beyond last command but we always let cmd #0 (i.e. home) be read
     if (index > (unsigned)_cmd_total && index != 0 && mission_type == AP_MISSION_AUTO_RUNNING) {
@@ -600,13 +600,30 @@ bool AP_Mission::read_cmd_from_storage(uint16_t index, Mission_Command& cmd, uin
 
         uint8_t b1 = _storage.read_byte(pos_in_storage);
         if (b1 == 0) {
-            cmd.id = _storage.read_uint16(pos_in_storage+1);
-            cmd.p1 = _storage.read_uint16(pos_in_storage+3);
-            _storage.read_block(cmd.content.bytes, pos_in_storage+5, 10);
+            if (mission_type == AP_MISSION_AUTO_RUNNING) {
+                cmd.id = _storage.read_uint16(pos_in_storage+1);
+                cmd.p1 = _storage.read_uint16(pos_in_storage+3);
+                _storage.read_block(cmd.content.bytes, pos_in_storage+5, 10);
+
+            } else if (mission_type == AP_MISSION_POINT_ATOB_RUNNING) {
+                cmd.id = _storage.read_uint16(pos_in_storage+1);
+                cmd.index = _storage.read_byte(pos_in_storage+3);
+                cmd.p1 = _storage.read_byte(pos_in_storage+4);
+                _storage.read_block(cmd.content.bytes, pos_in_storage+5, 10);
+            }
+
         } else {
-            cmd.id = b1;
-            cmd.p1 = _storage.read_uint16(pos_in_storage+1);
-            _storage.read_block(cmd.content.bytes, pos_in_storage+3, 12);
+            if (mission_type == AP_MISSION_AUTO_RUNNING) {
+                cmd.id = b1;
+                cmd.p1 = _storage.read_uint16(pos_in_storage+1);
+                _storage.read_block(cmd.content.bytes, pos_in_storage+3, 12);
+
+            } else if (mission_type == AP_MISSION_POINT_ATOB_RUNNING) {
+                cmd.id = b1;
+                cmd.index = _storage.read_byte(pos_in_storage+1);
+                cmd.p1 = _storage.read_byte(pos_in_storage+2);
+                _storage.read_block(cmd.content.bytes, pos_in_storage+3, 12);
+            }
         }
 
         // set command's index to it's position in eeprom
@@ -622,7 +639,7 @@ bool AP_Mission::read_cmd_from_storage(uint16_t index, Mission_Command& cmd, uin
 /// write_cmd_to_storage - write a command to storage
 ///     index is used to calculate the storage location
 ///     true is returned if successful
-bool AP_Mission::write_cmd_to_storage(uint16_t index, Mission_Command& cmd)
+bool AP_Mission::write_cmd_to_storage(uint16_t index, Mission_Command& cmd, uint8_t mission_type = AP_MISSION_AUTO_RUNNING)
 {
     // range check cmd's index
     if (index >= num_commands_max()) {
@@ -633,15 +650,35 @@ bool AP_Mission::write_cmd_to_storage(uint16_t index, Mission_Command& cmd)
     uint16_t pos_in_storage = 4 + (index * AP_MISSION_EEPROM_COMMAND_SIZE);
 
     if (cmd.id < 256) {
-        _storage.write_byte(pos_in_storage, cmd.id);
-        _storage.write_uint16(pos_in_storage+1, cmd.p1);
-        _storage.write_block(pos_in_storage+3, cmd.content.bytes, 12);
+        if (mission_type == AP_MISSION_AUTO_RUNNING) {
+            _storage.write_byte(pos_in_storage, cmd.id);
+            _storage.write_uint16(pos_in_storage+1, cmd.p1);
+            _storage.write_block(pos_in_storage+3, cmd.content.bytes, 12);
+
+        } else if (mission_type == AP_MISSION_POINT_ATOB_RUNNING) {
+            // write mission in point item form
+            _storage.write_byte(pos_in_storage, cmd.id);
+            _storage.write_byte(pos_in_storage+1, cmd.index);
+            _storage.write_byte(pos_in_storage+2, cmd.p1);
+            _storage.write_block(pos_in_storage+3, cmd.content.bytes, 12);
+        }
+
     } else {
         // if the command ID is above 256 we store a 0 followed by the 16 bit command ID
-        _storage.write_byte(pos_in_storage, 0);
-        _storage.write_uint16(pos_in_storage+1, cmd.id);
-        _storage.write_uint16(pos_in_storage+3, cmd.p1);
-        _storage.write_block(pos_in_storage+5, cmd.content.bytes, 10);
+        if (mission_type == AP_MISSION_AUTO_RUNNING) {
+            _storage.write_byte(pos_in_storage, 0);
+            _storage.write_uint16(pos_in_storage+1, cmd.id);
+            _storage.write_uint16(pos_in_storage+3, cmd.p1);
+            _storage.write_block(pos_in_storage+5, cmd.content.bytes, 10);
+
+        } else if (mission_type == AP_MISSION_POINT_ATOB_RUNNING) {
+            // write mission in point item form
+            _storage.write_byte(pos_in_storage, 0);
+            _storage.write_byte(pos_in_storage+1, cmd.id);
+            _storage.write_byte(pos_in_storage+3, cmd.index);
+            _storage.write_byte(pos_in_storage+4, cmd.p1);
+            _storage.write_block(pos_in_storage+5, cmd.content.bytes, 10);
+        }
     }
 
     // remember when the mission last changed
@@ -1565,7 +1602,7 @@ bool AP_Mission::advance_current_point_cmd()
         return false;
     }
 
-    if (!read_cmd_from_storage(AP_MISSION_POINT_CURRENT_OFFSET, cmd)) {
+    if (!read_cmd_from_storage(AP_MISSION_POINT_CURRENT_OFFSET, cmd, AP_MISSION_POINT_ATOB_RUNNING)) {
         // not supposed to happen
         return false;
     }
@@ -1579,6 +1616,12 @@ bool AP_Mission::advance_current_point_cmd()
         _point_cmd.p1 = cmd.p1;
     }
 
+    if (_point_cmd.p1 > 255) {
+        // the largest lateral index is 256
+        _point_flags.state = MISSION_COMPLETE;
+        return false;
+    }
+
     if (_point_cmd.p1 % 2 == _point_cmd.index) {
         _point_cmd.content.location = _point_cmd_a.content.location;
     } else {
@@ -1589,7 +1632,7 @@ bool AP_Mission::advance_current_point_cmd()
     location_update(_point_cmd.content.location, _point_flags.bearing, (float)(_point_cmd.p1 * _point_flags.interval));
     _point_cmd.content.location.alt = (float) _point_flags.flight_alt;
 
-    if (!write_cmd_to_storage(AP_MISSION_POINT_CURRENT_OFFSET, _point_cmd)) {
+    if (!write_cmd_to_storage(AP_MISSION_POINT_CURRENT_OFFSET, _point_cmd, AP_MISSION_POINT_ATOB_RUNNING)) {
         // not supposed to happen
         return false;
     }
@@ -1820,5 +1863,20 @@ uint16_t AP_Mission::get_landing_sequence_start()
     }
 
     return landing_start_index;
+}
+
+bool AP_Mission::is_valid_point()
+{
+    Mission_Command tmp;
+
+    if (!read_cmd_from_storage(AP_MISSION_POINT_CURRENT_OFFSET, tmp, AP_MISSION_POINT_ATOB_RUNNING)) {
+        return false;
+    }
+
+    if (tmp.id == MAV_CMD_NAV_WAYPOINT && tmp.content.location.alt != 0 && tmp.content.location.lng != 0 && tmp.content.location.lat != 0) {
+        return true;
+    }
+
+    return false;
 }
 

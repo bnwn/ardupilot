@@ -410,12 +410,12 @@ public:
 
     /// load_cmd_from_storage - load command from storage
     ///     true is return if successful
-    bool read_cmd_from_storage(uint16_t index, Mission_Command& cmd, uint8_t mission_type) const;
+    bool read_cmd_from_storage(uint16_t index, Mission_Command& cmd, uint8_t mission_type = AP_MISSION_AUTO_RUNNING) const;
 
     /// write_cmd_to_storage - write a command to storage
     ///     cmd.index is used to calculate the storage location
     ///     true is returned if successful
-    bool write_cmd_to_storage(uint16_t index, Mission_Command& cmd);
+    bool write_cmd_to_storage(uint16_t index, Mission_Command& cmd, uint8_t mission_type = AP_MISSION_AUTO_RUNNING);
 
     /// write_home_to_storage - writes the special purpose cmd 0 (home) to storage
     ///     home is taken directly from ahrs
