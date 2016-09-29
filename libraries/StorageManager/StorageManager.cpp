@@ -77,7 +77,7 @@ const StorageManager::StorageArea StorageManager::layout_copter[STORAGE_NUM_AREA
     { StorageParam,    8192,  1280},
     { StorageRally,    9472,   300},
     { StorageFence,    9772,   256},
-    { StorageMission, 10028,  6228}, // leave 128 byte gap for expansion
+    { StorageMission, 10028,  6228}, // leave 128 byte gap for expansion, last 60 byte has been reserved for point A to B
 #endif
 };
 

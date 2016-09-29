@@ -168,6 +168,58 @@ void AP_Mission::start_or_resume()
     }
 }
 
+/// point A to B start - First command type must be TAKEOFF
+void AP_Mission::point_atob_start()
+{
+    int32_t bearing_cd;
+
+    _point_flags.state = MISSION_RUNNING;
+
+    _point_cmd.id = MAV_CMD_NAV_TAKEOFF;
+    _point_cmd.index = 0;
+    _point_cmd.p1 = 0;
+    _point_cmd.content.location.lat = 0;
+    _point_cmd.content.location.lng = 0;
+    _point_cmd.content.location.options = 0;
+    _point_cmd.content.location.alt = MAX(_point_atob_altitude * 100, 100); // convert m to cm
+
+    _point_flags.nav_cmd_loaded = true;
+    _point_flags.flight_alt = _point_atob_altitude;
+    _point_flags.interval = _point_atob_interval;
+
+    if (!read_cmd_from_storage(AP_MISSION_POINT_A_OFFSET, _point_cmd_a, AP_MISSION_POINT_ATOB_RUNNING)) {
+        // not supposed to happen
+        return;
+    }
+
+    if (!read_cmd_from_storage(AP_MISSION_POINT_B_OFFSET, _point_cmd_b, AP_MISSION_POINT_ATOB_RUNNING)) {
+        // not supposed to happen
+        return;
+    }
+
+    bearing_cd = get_bearing_cd(_point_cmd_a.content.location, _point_cmd_b.content.location);
+
+    if (_point_atob_direction == 1) {
+        bearing_cd += 9000;
+    } else {
+        bearing_cd -= 9000;
+    }
+
+    if (bearing < 0) {
+        bearing_cd += 36000;
+    } else if (bearing_cd > 36000) {
+        bearing_cd -= 36000;
+    }
+
+    _point_flags.bearing = (float)bearing_cd / 100.0 * DEG_TO_RAD;
+
+    // Note: if there is no active command then the mission must have been stopped just after the previous nav command completed
+    //      update will take care of finding and starting the nav command
+    if (_point_flags.nav_cmd_loaded) {
+        _cmd_start_fn(_point_cmd);
+    }
+}
+
 /// reset - reset mission to the first command
 void AP_Mission::reset()
 {
@@ -252,6 +304,80 @@ void AP_Mission::update()
         if (_cmd_verify_fn(_do_cmd)) {
             // market _nav_cmd as complete (it will be started on the next iteration)
             _flags.do_cmd_loaded = false;
+        }
+    }
+}
+
+/// update in arducopter - ensures the command queues are loaded with the next command and calls main programs command_init and command_verify functions to progress the mission
+///     should be called at 10hz or higher
+void AP_Mission::update(uint8_t mission_type)
+{
+    if (mission_type == AP_MISSION_AUTO_RUNNING) {
+
+        // exit immediately if not running or no mission commands
+        if (_flags.state != MISSION_RUNNING || _cmd_total == 0) {
+            return;
+        }
+
+        // check if we have an active nav command
+        if (!_flags.nav_cmd_loaded || _nav_cmd.index == AP_MISSION_CMD_INDEX_NONE) {
+            // advance in mission if no active nav command
+            if (!advance_current_nav_cmd()) {
+                // failure to advance nav command means mission has completed
+                complete();
+                return;
+            }
+        }else{
+            // run the active nav command
+            if (_cmd_verify_fn(_nav_cmd)) {
+                // market _nav_cmd as complete (it will be started on the next iteration)
+                _flags.nav_cmd_loaded = false;
+                // immediately advance to the next mission command
+                if (!advance_current_nav_cmd()) {
+                    // failure to advance nav command means mission has completed
+                    complete();
+                    return;
+                }
+            }
+        }
+
+        // check if we have an active do command
+        if (!_flags.do_cmd_loaded) {
+            advance_current_do_cmd();
+        }else{
+            // run the active do command
+            if (_cmd_verify_fn(_do_cmd)) {
+                // market _nav_cmd as complete (it will be started on the next iteration)
+                _flags.do_cmd_loaded = false;
+            }
+        }
+
+    } else if (mission_type == AP_MISSION_POINT_ATOB_RUNNING) {
+        // exit immediately if point A to B not running
+        if (_point_flags.state != MISSION_RUNNING) {
+            return;
+        }
+
+        // check if we hava an active point mission
+        if (!_point_flags.nav_cmd_loaded) {
+            // advance in mission if no active point command
+            if (!advance_current_point_cmd()) {
+                // failure to advance point command holding the vehicle and wait
+                point_complete();
+                return;
+            }
+        } else {
+            // run the active point command
+            if (_cmd_verify_fn(_point_cmd)) {
+                //market _nav_cmd as complete
+                _point_flags.nav_cmd_loaded = false;
+                //immediately advance to next point command
+                if (!advance_current_point_cmd()) {
+                    //failure to advance point command holding the vehicle and wait
+                    point_complete();
+                    return;
+                }
+            }
         }
     }
 }
@@ -453,10 +579,10 @@ bool AP_Mission::set_current_cmd(uint16_t index)
 
 /// load_cmd_from_storage - load command from storage
 ///     true is return if successful
-bool AP_Mission::read_cmd_from_storage(uint16_t index, Mission_Command& cmd) const
+bool AP_Mission::read_cmd_from_storage(uint16_t index, Mission_Command& cmd, uint8_t mission_type) const
 {
     // exit immediately if index is beyond last command but we always let cmd #0 (i.e. home) be read
-    if (index > (unsigned)_cmd_total && index != 0) {
+    if (index > (unsigned)_cmd_total && index != 0 && mission_type == AP_MISSION_AUTO_RUNNING) {
         return false;
     }
 
@@ -484,7 +610,9 @@ bool AP_Mission::read_cmd_from_storage(uint16_t index, Mission_Command& cmd) con
         }
 
         // set command's index to it's position in eeprom
-        cmd.index = index;
+        if (mission_type == AP_MISSION_AUTO_RUNNING) {
+            cmd.index = index;
+        }
     }
 
     // return success
@@ -1292,6 +1420,16 @@ void AP_Mission::complete()
     _mission_complete_fn();
 }
 
+/// point_complete - point command calculate error including calling the mission_complete_fn
+void AP_Mission::point_complete()
+{
+    // point flag mission as shut down
+    _point_flags.state = MISSION_COMPLETE;
+
+    // callback to main program's mission complete function
+    _mission_complete_fn();
+}
+
 /// advance_current_nav_cmd - moves current nav command forward
 ///     do command will also be loaded
 ///     accounts for do-jump commands
@@ -1413,6 +1551,53 @@ void AP_Mission::advance_current_do_cmd()
         // set flag to stop unnecessarily searching for do commands
         _flags.do_cmd_all_done = true;
     }
+}
+
+/// advance_current_point_cmd - moves current point command  forward
+///     calculate next point
+///     return true if successfully advanced, false if failed (vehicle loiter wait command)
+bool AP_Mission::advance_current_point_cmd()
+{
+    Mission_Command cmd;
+
+    if (_point_flags.nav_cmd_loaded) {
+        // exit immediately if current point mission has not completed
+        return false;
+    }
+
+    if (!read_cmd_from_storage(AP_MISSION_POINT_CURRENT_OFFSET, cmd)) {
+        // not supposed to happen
+        return false;
+    }
+
+    _point_cmd.id = MAV_CMD_NAV_WAYPOINT;
+    _point_cmd.index = cmd.index ^ 1;
+
+    if (1 == cmd.index) {
+        _point_cmd.p1 = cmd.p1 + 1;
+    } else {
+        _point_cmd.p1 = cmd.p1;
+    }
+
+    if (_point_cmd.p1 % 2 == _point_cmd.index) {
+        _point_cmd.content.location = _point_cmd_a.content.location;
+    } else {
+        _point_cmd.content.location = _point_cmd_b.content.location;
+    }
+
+    // update poitn command location value
+    location_update(_point_cmd.content.location, _point_flags.bearing, (float)(_point_cmd.p1 * _point_flags.interval));
+    _point_cmd.content.location.alt = (float) _point_flags.flight_alt;
+
+    if (!write_cmd_to_storage(AP_MISSION_POINT_CURRENT_OFFSET, _point_cmd)) {
+        // not supposed to happen
+        return false;
+    }
+
+    _point_flags.nav_cmd_loaded = true;
+    _cmd_start_fn(_point_cmd);
+
+    return true;
 }
 
 /// get_next_cmd - gets next command found at or after start_index

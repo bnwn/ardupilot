@@ -39,6 +39,14 @@
 
 #define AP_MISSION_RESTART_DEFAULT          0       // resume the mission from the last command run by default
 
+#define AP_MISSION_POINT_ATOB_RUNNING       0       // mission in point A to B flight mode
+#define AP_MISSION_AUTO_RUNNING             1       // mission in auto flight mode
+
+#define AP_MISSION_POINT_ITEM_OFFSET        410    // point item offset in storagemanager
+#define AP_MISSION_POINT_A_OFFSET           (AP_MISSION_POINT_ITEM_OFFSET)
+#define AP_MISSION_POINT_B_OFFSET           (AP_MISSION_POINT_ITEM_OFFSET + 1)
+#define AP_MISSION_POINT_CURRENT_OFFSET     (AP_MISSION_POINT_ITEM_OFFSET + 2)
+
 /// @class    AP_Mission
 /// @brief    Object managing Mission
 class AP_Mission {
@@ -244,9 +252,9 @@ public:
 
     // command structure
     struct Mission_Command {
-        uint16_t index;             // this commands position in the command list
+        uint16_t index;             // this commands position in the command list; in point commands mean current sequence
         uint16_t id;                // mavlink command id
-        uint16_t p1;                // general purpose parameter 1
+        uint16_t p1;                // general purpose parameter 1; in point commands mean lateral movement
         Content content;
     };
 
@@ -322,6 +330,9 @@ public:
     /// start_or_resume - if MIS_AUTORESTART=0 this will call resume(), otherwise it will call start()
     void start_or_resume();
 
+    /// point A to B flight mode start - First command type must be TAKEOFF
+    void point_atob_start();
+
     /// check mission starts with a takeoff command
     bool starts_with_takeoff_cmd();
 
@@ -338,6 +349,7 @@ public:
     /// update - ensures the command queues are loaded with the next command and calls main programs command_init and command_verify functions to progress the mission
     ///     should be called at 10hz or higher
     void update();
+    void update(uint8_t mission_type);
 
     ///
     /// public command methods
@@ -398,7 +410,7 @@ public:
 
     /// load_cmd_from_storage - load command from storage
     ///     true is return if successful
-    bool read_cmd_from_storage(uint16_t index, Mission_Command& cmd) const;
+    bool read_cmd_from_storage(uint16_t index, Mission_Command& cmd, uint8_t mission_type) const;
 
     /// write_cmd_to_storage - write a command to storage
     ///     cmd.index is used to calculate the storage location
@@ -431,6 +443,9 @@ public:
     // be found.
     uint16_t get_landing_sequence_start();
 
+    // return the point valid flag
+    bool is_valid_point(void);
+
     // user settable parameters
     static const struct AP_Param::GroupInfo var_info[];
 
@@ -448,9 +463,7 @@ private:
         mission_state state;
         uint8_t nav_cmd_loaded  : 1; // true if a "navigation" command has been loaded into _nav_cmd
         uint8_t turn_direction  : 1; // true if vehicle flight direction turn to right, else turn to left
-        uint8_t current_seq     : 1; // true if lateral movement need to increasing
         float bearing;
-        uint32_t lateral_movement;   // vehicle lateral movement times in point A to B flight mode
         float interval;              // vehicle move distance in lateral once
         float flight_alt;            // vehicle flight alttitude in point A to B flight mode
     } _point_flags;
@@ -461,6 +474,7 @@ private:
 
     /// complete - mission is marked complete and clean-up performed including calling the mission_complete_fn
     void complete();
+    void point_complete();
 
     /// advance_current_nav_cmd - moves current nav command forward
     ///     do command will also be loaded
@@ -472,6 +486,11 @@ private:
     ///     accounts for do-jump commands
     ///     returns true if successfully advanced (can it ever be unsuccessful?)
     void advance_current_do_cmd();
+
+    /// advance_current_point_cmd - moves current point command  forward
+    ///     calculate next point
+    ///     return true if successfully advanced, false if failed (vehicle loiter wait command)
+    bool advance_current_point_cmd();
 
     /// get_next_cmd - gets next command found at or after start_index
     ///     returns true if found, false if not found (i.e. mission complete)
@@ -519,6 +538,8 @@ private:
 
     // internal variables
     struct Mission_Command  _nav_cmd;   // current "navigation" command.  It's position in the command list is held in _nav_cmd.index
+    struct Mission_Command  _point_cmd; // current "point A to B" command.  It's position in command list is held in _point_cmd.index
+    struct Mission_Command  _point_cmd_a, _point_cmd_b;
     struct Mission_Command  _do_cmd;    // current "do" command.  It's position in the command list is held in _do_cmd.index
     uint16_t                _prev_nav_cmd_id;       // id of the previous "navigation" command. (WAYPOINT, LOITER_TO_ALT, ect etc)
     uint16_t                _prev_nav_cmd_index;    // index of the previous "navigation" command.  Rarely used which is why we don't store the whole command
