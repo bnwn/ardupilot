@@ -22,6 +22,7 @@
 #include <AP_Param/AP_Param.h>
 #include <AP_AHRS/AP_AHRS.h>
 #include <StorageManager/StorageManager.h>
+#include <string.h>
 
 // definitions
 #define AP_MISSION_EEPROM_VERSION           0x65AE  // version number stored in first four bytes of eeprom.  increment this by one when eeprom format is changed
@@ -46,6 +47,15 @@
 #define AP_MISSION_POINT_A_OFFSET           (AP_MISSION_POINT_ITEM_OFFSET)
 #define AP_MISSION_POINT_B_OFFSET           (AP_MISSION_POINT_ITEM_OFFSET + 1)
 #define AP_MISSION_POINT_CURRENT_OFFSET     (AP_MISSION_POINT_ITEM_OFFSET + 2)
+
+// mission state enumeration
+enum point_save_state {
+    AP_MISSION_POINT_SET_A=0,
+    AP_MISSION_POINT_SET_B=1,
+    AP_MISSION_POINT_SET_CURRENT=2,
+    AP_MISSION_POINT_CLEAR_UP=3,
+    AP_MISSION_POINT_SET_FAILED=4,
+};
 
 /// @class    AP_Mission
 /// @brief    Object managing Mission
@@ -297,7 +307,7 @@ public:
         _point_flags.nav_cmd_loaded = false;
         _point_flags.turn_direction = true;
         _point_flags.interval = 5;
-        _point_flags.flight_alt = 5;
+        _point_flags.flight_alt = 5 * 100.0f;
     }
 
     ///
@@ -309,6 +319,9 @@ public:
 
     /// status - returns the status of the mission (i.e. Mission_Started, Mission_Complete, Mission_Stopped
     mission_state state() const { return _flags.state; }
+
+    /// status - returns the point flight mode status
+    mission_state point_state() const { return _point_flags.state; }
 
     /// num_commands - returns total number of commands in the mission
     uint16_t num_commands() const { return _cmd_total; }
@@ -322,6 +335,18 @@ public:
 
     /// stop - stops mission execution.  subsequent calls to update() will have no effect until the mission is started or resumed
     void stop();
+
+    /// save break point
+    void save_break_point();
+
+    /// clear point item
+    point_save_state clear_point_item();
+
+    /// reset current point
+    point_save_state reset_current_point();
+
+    /// set_current point
+    point_save_state set_current_point();
 
     /// resume - continues the mission execution from where we last left off
     ///     previous running commands will be re-initialised

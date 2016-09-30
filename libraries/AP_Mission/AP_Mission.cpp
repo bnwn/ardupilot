@@ -89,6 +89,144 @@ void AP_Mission::start()
 void AP_Mission::stop()
 {
     _flags.state = MISSION_STOPPED;
+    _point_flags.state = MISSION_STOPPED;
+}
+
+/// save break point
+void AP_Mission::save_break_point()
+{
+    Mission_Command cmd, break_cmd;
+
+    if (!read_cmd_from_storage(AP_MISSION_POINT_CURRENT_OFFSET, cmd, AP_MISSION_POINT_ATOB_RUNNING)) {
+        // not supposed to happen
+        return;
+    }
+
+    if (cmd.p1 == 0 && cmd.index == 0) {
+        // it is not have point item or just on the point A
+        return;
+    }
+
+    break_cmd = cmd;
+
+    if (0 == break_cmd.index) {
+       break_cmd.p1 -= 1;
+    }
+
+    break_cmd.index ^= 1;
+
+    if (!_ahrs.get_position(break_cmd.content.location)) {
+        // callback if failure to get current local position
+        break_cmd = cmd;
+    }
+
+    if (!write_cmd_to_storage(AP_MISSION_POINT_CURRENT_OFFSET, break_cmd, AP_MISSION_POINT_ATOB_RUNNING)) {
+        // not supposed to happen
+        return;
+    }
+}
+
+point_save_state AP_Mission::clear_point_item()
+{
+    Mission_Command cmd;
+
+    memset(&cmd, 0, sizeof(cmd));
+
+    if (!write_cmd_to_storage(AP_MISSION_POINT_A_OFFSET, cmd, AP_MISSION_POINT_ATOB_RUNNING)) {
+        return AP_MISSION_POINT_SET_FAILED;
+    }
+    if (!write_cmd_to_storage(AP_MISSION_POINT_B_OFFSET, cmd, AP_MISSION_POINT_ATOB_RUNNING)) {
+        return AP_MISSION_POINT_SET_FAILED;
+    }
+    if (!write_cmd_to_storage(AP_MISSION_POINT_CURRENT_OFFSET, cmd, AP_MISSION_POINT_ATOB_RUNNING)) {
+        return AP_MISSION_POINT_SET_FAILED;
+    }
+    return AP_MISSION_POINT_CLEAR_UP;
+}
+
+point_save_state AP_Mission::reset_current_point()
+{
+    uint32_t distance_ctoa, distance_ctob, distance_min;
+    uint16_t multiple, error;
+    Mission_Command cmd_a, cmd_b, cmd_c;
+
+    Location loc;
+
+    if (read_cmd_from_storage(AP_MISSION_POINT_A_OFFSET, cmd_a, AP_MISSION_POINT_ATOB_RUNNING)) {
+        if (read_cmd_from_storage(AP_MISSION_POINT_B_OFFSET, cmd_b, AP_MISSION_POINT_ATOB_RUNNING)) {
+            if (_ahrs.get_position(loc)) {
+                distance_ctoa = get_distance_cm(cmd_a.content.location, loc);
+                distance_ctob = get_distance_cm(cmd_b.content.location, loc);
+
+                if (distance_ctoa < distance_ctob) {
+                    distance_min = distance_ctoa;
+                    cmd_c = cmd_a;
+                } else {
+                    distance_min = distance_ctob;
+                    cmd_c = cmd_b;
+                }
+                distance_min = distance_ctoa < distance_ctob ? distance_ctoa : distance_ctob;
+                multiple = distance_min / (_point_flags.interval * 100);
+
+                error = distance_min % multiple;
+                if (error > (_point_flags.interval * 50)) {
+                    multiple += 1;
+                }
+
+                cmd_c.p1 = multiple;
+                if (cmd_c.index == 0) {
+                    cmd_c.index = multiple % 2;
+                } else {
+                    cmd_c.index = (multiple % 2) ^ 1;
+                }
+
+                location_update(cmd_c.content.location, _point_flags.bearing, (float)(cmd_c.p1 * _point_flags.interval));
+                cmd_c.content.location.alt = _point_flags.flight_alt;
+
+                if (write_cmd_to_storage(AP_MISSION_POINT_CURRENT_OFFSET, cmd_c, AP_MISSION_POINT_ATOB_RUNNING)) {
+                    return AP_MISSION_POINT_SET_CURRENT;
+                }
+            }
+        }
+    }
+
+    return AP_MISSION_POINT_SET_FAILED;
+}
+
+point_save_state AP_Mission::set_current_point()
+{
+    Mission_Command cmd;
+    static point_save_state current_point_set_index = AP_MISSION_POINT_SET_A;
+    point_save_state ret = AP_MISSION_POINT_SET_FAILED;
+
+    struct Location current_loc;
+
+    if (!_ahrs.get_position(current_loc)) {
+        return ret;
+    }
+
+    // Init point command
+    cmd.id = MAV_CMD_NAV_WAYPOINT;
+    cmd.index = current_point_set_index;
+    cmd.p1 = 0;
+    cmd.content.location = current_loc;
+    cmd.content.location.alt = _point_flags.flight_alt;
+
+    if (current_point_set_index == AP_MISSION_POINT_SET_A) {
+        if (write_cmd_to_storage(AP_MISSION_POINT_A_OFFSET, cmd, AP_MISSION_POINT_ATOB_RUNNING)) {
+            if (write_cmd_to_storage(AP_MISSION_POINT_CURRENT_OFFSET, cmd, AP_MISSION_POINT_ATOB_RUNNING)) {
+                ret = current_point_set_index;
+                current_point_set_index = AP_MISSION_POINT_SET_B;
+            }
+        }
+    } else if (current_point_set_index == AP_MISSION_POINT_SET_B) {
+        if (write_cmd_to_storage(AP_MISSION_POINT_B_OFFSET, cmd, AP_MISSION_POINT_ATOB_RUNNING)) {
+            ret = current_point_set_index;
+            current_point_set_index = AP_MISSION_POINT_SET_A;
+        }
+    }
+
+    return ret;
 }
 
 /// resume - continues the mission execution from where we last left off
@@ -181,10 +319,10 @@ void AP_Mission::point_atob_start()
     _point_cmd.content.location.lat = 0;
     _point_cmd.content.location.lng = 0;
     _point_cmd.content.location.options = 0;
-    _point_cmd.content.location.alt = MAX(_point_atob_altitude * 100, 100); // convert m to cm
+    _point_cmd.content.location.alt = MAX(_point_atob_altitude * 100.0f, 100); // convert m to cm
 
     _point_flags.nav_cmd_loaded = true;
-    _point_flags.flight_alt = _point_atob_altitude;
+    _point_flags.flight_alt = _point_cmd.content.location.alt;
     _point_flags.interval = _point_atob_interval;
 
     if (!read_cmd_from_storage(AP_MISSION_POINT_A_OFFSET, _point_cmd_a, AP_MISSION_POINT_ATOB_RUNNING)) {
@@ -205,13 +343,13 @@ void AP_Mission::point_atob_start()
         bearing_cd -= 9000;
     }
 
-    if (bearing < 0) {
+    if (bearing_cd < 0) {
         bearing_cd += 36000;
     } else if (bearing_cd > 36000) {
         bearing_cd -= 36000;
     }
 
-    _point_flags.bearing = (float)bearing_cd / 100.0 * DEG_TO_RAD;
+    _point_flags.bearing = (float)bearing_cd / 100.0; // cm to m
 
     // Note: if there is no active command then the mission must have been stopped just after the previous nav command completed
     //      update will take care of finding and starting the nav command
@@ -579,7 +717,7 @@ bool AP_Mission::set_current_cmd(uint16_t index)
 
 /// load_cmd_from_storage - load command from storage
 ///     true is return if successful
-bool AP_Mission::read_cmd_from_storage(uint16_t index, Mission_Command& cmd, uint8_t mission_type = AP_MISSION_AUTO_RUNNING) const
+bool AP_Mission::read_cmd_from_storage(uint16_t index, Mission_Command& cmd, uint8_t mission_type) const
 {
     // exit immediately if index is beyond last command but we always let cmd #0 (i.e. home) be read
     if (index > (unsigned)_cmd_total && index != 0 && mission_type == AP_MISSION_AUTO_RUNNING) {
@@ -639,7 +777,7 @@ bool AP_Mission::read_cmd_from_storage(uint16_t index, Mission_Command& cmd, uin
 /// write_cmd_to_storage - write a command to storage
 ///     index is used to calculate the storage location
 ///     true is returned if successful
-bool AP_Mission::write_cmd_to_storage(uint16_t index, Mission_Command& cmd, uint8_t mission_type = AP_MISSION_AUTO_RUNNING)
+bool AP_Mission::write_cmd_to_storage(uint16_t index, Mission_Command& cmd, uint8_t mission_type)
 {
     // range check cmd's index
     if (index >= num_commands_max()) {
@@ -1630,7 +1768,7 @@ bool AP_Mission::advance_current_point_cmd()
 
     // update poitn command location value
     location_update(_point_cmd.content.location, _point_flags.bearing, (float)(_point_cmd.p1 * _point_flags.interval));
-    _point_cmd.content.location.alt = (float) _point_flags.flight_alt;
+    _point_cmd.content.location.alt = _point_flags.flight_alt;
 
     if (!write_cmd_to_storage(AP_MISSION_POINT_CURRENT_OFFSET, _point_cmd, AP_MISSION_POINT_ATOB_RUNNING)) {
         // not supposed to happen

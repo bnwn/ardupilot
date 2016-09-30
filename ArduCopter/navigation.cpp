@@ -72,6 +72,6 @@ void Copter::run_autopilot()
         mission.update(AP_MISSION_AUTO_RUNNING);
 
     } else if (control_mode == POINT_ATOB) {
-        mission.update(AP_MISSION_POINT_RUNNING);
+        mission.update(AP_MISSION_POINT_ATOB_RUNNING);
     }
 }
