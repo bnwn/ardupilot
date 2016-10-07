@@ -211,6 +211,7 @@ point_save_state AP_Mission::set_current_point()
     cmd.p1 = 0;
     cmd.content.location = current_loc;
     cmd.content.location.alt = _point_flags.flight_alt;
+    cmd.content.location.options = 0;
 
     if (current_point_set_index == AP_MISSION_POINT_SET_A) {
         if (write_cmd_to_storage(AP_MISSION_POINT_A_OFFSET, cmd, AP_MISSION_POINT_ATOB_RUNNING)) {
@@ -319,7 +320,8 @@ void AP_Mission::point_atob_start()
     _point_cmd.content.location.lat = 0;
     _point_cmd.content.location.lng = 0;
     _point_cmd.content.location.options = 0;
-    _point_cmd.content.location.alt = MAX(_point_atob_altitude * 100.0f, 100); // convert m to cm
+    _point_cmd.content.location.alt = MAX(_point_atob_altitude * 100.0f, 100.0f); // convert m to cm
+//    _point_cmd.content.location.alt = _point_atob_altitude * 100.0f;
 
     _point_flags.nav_cmd_loaded = true;
     _point_flags.flight_alt = _point_cmd.content.location.alt;
@@ -1745,6 +1747,11 @@ bool AP_Mission::advance_current_point_cmd()
         return false;
     }
 
+    if (_point_cmd.id == MAV_CMD_NAV_TAKEOFF) {
+        _point_cmd = cmd;
+        return true;
+    }
+
     _point_cmd.id = MAV_CMD_NAV_WAYPOINT;
     _point_cmd.index = cmd.index ^ 1;
 
@@ -1766,9 +1773,14 @@ bool AP_Mission::advance_current_point_cmd()
         _point_cmd.content.location = _point_cmd_b.content.location;
     }
 
-    // update poitn command location value
+    // update point command location value
     location_update(_point_cmd.content.location, _point_flags.bearing, (float)(_point_cmd.p1 * _point_flags.interval));
     _point_cmd.content.location.alt = _point_flags.flight_alt;
+
+    // current point is point B
+    if (_point_cmd.p1 == 0) {
+        _point_cmd = _point_cmd_b;
+    }
 
     if (!write_cmd_to_storage(AP_MISSION_POINT_CURRENT_OFFSET, _point_cmd, AP_MISSION_POINT_ATOB_RUNNING)) {
         // not supposed to happen
@@ -2012,7 +2024,12 @@ bool AP_Mission::is_valid_point()
     }
 
     if (tmp.id == MAV_CMD_NAV_WAYPOINT && tmp.content.location.alt != 0 && tmp.content.location.lng != 0 && tmp.content.location.lat != 0) {
-        return true;
+        if (!read_cmd_from_storage(AP_MISSION_POINT_B_OFFSET, tmp, AP_MISSION_POINT_ATOB_RUNNING)) {
+            return false;
+        }
+        if (tmp.id == MAV_CMD_NAV_WAYPOINT && tmp.content.location.alt != 0 && tmp.content.location.lng != 0 && tmp.content.location.lat != 0) {
+            return true;
+        }
     }
 
     return false;
