@@ -308,6 +308,7 @@ public:
         _point_flags.turn_direction = true;
         _point_flags.interval = _point_atob_interval;
         _point_flags.flight_alt = MAX(_point_atob_altitude * 100.0f, 100.0f);
+        // maybe ahrs have not initial
         _point_flags.flight_alt += _ahrs.get_home().alt;
         _point_flags.save_state = AP_MISSION_POINT_CLEAR_UP;
     }

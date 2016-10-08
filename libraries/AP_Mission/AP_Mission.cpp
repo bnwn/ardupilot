@@ -343,7 +343,6 @@ void AP_Mission::point_atob_start()
     _point_cmd.content.location.alt = MAX(_point_atob_altitude * 100.0f, 100.0f); // convert m to cm
     _point_cmd.content.location.alt += _ahrs.get_home().alt;
     _point_cmd.content.location.flags.relative_alt = false;
-//    _point_cmd.content.location.alt = _point_atob_altitude * 100.0f;
 
     _point_flags.nav_cmd_loaded = false;
     _point_flags.flight_alt = _point_cmd.content.location.alt;
@@ -1802,9 +1801,11 @@ bool AP_Mission::advance_current_point_cmd()
 
         // update point command location value
         location_update(_point_next_cmd.content.location, _point_flags.bearing, (float)(_point_next_cmd.p1 * _point_flags.interval));
-        _point_next_cmd.content.location.alt = _point_flags.flight_alt;
-        _point_next_cmd.content.location.flags.relative_alt = false;
     }
+
+    // ensure altitue set to relative
+    _point_next_cmd.content.location.alt = _point_flags.flight_alt;
+    _point_next_cmd.content.location.flags.relative_alt = false;
 
     if (!write_cmd_to_storage(AP_MISSION_POINT_CURRENT_OFFSET, _point_next_cmd, AP_MISSION_POINT_ATOB_RUNNING)) {
         // not supposed to happen
