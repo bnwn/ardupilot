@@ -338,12 +338,7 @@ void AP_Mission::point_atob_start()
     _point_cmd.content.location.alt = MAX(_point_atob_altitude * 100.0f, 100.0f); // convert m to cm
     _point_cmd.content.location.alt += _ahrs.get_home().alt;
     _point_cmd.content.location.flags.relative_alt = false;
-<<<<<<< HEAD
-//    _point_cmd.content.location.alt = _point_atob_altitude * 100.0f;
-=======
->>>>>>> cdcdec654fee380b62ef7f06b2a7a4fbe57857fd
 
-    _point_flags.nav_cmd_loaded = false;
     _point_flags.flight_alt = _point_cmd.content.location.alt;
     _point_flags.interval = _point_atob_interval;
 
@@ -376,6 +371,7 @@ void AP_Mission::point_atob_start()
 
     // Note: if there is no active command then the mission must have been stopped just after the previous nav command completed
     //      update will take care of finding and starting the nav command
+    _point_flags.nav_cmd_loaded = false;
     _cmd_start_fn(_point_cmd);
 }
 
