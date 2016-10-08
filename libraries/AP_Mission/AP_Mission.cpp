@@ -95,19 +95,14 @@ void AP_Mission::stop()
 /// save break point
 void AP_Mission::save_break_point()
 {
-    Mission_Command cmd, break_cmd;
+    Mission_Command break_cmd;
 
-    if (!read_cmd_from_storage(AP_MISSION_POINT_CURRENT_OFFSET, cmd, AP_MISSION_POINT_ATOB_RUNNING)) {
-        // not supposed to happen
-        return;
-    }
-
-    if (cmd.p1 == 0 && cmd.index == 0) {
+    if (_point_cmd.p1 == 0 && _point_cmd.index == 0) {
         // it is not have point item or just on the point A
         return;
     }
 
-    break_cmd = cmd;
+    break_cmd = _point_cmd;
 
     if (0 == break_cmd.index) {
        break_cmd.p1 -= 1;
@@ -117,7 +112,7 @@ void AP_Mission::save_break_point()
 
     if (!_ahrs.get_position(break_cmd.content.location)) {
         // callback if failure to get current local position
-        break_cmd = cmd;
+        break_cmd = _point_cmd;
     }
 
     if (!write_cmd_to_storage(AP_MISSION_POINT_CURRENT_OFFSET, break_cmd, AP_MISSION_POINT_ATOB_RUNNING)) {
@@ -1765,13 +1760,12 @@ bool AP_Mission::advance_current_point_cmd()
         return false;
     }
 
-    if (!read_cmd_from_storage(AP_MISSION_POINT_CURRENT_OFFSET, cmd, AP_MISSION_POINT_ATOB_RUNNING)) {
-        // not supposed to happen
-        return false;
-    }
-
     if (_point_cmd.id == MAV_CMD_NAV_TAKEOFF) {
         // current command is takeoff then go to first point
+        if (!read_cmd_from_storage(AP_MISSION_POINT_CURRENT_OFFSET, cmd, AP_MISSION_POINT_ATOB_RUNNING)) {
+            // not supposed to happen
+            return false;
+        }
         _point_next_cmd = cmd;
     } else if (_point_cmd.p1 == 0 && _point_cmd.index == 0) {
         // current point is point B
@@ -1779,12 +1773,12 @@ bool AP_Mission::advance_current_point_cmd()
     } else {
 
         _point_next_cmd.id = MAV_CMD_NAV_WAYPOINT;
-        _point_next_cmd.index = cmd.index ^ 1;
+        _point_next_cmd.index = _point_cmd.index ^ 1;
 
-        if (1 == cmd.index) {
-            _point_next_cmd.p1 = cmd.p1 + 1;
+        if (1 == _point_cmd.index) {
+            _point_next_cmd.p1 = _point_cmd.p1 + 1;
         } else {
-            _point_next_cmd.p1 = cmd.p1;
+            _point_next_cmd.p1 = _point_cmd.p1;
         }
 
         if (_point_next_cmd.p1 > 255) {
@@ -1807,10 +1801,11 @@ bool AP_Mission::advance_current_point_cmd()
     _point_next_cmd.content.location.alt = _point_flags.flight_alt;
     _point_next_cmd.content.location.flags.relative_alt = false;
 
+    /* promote process speed
     if (!write_cmd_to_storage(AP_MISSION_POINT_CURRENT_OFFSET, _point_next_cmd, AP_MISSION_POINT_ATOB_RUNNING)) {
         // not supposed to happen
         return false;
-    }
+    } */
 
     _point_flags.nav_cmd_loaded = true;
 
