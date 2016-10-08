@@ -144,6 +144,19 @@ point_save_state AP_Mission::clear_point_item()
     return AP_MISSION_POINT_CLEAR_UP;
 }
 
+point_save_state AP_Mission::reset_point_item()
+{
+    Mission_Command cmd;
+
+    if (read_cmd_from_storage(AP_MISSION_POINT_A_OFFSET, cmd, AP_MISSION_POINT_ATOB_RUNNING)) {
+        if (write_cmd_to_storage(AP_MISSION_POINT_CURRENT_OFFSET, cmd, AP_MISSION_POINT_ATOB_RUNNING)) {
+            return AP_MISSION_POINT_SET_CURRENT;
+        }
+    }
+
+    return AP_MISSION_POINT_SET_FAILED;
+}
+
 point_save_state AP_Mission::reset_current_point()
 {
     uint32_t distance_ctoa, distance_ctob, distance_min;
@@ -182,8 +195,10 @@ point_save_state AP_Mission::reset_current_point()
 
                 location_update(cmd_c.content.location, _point_flags.bearing, (float)(cmd_c.p1 * _point_flags.interval));
                 cmd_c.content.location.alt = _point_flags.flight_alt;
+                cmd_c.content.location.flags.relative_alt = false;
 
                 if (write_cmd_to_storage(AP_MISSION_POINT_CURRENT_OFFSET, cmd_c, AP_MISSION_POINT_ATOB_RUNNING)) {
+                    _point_flags.save_state = AP_MISSION_POINT_CLEAR_UP;
                     return AP_MISSION_POINT_SET_CURRENT;
                 }
             }
@@ -196,7 +211,7 @@ point_save_state AP_Mission::reset_current_point()
 point_save_state AP_Mission::set_current_point()
 {
     Mission_Command cmd;
-    static point_save_state current_point_set_index = AP_MISSION_POINT_SET_A;
+    point_save_state current_point_set_index = _point_flags.save_state;
     point_save_state ret = AP_MISSION_POINT_SET_FAILED;
 
     struct Location current_loc;
@@ -205,25 +220,30 @@ point_save_state AP_Mission::set_current_point()
         return ret;
     }
 
+    if (current_point_set_index == AP_MISSION_POINT_CLEAR_UP) {
+        current_point_set_index = AP_MISSION_POINT_SET_A;
+    }
+
     // Init point command
     cmd.id = MAV_CMD_NAV_WAYPOINT;
     cmd.index = current_point_set_index;
     cmd.p1 = 0;
     cmd.content.location = current_loc;
     cmd.content.location.alt = _point_flags.flight_alt;
+    cmd.content.location.flags.relative_alt = false;
     cmd.content.location.options = 0;
 
     if (current_point_set_index == AP_MISSION_POINT_SET_A) {
         if (write_cmd_to_storage(AP_MISSION_POINT_A_OFFSET, cmd, AP_MISSION_POINT_ATOB_RUNNING)) {
             if (write_cmd_to_storage(AP_MISSION_POINT_CURRENT_OFFSET, cmd, AP_MISSION_POINT_ATOB_RUNNING)) {
                 ret = current_point_set_index;
-                current_point_set_index = AP_MISSION_POINT_SET_B;
+                _point_flags.save_state = AP_MISSION_POINT_SET_B;
             }
         }
     } else if (current_point_set_index == AP_MISSION_POINT_SET_B) {
         if (write_cmd_to_storage(AP_MISSION_POINT_B_OFFSET, cmd, AP_MISSION_POINT_ATOB_RUNNING)) {
             ret = current_point_set_index;
-            current_point_set_index = AP_MISSION_POINT_SET_A;
+            _point_flags.save_state = AP_MISSION_POINT_SET_A;
         }
     }
 
@@ -321,9 +341,11 @@ void AP_Mission::point_atob_start()
     _point_cmd.content.location.lng = 0;
     _point_cmd.content.location.options = 0;
     _point_cmd.content.location.alt = MAX(_point_atob_altitude * 100.0f, 100.0f); // convert m to cm
+    _point_cmd.content.location.alt += _ahrs.get_home().alt;
+    _point_cmd.content.location.flags.relative_alt = false;
 //    _point_cmd.content.location.alt = _point_atob_altitude * 100.0f;
 
-    _point_flags.nav_cmd_loaded = true;
+    _point_flags.nav_cmd_loaded = false;
     _point_flags.flight_alt = _point_cmd.content.location.alt;
     _point_flags.interval = _point_atob_interval;
 
@@ -338,6 +360,7 @@ void AP_Mission::point_atob_start()
     }
 
     bearing_cd = get_bearing_cd(_point_cmd_a.content.location, _point_cmd_b.content.location);
+    _point_flags.heading = bearing_cd;
 
     if (_point_atob_direction == 1) {
         bearing_cd += 9000;
@@ -351,13 +374,11 @@ void AP_Mission::point_atob_start()
         bearing_cd -= 36000;
     }
 
-    _point_flags.bearing = (float)bearing_cd / 100.0; // cm to m
+    _point_flags.bearing = (float)bearing_cd / 100.0f; // cm to m
 
     // Note: if there is no active command then the mission must have been stopped just after the previous nav command completed
     //      update will take care of finding and starting the nav command
-    if (_point_flags.nav_cmd_loaded) {
-        _cmd_start_fn(_point_cmd);
-    }
+    _cmd_start_fn(_point_cmd);
 }
 
 /// reset - reset mission to the first command
@@ -506,11 +527,10 @@ void AP_Mission::update(uint8_t mission_type)
                 point_complete();
                 return;
             }
-        } else {
-            // run the active point command
-            if (_cmd_verify_fn(_point_cmd)) {
-                //market _nav_cmd as complete
-                _point_flags.nav_cmd_loaded = false;
+        }
+        // run the active point command
+        if (_cmd_verify_fn(_point_cmd)) {
+            if (!_point_flags.nav_cmd_loaded) {
                 //immediately advance to next point command
                 if (!advance_current_point_cmd()) {
                     //failure to advance point command holding the vehicle and wait
@@ -518,6 +538,10 @@ void AP_Mission::update(uint8_t mission_type)
                     return;
                 }
             }
+            //market _nav_cmd as complete
+            _point_flags.nav_cmd_loaded = false;
+            _point_cmd = _point_next_cmd;
+            _cmd_start_fn(_point_cmd);
         }
     }
 }
@@ -1748,47 +1772,46 @@ bool AP_Mission::advance_current_point_cmd()
     }
 
     if (_point_cmd.id == MAV_CMD_NAV_TAKEOFF) {
-        _point_cmd = cmd;
-        return true;
-    }
-
-    _point_cmd.id = MAV_CMD_NAV_WAYPOINT;
-    _point_cmd.index = cmd.index ^ 1;
-
-    if (1 == cmd.index) {
-        _point_cmd.p1 = cmd.p1 + 1;
+        // current command is takeoff then go to first point
+        _point_next_cmd = cmd;
+    } else if (_point_cmd.p1 == 0 && _point_cmd.index == 0) {
+        // current point is point B
+        _point_next_cmd = _point_cmd_b;
     } else {
-        _point_cmd.p1 = cmd.p1;
+
+        _point_next_cmd.id = MAV_CMD_NAV_WAYPOINT;
+        _point_next_cmd.index = cmd.index ^ 1;
+
+        if (1 == cmd.index) {
+            _point_next_cmd.p1 = cmd.p1 + 1;
+        } else {
+            _point_next_cmd.p1 = cmd.p1;
+        }
+
+        if (_point_next_cmd.p1 > 255) {
+            // the largest lateral index is 256
+            _point_flags.state = MISSION_COMPLETE;
+            return false;
+        }
+
+        if (_point_next_cmd.p1 % 2 == _point_next_cmd.index) {
+            _point_next_cmd.content.location = _point_cmd_a.content.location;
+        } else {
+            _point_next_cmd.content.location = _point_cmd_b.content.location;
+        }
+
+        // update point command location value
+        location_update(_point_next_cmd.content.location, _point_flags.bearing, (float)(_point_next_cmd.p1 * _point_flags.interval));
+        _point_next_cmd.content.location.alt = _point_flags.flight_alt;
+        _point_next_cmd.content.location.flags.relative_alt = false;
     }
 
-    if (_point_cmd.p1 > 255) {
-        // the largest lateral index is 256
-        _point_flags.state = MISSION_COMPLETE;
-        return false;
-    }
-
-    if (_point_cmd.p1 % 2 == _point_cmd.index) {
-        _point_cmd.content.location = _point_cmd_a.content.location;
-    } else {
-        _point_cmd.content.location = _point_cmd_b.content.location;
-    }
-
-    // update point command location value
-    location_update(_point_cmd.content.location, _point_flags.bearing, (float)(_point_cmd.p1 * _point_flags.interval));
-    _point_cmd.content.location.alt = _point_flags.flight_alt;
-
-    // current point is point B
-    if (_point_cmd.p1 == 0) {
-        _point_cmd = _point_cmd_b;
-    }
-
-    if (!write_cmd_to_storage(AP_MISSION_POINT_CURRENT_OFFSET, _point_cmd, AP_MISSION_POINT_ATOB_RUNNING)) {
+    if (!write_cmd_to_storage(AP_MISSION_POINT_CURRENT_OFFSET, _point_next_cmd, AP_MISSION_POINT_ATOB_RUNNING)) {
         // not supposed to happen
         return false;
     }
 
     _point_flags.nav_cmd_loaded = true;
-    _cmd_start_fn(_point_cmd);
 
     return true;
 }
