@@ -306,8 +306,11 @@ public:
         _point_flags.state = MISSION_STOPPED;
         _point_flags.nav_cmd_loaded = false;
         _point_flags.turn_direction = true;
-        _point_flags.interval = 5;
-        _point_flags.flight_alt = 5 * 100.0f;
+        _point_flags.interval = _point_atob_interval;
+        _point_flags.flight_alt = MAX(_point_atob_altitude * 100.0f, 100.0f);
+        // maybe ahrs have not initial
+        _point_flags.flight_alt += _ahrs.get_home().alt;
+        _point_flags.save_state = AP_MISSION_POINT_CLEAR_UP;
     }
 
     ///
@@ -395,6 +398,9 @@ public:
 
     /// is_nav_cmd - returns true if the command's id is a "navigation" command, false if "do" or "conditional" command
     static bool is_nav_cmd(const Mission_Command& cmd);
+
+    /// get_point_atob_heading - returns the bearing bettween point A and B in centi-degrees
+    float get_point_atob_heading() const { return _point_flags.heading; }
 
     /// get_current_nav_cmd - returns the current "navigation" command
     const Mission_Command& get_current_nav_cmd() const { return _nav_cmd; }
@@ -491,9 +497,11 @@ private:
         mission_state state;
         uint8_t nav_cmd_loaded  : 1; // true if a "navigation" command has been loaded into _nav_cmd
         uint8_t turn_direction  : 1; // true if vehicle flight direction turn to right, else turn to left
+        float heading;
         float bearing;
         float interval;              // vehicle move distance in lateral once
         float flight_alt;            // vehicle flight alttitude in point A to B flight mode
+        point_save_state save_state;
     } _point_flags;
 
     ///
@@ -566,7 +574,7 @@ private:
 
     // internal variables
     struct Mission_Command  _nav_cmd;   // current "navigation" command.  It's position in the command list is held in _nav_cmd.index
-    struct Mission_Command  _point_cmd; // current "point A to B" command.  It's position in command list is held in _point_cmd.index
+    struct Mission_Command  _point_cmd, _point_next_cmd; // current "point A to B" command.  It's position in command list is held in _point_cmd.index
     struct Mission_Command  _point_cmd_a, _point_cmd_b;
     struct Mission_Command  _do_cmd;    // current "do" command.  It's position in the command list is held in _do_cmd.index
     uint16_t                _prev_nav_cmd_id;       // id of the previous "navigation" command. (WAYPOINT, LOITER_TO_ALT, ect etc)

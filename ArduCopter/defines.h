@@ -215,11 +215,6 @@ enum GuidedMode {
     Guided_Angle,
 };
 
-enum PointMode {
-    Point_TakeOff,
-    Point_WP,
-};
-
 // RTL states
 enum RTLState {
     RTL_InitialClimb,
