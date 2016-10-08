@@ -342,6 +342,9 @@ public:
     /// clear point item
     point_save_state clear_point_item();
 
+    /// reset point item
+    point_save_state reset_point_item();
+
     /// reset current point
     point_save_state reset_current_point();
 

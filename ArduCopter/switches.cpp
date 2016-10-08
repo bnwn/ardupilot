@@ -62,7 +62,7 @@ void Copter::read_control_switch()
     } else {
         if (!is_hold_long && position_ok() && (tnow_ms - control_switch_state.last_aux10_edge_time_ms > CONTROL_SWITCH_DEBOUNCE_TIME_MS) && (control_switch_state.last_switch_aux10_position != -1)) {
         //if (!is_hold_long && (tnow_ms - control_switch_state.last_aux10_edge_time_ms > CONTROL_SWITCH_DEBOUNCE_TIME_MS) && (control_switch_state.last_switch_aux10_position != -1)) {
-            if (!ap.land_complete) {
+            if (ap.land_complete) {
                 if (mission.reset_current_point() == AP_MISSION_POINT_SET_CURRENT) {
                     if (ap.initialised) {
                         AP_Notify::events.tune_save = 1;

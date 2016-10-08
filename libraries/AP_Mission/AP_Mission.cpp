@@ -144,6 +144,19 @@ point_save_state AP_Mission::clear_point_item()
     return AP_MISSION_POINT_CLEAR_UP;
 }
 
+point_save_state AP_Mission::reset_point_item()
+{
+    Mission_Command cmd;
+
+    if (read_cmd_from_storage(AP_MISSION_POINT_A_OFFSET, cmd, AP_MISSION_POINT_ATOB_RUNNING)) {
+        if (write_cmd_to_storage(AP_MISSION_POINT_CURRENT_OFFSET, cmd, AP_MISSION_POINT_ATOB_RUNNING)) {
+            return AP_MISSION_POINT_SET_CURRENT;
+        }
+    }
+
+    return AP_MISSION_POINT_SET_FAILED;
+}
+
 point_save_state AP_Mission::reset_current_point()
 {
     uint32_t distance_ctoa, distance_ctob, distance_min;
@@ -321,6 +334,8 @@ void AP_Mission::point_atob_start()
     _point_cmd.content.location.lng = 0;
     _point_cmd.content.location.options = 0;
     _point_cmd.content.location.alt = MAX(_point_atob_altitude * 100.0f, 100.0f); // convert m to cm
+    _point_cmd.content.location.alt += _ahrs.get_home().alt;
+    _point_cmd.content.location.flags.relative_alt = false;
 //    _point_cmd.content.location.alt = _point_atob_altitude * 100.0f;
 
     _point_flags.nav_cmd_loaded = true;
