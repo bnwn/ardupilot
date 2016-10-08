@@ -306,7 +306,7 @@ public:
         _point_flags.state = MISSION_STOPPED;
         _point_flags.nav_cmd_loaded = false;
         _point_flags.turn_direction = true;
-        _point_flags.interval = 5;
+        _point_flags.interval = _point_atob_interval;
         _point_flags.flight_alt = MAX(_point_atob_altitude * 100.0f, 100.0f);
         _point_flags.flight_alt += _ahrs.get_home().alt;
         _point_flags.save_state = AP_MISSION_POINT_CLEAR_UP;
