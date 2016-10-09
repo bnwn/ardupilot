@@ -260,7 +260,10 @@ void Copter::auto_wp_run()
     pos_control.update_z_controller();
 
     // call attitude controller
-    if (auto_yaw_mode == AUTO_YAW_HOLD) {
+    if (control_mode == POINT_ATOB) {
+        // roll & pitch from waypoint controller, yaw rate from bearing bettween point A and B
+        attitude_control.input_euler_angle_roll_pitch_yaw(wp_nav.get_roll(), wp_nav.get_pitch(), mission.get_point_atob_heading(), true, get_smoothing_gain());
+    } else if (auto_yaw_mode == AUTO_YAW_HOLD) {
         // roll & pitch from waypoint controller, yaw rate from pilot
         attitude_control.input_euler_angle_roll_pitch_euler_rate_yaw(wp_nav.get_roll(), wp_nav.get_pitch(), target_yaw_rate, get_smoothing_gain());
     }else{
