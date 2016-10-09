@@ -1802,9 +1802,10 @@ bool AP_Mission::advance_current_point_cmd()
 
         // update point command location value
         location_update(_point_next_cmd.content.location, _point_flags.bearing, (float)(_point_next_cmd.p1 * _point_flags.interval));
-        _point_next_cmd.content.location.alt = _point_flags.flight_alt;
-        _point_next_cmd.content.location.flags.relative_alt = false;
     }
+
+    _point_next_cmd.content.location.alt = _point_flags.flight_alt;
+    _point_next_cmd.content.location.flags.relative_alt = false;
 
     if (!write_cmd_to_storage(AP_MISSION_POINT_CURRENT_OFFSET, _point_next_cmd, AP_MISSION_POINT_ATOB_RUNNING)) {
         // not supposed to happen

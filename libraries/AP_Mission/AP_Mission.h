@@ -304,7 +304,7 @@ public:
 
         // need to initialise point flags
         _point_flags.state = MISSION_STOPPED;
-        _point_flags.nav_cmd_loaded = false;
+        _point_flags.nav_cmd_loaded = true;
         _point_flags.turn_direction = true;
         _point_flags.interval = _point_atob_interval;
         _point_flags.flight_alt = MAX(_point_atob_altitude * 100.0f, 100.0f);
