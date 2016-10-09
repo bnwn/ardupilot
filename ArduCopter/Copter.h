@@ -277,7 +277,12 @@ private:
     struct {
         int8_t debounced_switch_position;   // currently used switch position
         int8_t last_switch_position;        // switch position in previous iteration
+        int8_t last_switch_aux10_position;  // aux10 switch position in previous iteration
+        int8_t debounced_switch_aux11_position; // currently aux11 switch position
+        int8_t last_switch_aux11_position;  // aux11 switch position in previous iteration
         uint32_t last_edge_time_ms;         // system time that switch position was last changed
+        uint32_t last_aux10_edge_time_ms;   // system time that aux10 switch position was last changed
+        uint32_t last_aux11_edge_time_ms;   // system time that aux11 switch position was last changed
     } control_switch_state;
 
     struct {
@@ -924,6 +929,10 @@ private:
     bool avoid_adsb_init(bool ignore_checks);
     void avoid_adsb_run();
     bool avoid_adsb_set_velocity(const Vector3f& velocity_neu);
+
+    // support for point A to B flight mode, POINT_ATOB
+    bool point_init(bool ignore_checks);
+    void point_run();
 
     void ekf_check();
     bool ekf_over_threshold();
