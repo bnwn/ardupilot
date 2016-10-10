@@ -35,7 +35,6 @@ MODULES		+= drivers/meas_airspeed
 MODULES		+= drivers/mkblctrl
 MODULES		+= drivers/batt_smbus
 MODULES		+= drivers/irlock
-MODULES     += drivers/hz16wa
 
 #
 # System commands

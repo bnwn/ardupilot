@@ -29,7 +29,7 @@ bool Copter::point_init(bool ignore_checks)
         // clear guided limits
         guided_limit_clear();
 
-        // start/resume the mission (based on MIS_RESTART parameter)
+        // start/resume the point mission
         mission.point_atob_start();
         return true;
 

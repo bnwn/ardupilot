@@ -2979,6 +2979,7 @@ modules/PX4Firmware/src/drivers/drv_baro.h
 modules/PX4Firmware/src/drivers/drv_batt_smbus.h
 modules/PX4Firmware/src/drivers/drv_blinkm.h
 modules/PX4Firmware/src/drivers/drv_device.h
+modules/PX4Firmware/src/drivers/drv_flowmeter.h
 modules/PX4Firmware/src/drivers/drv_gpio.h
 modules/PX4Firmware/src/drivers/drv_gps.h
 modules/PX4Firmware/src/drivers/drv_gyro.h
@@ -3807,6 +3808,7 @@ modules/PX4Firmware/src/modules/uORB/topics/estimator_status.h
 modules/PX4Firmware/src/modules/uORB/topics/fence.h
 modules/PX4Firmware/src/modules/uORB/topics/fence_vertex.h
 modules/PX4Firmware/src/modules/uORB/topics/filtered_bottom_flow.h
+modules/PX4Firmware/src/modules/uORB/topics/flowmeter_sensor.h
 modules/PX4Firmware/src/modules/uORB/topics/follow_target.h
 modules/PX4Firmware/src/modules/uORB/topics/fw_virtual_attitude_setpoint.h
 modules/PX4Firmware/src/modules/uORB/topics/fw_virtual_rates_setpoint.h
