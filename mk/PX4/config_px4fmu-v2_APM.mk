@@ -9,6 +9,7 @@ MODULES		+= drivers/mpu9250
 MODULES		+= drivers/boards/px4fmu-v2
 MODULES		+= drivers/pwm_input
 MODULES     += drivers/hz16wa
+MODULES		+= drivers/m006
 MODULES         += modules/uavcan
 MODULES         += lib/mathlib
 MODULES		+= drivers/px4io
