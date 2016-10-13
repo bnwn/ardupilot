@@ -2899,6 +2899,8 @@ modules/PX4Firmware/src/drivers/ll40ls/LidarLitePWM.cpp
 modules/PX4Firmware/src/drivers/ll40ls/LidarLitePWM.h
 modules/PX4Firmware/src/drivers/ll40ls/ll40ls.cpp
 modules/PX4Firmware/src/drivers/lsm303d/lsm303d.cpp
+modules/PX4Firmware/src/drivers/m006/m006.cpp
+modules/PX4Firmware/src/drivers/m006/m006.h
 modules/PX4Firmware/src/drivers/mb12xx/mb12xx.cpp
 modules/PX4Firmware/src/drivers/md25/BlockSysIdent.cpp
 modules/PX4Firmware/src/drivers/md25/BlockSysIdent.hpp
@@ -12303,6 +12305,8 @@ modules/PX4Firmware/src/drivers/ll40ls/LidarLitePWM.cpp
 modules/PX4Firmware/src/drivers/ll40ls/LidarLitePWM.h
 modules/PX4Firmware/src/drivers/ll40ls/ll40ls.cpp
 modules/PX4Firmware/src/drivers/lsm303d/lsm303d.cpp
+modules/PX4Firmware/src/drivers/m006/m006.cpp
+modules/PX4Firmware/src/drivers/m006/m006.h
 modules/PX4Firmware/src/drivers/mb12xx/mb12xx.cpp
 modules/PX4Firmware/src/drivers/md25/BlockSysIdent.cpp
 modules/PX4Firmware/src/drivers/md25/BlockSysIdent.hpp

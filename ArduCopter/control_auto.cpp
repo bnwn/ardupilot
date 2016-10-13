@@ -147,6 +147,7 @@ void Copter::auto_takeoff_start(const Location& dest_loc)
 //      called by auto_run at 100hz or more
 void Copter::auto_takeoff_run()
 {
+    float target_climb_rate = 0.0f;
     // if not auto armed or motor interlock not enabled set throttle to zero and exit immediately
     if (!motors.armed() || !ap.auto_armed || !motors.get_interlock()) {
         // initialise wpnav targets
@@ -178,6 +179,13 @@ void Copter::auto_takeoff_run()
     // run waypoint controller
     failsafe_terrain_set_status(wp_nav.update_wpnav());
 
+    // adjust climb rate using rangefinder
+    if (rangefinder_alt_ok()) {
+        // if rangefinder is ok, use surface tracking
+        target_climb_rate = get_surface_tracking_climb_rate(target_climb_rate, pos_control.get_alt_target(), G_Dt);
+    }
+
+    pos_control.set_alt_target_from_climb_rate_ff(target_climb_rate, G_Dt, false);
     // call z-axis position controller (wpnav should have already updated it's alt target)
     pos_control.update_z_controller();
 
@@ -223,6 +231,7 @@ void Copter::auto_wp_start(const Location_Class& dest_loc)
 //      called by auto_run at 100hz or more
 void Copter::auto_wp_run()
 {
+    float target_climb_rate = 0.0f;
     // if not auto armed or motor interlock not enabled set throttle to zero and exit immediately
     if (!motors.armed() || !ap.auto_armed || !motors.get_interlock()) {
         // To-Do: reset waypoint origin to current location because copter is probably on the ground so we don't want it lurching left or right on take-off
@@ -256,6 +265,13 @@ void Copter::auto_wp_run()
     // run waypoint controller
     failsafe_terrain_set_status(wp_nav.update_wpnav());
 
+    // adjust climb rate using rangefinder
+    if (rangefinder_alt_ok()) {
+        // if rangefinder is ok, use surface tracking
+        target_climb_rate = get_surface_tracking_climb_rate(target_climb_rate, pos_control.get_alt_target(), G_Dt);
+    }
+
+    pos_control.set_alt_target_from_climb_rate_ff(target_climb_rate, G_Dt, false);
     // call z-axis position controller (wpnav should have already updated it's alt target)
     pos_control.update_z_controller();
 
@@ -298,6 +314,7 @@ void Copter::auto_spline_start(const Location_Class& destination, bool stopped_a
 //      called by auto_run at 100hz or more
 void Copter::auto_spline_run()
 {
+    float target_climb_rate = 0.0f;
     // if not auto armed or motor interlock not enabled set throttle to zero and exit immediately
     if (!motors.armed() || !ap.auto_armed || !motors.get_interlock()) {
         // To-Do: reset waypoint origin to current location because copter is probably on the ground so we don't want it lurching left or right on take-off
@@ -331,6 +348,13 @@ void Copter::auto_spline_run()
     // run waypoint controller
     wp_nav.update_spline();
 
+    // adjust climb rate using rangefinder
+    if (rangefinder_alt_ok()) {
+        // if rangefinder is ok, use surface tracking
+        target_climb_rate = get_surface_tracking_climb_rate(target_climb_rate, pos_control.get_alt_target(), G_Dt);
+    }
+
+    pos_control.set_alt_target_from_climb_rate_ff(target_climb_rate, G_Dt, false);
     // call z-axis position controller (wpnav should have already updated it's alt target)
     pos_control.update_z_controller();
 
@@ -483,9 +507,17 @@ void Copter::auto_circle_start()
 //      called by auto_run at 100hz or more
 void Copter::auto_circle_run()
 {
+    float target_climb_rate = 0.0f;
     // call circle controller
     circle_nav.update();
 
+    // adjust climb rate using rangefinder
+    if (rangefinder_alt_ok()) {
+        // if rangefinder is ok, use surface tracking
+        target_climb_rate = get_surface_tracking_climb_rate(target_climb_rate, pos_control.get_alt_target(), G_Dt);
+    }
+
+    pos_control.set_alt_target_from_climb_rate_ff(target_climb_rate, G_Dt, false);
     // call z-axis position controller
     pos_control.update_z_controller();
 
@@ -545,6 +577,7 @@ bool Copter::auto_loiter_start()
 //      called by auto_run at 100hz or more
 void Copter::auto_loiter_run()
 {
+    float target_climb_rate = 0.0f;
     // if not auto armed or motor interlock not enabled set throttle to zero and exit immediately
     if (!motors.armed() || !ap.auto_armed || ap.land_complete || !motors.get_interlock()) {
 #if FRAME_CONFIG == HELI_FRAME  // Helicopters always stabilize roll/pitch/yaw
@@ -571,6 +604,13 @@ void Copter::auto_loiter_run()
     // run waypoint and z-axis position controller
     failsafe_terrain_set_status(wp_nav.update_wpnav());
 
+    // adjust climb rate using rangefinder
+    if (rangefinder_alt_ok()) {
+        // if rangefinder is ok, use surface tracking
+        target_climb_rate = get_surface_tracking_climb_rate(target_climb_rate, pos_control.get_alt_target(), G_Dt);
+    }
+
+    pos_control.set_alt_target_from_climb_rate_ff(target_climb_rate, G_Dt, false);
     pos_control.update_z_controller();
     attitude_control.input_euler_angle_roll_pitch_euler_rate_yaw(wp_nav.get_roll(), wp_nav.get_pitch(), target_yaw_rate, get_smoothing_gain());
 }

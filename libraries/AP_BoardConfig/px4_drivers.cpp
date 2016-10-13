@@ -49,6 +49,8 @@ extern "C" {
     int ll40ls_main(int, char **);
     int trone_main(int, char **);
     int mb12xx_main(int, char **);
+    int m006_main(int, char **);
+    int hz16wa_main(int, char **);
     int pwm_input_main(int, char **);
     int uavcan_main(int, char **);
     int fmu_main(int, char **);
@@ -519,6 +521,12 @@ void AP_BoardConfig::px4_start_optional_sensors(void)
     }
     if (px4_start_driver(mb12xx_main, "mb12xx", "start")) {
         printf("Found mb12xx sensor\n");
+    }
+    if (px4_start_driver(m006_main, "m006", "start")) {
+        printf("Found m006 sensor\n");
+    }
+    if (px4_start_driver(hz16wa_main, "hz16wa", "start")) {
+        printf("Found hz16wa sensor\n");
     }
 
 #if !defined(CONFIG_ARCH_BOARD_PX4FMU_V1)
