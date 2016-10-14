@@ -85,6 +85,8 @@ void Copter::init_rc_out()
 
     // refresh auxiliary channel to function map
     RC_Channel_aux::update_aux_servo_function();
+
+    pump_output_init();
 }
 
 // enable_motor_output() - enable and output lowest possible value to motors
@@ -116,6 +118,8 @@ void Copter::read_radio()
 
         // pass pilot input through to motors (used to allow wiggling servos while disarmed on heli, single, coax copters)
         radio_passthrough_to_motors();
+
+        radio_to_pump_output();
 
         float dt = (tnow_ms - last_radio_update_ms)*1.0e-3f;
         rc_throttle_control_in_filter.apply(g.rc_3.get_control_in(), dt);

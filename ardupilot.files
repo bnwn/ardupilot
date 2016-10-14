@@ -18977,3 +18977,4 @@ Tools/Replay/Parameters.h
 Tools/Replay/Replay.cpp
 Tools/Replay/Replay.h
 Tools/Replay/VehicleType.h
+ArduCopter/farming.cpp

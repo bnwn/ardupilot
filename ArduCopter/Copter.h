@@ -1027,6 +1027,9 @@ private:
     void set_throttle_and_failsafe(uint16_t throttle_pwm);
     void set_throttle_zero_flag(int16_t throttle_control);
     void radio_passthrough_to_motors();
+    void pump_output_init();
+    void radio_to_pump_output();
+    void pesticide_remaining_check();
     void init_barometer(bool full_calibration);
     void read_barometer(void);
     void init_rangefinder(void);
