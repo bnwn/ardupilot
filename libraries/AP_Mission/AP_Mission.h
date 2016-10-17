@@ -311,6 +311,7 @@ public:
         // maybe ahrs have not initial
         _point_flags.flight_alt += _ahrs.get_home().alt;
         _point_flags.save_state = AP_MISSION_POINT_CLEAR_UP;
+        _point_flags.is_achieve_point = false;
     }
 
     ///
@@ -483,6 +484,9 @@ public:
     // user settable parameters
     static const struct AP_Param::GroupInfo var_info[];
 
+    // get current target alt
+    float get_current_target_alt(void);
+
 private:
     static StorageAccess _storage;
 
@@ -501,6 +505,7 @@ private:
         float bearing;
         float interval;              // vehicle move distance in lateral once
         float flight_alt;            // vehicle flight alttitude in point A to B flight mode
+        bool is_achieve_point;
         point_save_state save_state;
     } _point_flags;
 

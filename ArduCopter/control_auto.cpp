@@ -182,7 +182,7 @@ void Copter::auto_takeoff_run()
     // adjust climb rate using rangefinder
     if (rangefinder_alt_ok()) {
         // if rangefinder is ok, use surface tracking
-        target_climb_rate = get_surface_tracking_climb_rate(target_climb_rate, pos_control.get_alt_target(), G_Dt);
+        target_climb_rate = get_surface_tracking_climb_rate_in_auto(target_climb_rate, pos_control.get_alt_target(), G_Dt);
     }
 
     pos_control.set_alt_target_from_climb_rate_ff(target_climb_rate, G_Dt, false);
@@ -268,7 +268,7 @@ void Copter::auto_wp_run()
     // adjust climb rate using rangefinder
     if (rangefinder_alt_ok()) {
         // if rangefinder is ok, use surface tracking
-        target_climb_rate = get_surface_tracking_climb_rate(target_climb_rate, pos_control.get_alt_target(), G_Dt);
+        target_climb_rate = get_surface_tracking_climb_rate_in_auto(target_climb_rate, pos_control.get_alt_target(), G_Dt);
     }
 
     pos_control.set_alt_target_from_climb_rate_ff(target_climb_rate, G_Dt, false);
@@ -351,7 +351,7 @@ void Copter::auto_spline_run()
     // adjust climb rate using rangefinder
     if (rangefinder_alt_ok()) {
         // if rangefinder is ok, use surface tracking
-        target_climb_rate = get_surface_tracking_climb_rate(target_climb_rate, pos_control.get_alt_target(), G_Dt);
+        target_climb_rate = get_surface_tracking_climb_rate_in_auto(target_climb_rate, pos_control.get_alt_target(), G_Dt);
     }
 
     pos_control.set_alt_target_from_climb_rate_ff(target_climb_rate, G_Dt, false);
@@ -514,7 +514,7 @@ void Copter::auto_circle_run()
     // adjust climb rate using rangefinder
     if (rangefinder_alt_ok()) {
         // if rangefinder is ok, use surface tracking
-        target_climb_rate = get_surface_tracking_climb_rate(target_climb_rate, pos_control.get_alt_target(), G_Dt);
+        target_climb_rate = get_surface_tracking_climb_rate_in_auto(target_climb_rate, pos_control.get_alt_target(), G_Dt);
     }
 
     pos_control.set_alt_target_from_climb_rate_ff(target_climb_rate, G_Dt, false);
@@ -607,7 +607,7 @@ void Copter::auto_loiter_run()
     // adjust climb rate using rangefinder
     if (rangefinder_alt_ok()) {
         // if rangefinder is ok, use surface tracking
-        target_climb_rate = get_surface_tracking_climb_rate(target_climb_rate, pos_control.get_alt_target(), G_Dt);
+        target_climb_rate = get_surface_tracking_climb_rate_in_auto(target_climb_rate, pos_control.get_alt_target(), G_Dt);
     }
 
     pos_control.set_alt_target_from_climb_rate_ff(target_climb_rate, G_Dt, false);

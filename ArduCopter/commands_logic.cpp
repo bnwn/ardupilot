@@ -3,11 +3,24 @@
 #include "Copter.h"
 
 // start_command - this function will be called when the ap_mission lib wishes to start a new command
-bool Copter::start_command(const AP_Mission::Mission_Command& cmd)
+bool Copter::start_command(const AP_Mission::Mission_Command& _cmd)
 {
+    AP_Mission::Mission_Command cmd = _cmd;
     // To-Do: logging when new commands start/end
     if (should_log(MASK_LOG_CMD)) {
         DataFlash.Log_Write_Mission_Cmd(mission, cmd);
+    }
+
+    if (rangefinder_alt_ok() && (cmd.id == MAV_CMD_NAV_TAKEOFF || cmd.id == MAV_CMD_NAV_WAYPOINT || cmd.id == MAV_CMD_NAV_SPLINE_WAYPOINT \
+                                 || cmd.id == MAV_CMD_NAV_LOITER_UNLIM || cmd.id == MAV_CMD_NAV_LOITER_TURNS || cmd.id == MAV_CMD_NAV_LOITER_TIME)) {
+        struct Location loc;
+        ahrs.get_position(loc);
+        cmd.content.location.alt = loc.alt;
+    }
+
+    if (control_mode == POINT_ATOB) {
+        cmd.p1 = 0;
+        cmd.index = 0;
     }
 
     switch(cmd.id) {

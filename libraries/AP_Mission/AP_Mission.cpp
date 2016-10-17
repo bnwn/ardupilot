@@ -2054,3 +2054,14 @@ bool AP_Mission::is_valid_point()
     return false;
 }
 
+float AP_Mission::get_current_target_alt(void)
+{
+    if (_point_flags.state == MISSION_RUNNING) {
+        return _point_cmd.content.location.alt;
+    } else if (_flags.state == MISSION_RUNNING) {
+        return _nav_cmd.content.location.alt;
+    }
+
+    return 0.0;
+}
+

@@ -694,6 +694,7 @@ private:
     float get_pilot_desired_climb_rate(float throttle_control);
     float get_non_takeoff_throttle();
     float get_surface_tracking_climb_rate(int16_t target_rate, float current_alt_target, float dt);
+    float get_surface_tracking_climb_rate_in_auto(int16_t target_rate, float current_alt_target, float dt);
     void auto_takeoff_set_start_alt(void);
     void auto_takeoff_attitude_run(float target_yaw_rate);
     void set_accel_throttle_I_from_pilot_throttle(float pilot_throttle);
@@ -1089,7 +1090,7 @@ private:
     void print_hit_enter();
     void tuning();
     void gcs_send_text_fmt(MAV_SEVERITY severity, const char *fmt, ...);
-    bool start_command(const AP_Mission::Mission_Command& cmd);
+    bool start_command(const AP_Mission::Mission_Command& _cmd);
     bool verify_command(const AP_Mission::Mission_Command& cmd);
     bool verify_command_callback(const AP_Mission::Mission_Command& cmd);
 

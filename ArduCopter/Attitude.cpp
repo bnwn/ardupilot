@@ -251,6 +251,38 @@ float Copter::get_surface_tracking_climb_rate(int16_t target_rate, float current
 #endif
 }
 
+// get_surface_tracking_climb_rate - hold copter at the desired distance above the ground
+//      returns climb rate (in cm/s) which should be passed to the position controller
+float Copter::get_surface_tracking_climb_rate_in_auto(int16_t target_rate, float current_alt_target, float dt)
+{
+#if RANGEFINDER_ENABLED == ENABLED
+    float distance_error;
+    float velocity_correction;
+    float current_alt = inertial_nav.get_altitude();
+
+    target_rangefinder_alt = mission.get_current_target_alt();
+
+    // adjust rangefinder target alt if motors have not hit their limits
+    if ((target_rate<0 && !motors.limit.throttle_lower) || (target_rate>0 && !motors.limit.throttle_upper)) {
+        target_rangefinder_alt += target_rate * dt;
+    }
+
+    // do not let target altitude get too far from current altitude above ground
+    // Note: the 750cm limit is perhaps too wide but is consistent with the regular althold limits and helps ensure a smooth transition
+    target_rangefinder_alt = constrain_float(target_rangefinder_alt,rangefinder_state.alt_cm-pos_control.get_leash_down_z(),rangefinder_state.alt_cm+pos_control.get_leash_up_z());
+
+    // calc desired velocity correction from target rangefinder alt vs actual rangefinder alt (remove the error already passed to Altitude controller to avoid oscillations)
+    distance_error = (target_rangefinder_alt - rangefinder_state.alt_cm) - (current_alt_target - current_alt);
+    velocity_correction = distance_error * g.rangefinder_gain;
+    velocity_correction = constrain_float(velocity_correction, -THR_SURFACE_TRACKING_VELZ_MAX, THR_SURFACE_TRACKING_VELZ_MAX);
+
+    // return combined pilot climb rate + rate to correct rangefinder alt error
+    return (target_rate + velocity_correction);
+#else
+    return (float)target_rate;
+#endif
+}
+
 // set_accel_throttle_I_from_pilot_throttle - smoothes transition from pilot controlled throttle to autopilot throttle
 void Copter::set_accel_throttle_I_from_pilot_throttle(float pilot_throttle)
 {
