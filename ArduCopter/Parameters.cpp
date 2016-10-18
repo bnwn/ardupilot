@@ -881,6 +881,12 @@ const AP_Param::Info Copter::var_info[] = {
     GOBJECT(rangefinder,   "RNGFND", RangeFinder),
 #endif
 
+#if FLOWMETER_ENABLED == ENABLED
+    // @Group: FLWMTR
+    // @Path: ../libraries/AP_Flowmeter/AP_Flowmeter.cpp
+    GOBJECT(flowmeter,     "FLWMTR", Flowmeter),
+#endif
+
 #if AP_TERRAIN_AVAILABLE && AC_TERRAIN
     // @Group: TERRAIN_
     // @Path: ../libraries/AP_Terrain/AP_Terrain.cpp

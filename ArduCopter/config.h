@@ -128,8 +128,20 @@
  # define RANGEFINDER_ENABLED ENABLED
 #endif
 
+#ifndef FLOWMETER_ENABLED
+ # define FLOWMETER_ENABLED ENABLED
+#endif
+
 #ifndef RANGEFINDER_HEALTH_MAX
  # define RANGEFINDER_HEALTH_MAX 3          // number of good reads that indicates a healthy rangefinder
+#endif
+
+#ifndef FLOWMETER_HEALTH_MAX
+ # define FLOWMETER_HEALTH_MAX 5
+#endif
+
+#ifndef PESTICIDE_EMPTY_TIMEOUT_MS
+ # define PESTICIDE_EMPTY_TIMEOUT_MS 1000
 #endif
 
 #ifndef RANGEFINDER_GAIN_DEFAULT
@@ -146,6 +158,10 @@
 
 #ifndef RANGEFINDER_WPNAV_FILT_HZ
  # define RANGEFINDER_WPNAV_FILT_HZ   0.25f // filter frequency for rangefinder altitude provided to waypoint navigation class
+#endif
+
+#ifndef FLOWMETER_FILT_HZ
+ # define FLOWMETER_FILT_HZ          0.0f
 #endif
 
 #ifndef RANGEFINDER_TILT_CORRECTION         // by disable tilt correction for use of range finder data by EKF

@@ -81,6 +81,76 @@ bool Copter::rangefinder_alt_ok()
     return (rangefinder_state.enabled && rangefinder_state.alt_healthy);
 }
 
+void Copter::init_flowmeter(void)
+{
+#if FLOWMETER_ENABLED == ENABLED
+    flowmeter_state.enabled = flowmeter.init();
+    flowmeter_state.flowrate_filt.set_cutoff_frequency(FLOWMETER_FILT_HZ);
+#endif
+}
+
+// return flowrate from flowmeter measurement
+void Copter::read_flowmeter(void)
+{
+#if FLOWMETER_ENABLED == ENABLED
+    flowmeter.update();
+
+    flowmeter_state.healthy = (flowmeter.has_data() && (flowmeter.range_valid_count() >= FLOWMETER_HEALTH_MAX));
+    flowmeter_state.pesticide_check_valid = flowmeter.get_state();
+    flowmeter_state.flowrate = flowmeter.flowrate();
+
+    // filter flowmeter
+    uint32_t now = AP_HAL::millis();
+
+    if (flowmeter_state.healthy) {
+        if (now - flowmeter_state.last_healthy_ms > RANGEFINDER_TIMEOUT_MS) {
+            // reset filter if we haven't used it within the last second
+            flowmeter_state.flowrate_filt.reset(flowmeter_state.flowrate);
+        } else {
+            flowmeter_state.flowrate_filt.apply(flowmeter_state.flowrate, 0.0f);
+        }
+        flowmeter_state.last_healthy_ms = now;
+    }
+#else
+    flowmeter_state.enable = false;
+    flowmeter_state.healthy = false;
+    flowmeter_state.flowrate = 0.0f;
+#endif
+}
+
+bool Copter::flowmeter_ok(void)
+{
+    return (flowmeter_state.enabled && flowmeter_state.healthy);
+}
+
+bool Copter::get_pesticide_remaining(void)
+{
+    read_flowmeter();
+
+    if (flowmeter_ok()) {
+        uint32_t now = AP_HAL::millis();
+
+        if (flowmeter_state.pesticide_check_valid && flowmeter_state.flowrate <= 0.0f) {
+            if (flowmeter_state.pesticide_empty_time == 0) {
+                flowmeter_state.pesticide_empty_time = now;
+
+            } else if ((now - flowmeter_state.pesticide_empty_time) > PESTICIDE_EMPTY_TIMEOUT_MS) {
+                flowmeter_state.pesticide_empty_time = 0;
+                flowmeter_state.pesticide_check_valid = false;
+                flowmeter_state.flowrate = 0.0f;
+                flowmeter_state.flowrate_filt.reset(flowmeter_state.flowrate);
+                flowmeter.disable();
+                return false;
+            }
+        } else {
+            // reset pesticide empty time
+            flowmeter_state.pesticide_empty_time = 0;
+        }
+    }
+
+    return true;
+}
+
 /*
   update RPM sensors
  */

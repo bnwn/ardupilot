@@ -27,7 +27,7 @@
 #define RANGEFINDER_PREARM_ALT_MAX_CM           200
 #define RANGEFINDER_PREARM_REQUIRED_CHANGE_CM   50
 
-class AP_RangeFinder_Backend; 
+class AP_RangeFinder_Backend;
  
 class RangeFinder
 {

@@ -88,6 +88,7 @@
 #include <AC_InputManager/AC_InputManager.h>        // Pilot input handling library
 #include <AC_InputManager/AC_InputManager_Heli.h>   // Heli specific pilot input handling library
 #include <AP_Button/AP_Button.h>
+#include <AP_Flowmeter/AP_Flowmeter.h>         // Flowmeter library
 
 // Configuration
 #include "defines.h"
@@ -187,6 +188,20 @@ private:
     Compass compass;
     AP_InertialSensor ins;
 
+#if FLOWMETER_ENABLED == ENABLED
+    Flowmeter flowmeter {serial_manager};
+    struct {
+        bool enabled:1;
+        bool healthy:1;
+        float flowrate;
+        uint32_t last_healthy_ms;
+        bool pesticide_check_valid;
+        uint32_t pesticide_empty_time;
+        LowPassFilterFloat flowrate_filt;
+    } flowmeter_state = { false, false, 0.0f, 0, false, 0 };
+#endif
+
+#if RANGEFINDER_ENABLED == ENABLED
     RangeFinder rangefinder {serial_manager};
     struct {
         bool enabled:1;
@@ -195,6 +210,7 @@ private:
         uint32_t last_healthy_ms;
         LowPassFilterFloat alt_cm_filt; // altitude filter
     } rangefinder_state = { false, false, 0, 0 };
+#endif
 
     AP_RPM rpm_sensor;
 
@@ -1036,6 +1052,10 @@ private:
     void init_rangefinder(void);
     void read_rangefinder(void);
     bool rangefinder_alt_ok();
+    void init_flowmeter(void);
+    void read_flowmeter(void);
+    bool get_pesticide_remaining(void);
+    bool flowmeter_ok(void);
     void init_compass();
     void init_optflow();
     void update_optical_flow(void);

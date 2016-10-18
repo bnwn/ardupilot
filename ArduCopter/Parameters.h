@@ -124,6 +124,7 @@ public:
         k_param_serial2_baud,           // deprecated - remove
         k_param_land_repositioning,
         k_param_rangefinder, // rangefinder object
+        k_param_flowmeter,
         k_param_fs_ekf_thresh,
         k_param_terrain,
         k_param_acro_expo,

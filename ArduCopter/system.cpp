@@ -258,6 +258,9 @@ void Copter::init_ardupilot()
     // initialise rangefinder
     init_rangefinder();
 
+    // initialise flowmeter
+    init_flowmeter();
+
     // initialise AP_RPM library
     rpm_sensor.init();
 

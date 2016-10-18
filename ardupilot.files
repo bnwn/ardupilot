@@ -537,6 +537,8 @@ libraries/AP_EPM/AP_EPM.cpp
 libraries/AP_EPM/AP_EPM.h
 libraries/AP_Frsky_Telem/AP_Frsky_Telem.cpp
 libraries/AP_Frsky_Telem/AP_Frsky_Telem.h
+libraries/AP_Flowmeter/AP_Flowmeter.h
+libraries/AP_Flowmeter/AP_Flowmeter.cpp
 libraries/AP_GPS/examples/GPS_AUTO_test/GPS_AUTO_test.cpp
 libraries/AP_GPS/examples/GPS_UBLOX_passthrough/GPS_UBLOX_passthrough.cpp
 libraries/AP_GPS/tests/test_gps.cpp
@@ -9941,6 +9943,8 @@ libraries/AP_EPM/AP_EPM.cpp
 libraries/AP_EPM/AP_EPM.h
 libraries/AP_Frsky_Telem/AP_Frsky_Telem.cpp
 libraries/AP_Frsky_Telem/AP_Frsky_Telem.h
+libraries/AP_Flowmeter/AP_Flowmeter.h
+libraries/AP_Flowmeter/AP_Flowmeter.cpp
 libraries/AP_GPS/examples/GPS_AUTO_test/GPS_AUTO_test.cpp
 libraries/AP_GPS/examples/GPS_UBLOX_passthrough/GPS_UBLOX_passthrough.cpp
 libraries/AP_GPS/tests/test_gps.cpp
