@@ -36,25 +36,32 @@ const AP_Param::GroupInfo Flowmeter::var_info[] = {
     // @Param: _COF
     // @DisplayName: Flowmeter coefficient
     // @Description: F=coefficient*Q(L/Min)
-    // @Units: (L/Min
-    // @User: Standard
+    // @Units: L/Min
+    // @User: Enigma
     AP_GROUPINFO("_COF", 0, Flowmeter, _coefficient, 16),
 
     // @Param: _MIN_RATE
     // @DisplayName: Flowmeter minimum flowrate
     // @Description: Minimum flowrate in L/Min that Flowmeter can reliably read
-    // @Units: centimeters
+    // @Units: L/Min
     // @Increment: 1
-    // @User: Standard
+    // @User: Enigma
     AP_GROUPINFO("_MIN_RATE",  1, Flowmeter, _min_flowrate, 0.0f),
 
     // @Param: _MAX_RATE
     // @DisplayName: Flowmeter maximum flowrate
     // @Description: Maximum flowrate in L/Min that Flowmeter can reliably read
-    // @Units: centimeters
+    // @Units: L/Min
     // @Increment: 1
-    // @User: Standard
+    // @User: Enigma
     AP_GROUPINFO("_MAX_RATE",  2, Flowmeter, _max_flowrate, 10.0f),
+
+    // @Param: _FARMING
+    // @DisplayName: farming mode switch
+    // @Description: control farming mode on/off
+    // @Default: 233(on)
+    // @User: Enigma
+    AP_GROUPINFO("_FARMING",  3, Flowmeter, _farming_mode, 233),
 
     AP_GROUPEND
 };
@@ -62,15 +69,12 @@ const AP_Param::GroupInfo Flowmeter::var_info[] = {
 Flowmeter::Flowmeter(AP_SerialManager &_serial_manager) :
     serial_manager(_serial_manager),
     _last_timestamp(0),
-    _last_pulse_time_ms(0),
-    _disable_time_ms(0),
-    _good_sample_count(0),
-    _last_sample_flowrate(0)
+    _flowrate_array{0}
 {
     AP_Param::setup_object_defaults(this, var_info);
 
     // init state
-    memset(state,0,sizeof(state));
+    memset(&state,0,sizeof(state));
 }
 
 Flowmeter::~Flowmeter()
@@ -114,58 +118,49 @@ void Flowmeter::update(void)
     }
 
     struct pwm_input_s pwm;
-    float sum_flowrate = 0;
+    float sum_flowrate = 0.0f;
+    float flowrate_max = 0.0f, flowrate_min = HUGE_VALF;
+    float pluse_rate_tmp = 0.0f;
     uint16_t count = 0;
-    uint32_t now = AP_HAL::millis();
-
+    float sum_pluse_rate = 0.0f;
     while (::read(_fd, &pwm, sizeof(pwm)) == sizeof(pwm)) {
-
-        _last_pulse_time_ms = now;
-
-        float pluse_rate = 1.0f / (float(pwm.period) * 1e-6f);
-        /* F(Hz) = [FLOWMETER_CONVERSION_COEFFICIENT * Q]. err = 10%. F = pulse_rate, Q = flowrate */
-        float flowrate = pluse_rate / _coefficient;
-
-        float flowrate_delta = fabsf(flowrate - _last_sample_flowrate);
-        _last_sample_flowrate = flowrate;
-
-        if (flowrate_delta > VALID_FLOWRATE_DELTA) {
-            // varying by more than 1L/min in a single sample,
-            _good_sample_count = 0;
-            continue;
-        }
-
-        if (_good_sample_count > 1) {
-            count++;
-            sum_flowrate += flowrate;
-            _last_timestamp = pwm.timestamp;
-        } else {
-            _good_sample_count++;
-        }
+        pluse_rate_tmp = 1.0f / (float(pwm.period) * 1e-6f);
+        sum_pluse_rate += pluse_rate_tmp;
+        count++;
     }
 
-    // if we have not taken a reading in the last 0.2s set status to No Data
-    if (AP_HAL::micros64() - _last_timestamp >= 200000) {
-        set_status(Flowmeter::Flowmeter_NoData);
+    if (count > 0) {
+        pluse_rate_tmp = sum_pluse_rate / (float)count;
     }
 
-    /* if we haven't seen any pulses for 0.5s then the sensor is
-       probably dead. Try resetting it. Tests show the sensor takes
-       about 0.2s to boot, so 500ms offers some safety margin
-    */
-    if (now - _last_pulse_time_ms > 500U && _disable_time_ms == 0) {
-        ioctl(_fd, SENSORIOCRESET, 0);
-        _last_pulse_time_ms = now;
+    /* F(Hz) = [FLOWMETER_CONVERSION_COEFFICIENT * Q]. err = 10%. F = pulse_rate, Q = flowrate */
+    float flowrate_tmp = pluse_rate_tmp / _coefficient;
+
+    for (int i=1; i<SAMPLE_INSTANCE; i++) {
+        _flowrate_array[i-1] = _flowrate_array[i];
     }
 
-    if (count != 0) {
-        state.flowrate = sum_flowrate / count;
+    _flowrate_array[SAMPLE_INSTANCE-1] = flowrate_tmp;
 
-        // update range_valid state based on distance measured
-        update_status();
-        if (state.flowrate > FLOWMETER_ENABLE_FLOWRATE) {
-            enable();
+    for (int i=0; i<SAMPLE_INSTANCE; i++) {
+
+        if (_flowrate_array[i] > flowrate_max) {
+            flowrate_max = _flowrate_array[i];
         }
+
+        if (_flowrate_array[i] < flowrate_min) {
+            flowrate_min = _flowrate_array[i];
+        }
+
+        sum_flowrate += _flowrate_array[i];
+    }
+
+    state.flowrate = (sum_flowrate - flowrate_max - flowrate_min) / (float)(SAMPLE_INSTANCE - 2);
+    state.pluse_rate = pluse_rate_tmp;
+    // update range_valid state based on distance measured
+    update_status();
+    if (state.flowrate > FLOWMETER_ENABLE_FLOWRATE) {
+        enable();
     }
 }
 
@@ -175,12 +170,12 @@ bool Flowmeter::has_data() const
     return ((state.status != Flowmeter_NotConnected) && (state.status != Flowmeter_NoData));
 }
 
-void Flowmeter::set_status(Flowmeter::Flowmeter_Status status)
+void Flowmeter::set_status(Flowmeter::Flowmeter_Status _status)
 {
-    state.status = status;
+    state.status = _status;
 
     // update valid count
-    if (status == Flowmeter::Flowmeter_Good) {
+    if (_status == Flowmeter::Flowmeter_Good) {
         if (state.range_valid_count < 10) {
             state.range_valid_count++;
         }

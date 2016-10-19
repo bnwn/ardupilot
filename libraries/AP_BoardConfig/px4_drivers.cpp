@@ -522,9 +522,9 @@ void AP_BoardConfig::px4_start_optional_sensors(void)
     if (px4_start_driver(mb12xx_main, "mb12xx", "start")) {
         printf("Found mb12xx sensor\n");
     }
-//    if (px4_start_driver(m006_main, "m006", "start")) {
-//        printf("Found m006 sensor\n");
-//    }
+    if (px4_start_driver(m006_main, "m006", "start")) {
+        printf("Found m006 sensor\n");
+    }
 //    if (px4_start_driver(hz16wa_main, "hz16wa", "start")) {
 //        printf("Found hz16wa sensor\n");
 //    }

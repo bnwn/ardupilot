@@ -188,6 +188,19 @@ private:
     Compass compass;
     AP_InertialSensor ins;
 
+#if FLOWMETER_ENABLED == ENABLED
+    Flowmeter flowmeter {serial_manager};
+    struct {
+        bool enabled:1;
+        bool healthy:1;
+        int16_t flowrate;
+        uint32_t last_healthy_ms;
+        bool pesticide_check_valid;
+        uint32_t pesticide_empty_time;
+        LowPassFilterFloat flowrate_filt;
+    } flowmeter_state = { false, false, 0, 0, false, 0 };
+#endif
+
 #if RANGEFINDER_ENABLED == ENABLED
     RangeFinder rangefinder {serial_manager};
     struct {
@@ -197,19 +210,6 @@ private:
         uint32_t last_healthy_ms;
         LowPassFilterFloat alt_cm_filt; // altitude filter
     } rangefinder_state = { false, false, 0, 0 };
-#endif
-
-#if FLOWMETER_ENABLED == ENABLED
-    Flowmeter flowmeter {serial_manager};
-    struct {
-        bool enabled:1;
-        bool healthy:1;
-        float flowrate;
-        uint32_t last_healthy_ms;
-        bool pesticide_check_valid;
-        uint32_t pesticide_empty_time;
-        LowPassFilterFloat flowrate_filt;
-    } flowmeter_state = { false, false, 0.0f, 0, false, 0 };
 #endif
 
     AP_RPM rpm_sensor;
@@ -1047,6 +1047,7 @@ private:
     void pump_output_init();
     void radio_to_pump_output();
     void pesticide_remaining_check();
+    void farming_mode_handle(void);
     void init_barometer(bool full_calibration);
     void read_barometer(void);
     void init_rangefinder(void);

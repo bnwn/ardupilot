@@ -17,7 +17,18 @@ void Copter::radio_to_pump_output()
 
 void Copter::pesticide_remaining_check()
 {
-    static bool is_spraying_status = false;
+    if (flowmeter.farming_state() && !ap.land_complete && !get_pesticide_remaining()) {
+        // pesticide is empty
+        set_mode(RTL, MODE_REASON_PESTICIDE_EMPTY);
+    }
+        /* test
+        printf("pesticide empty RTL!\n");
+    } else {
+        printf("flowrate_rel: %d \n  pluse rate: %d \n", flowmeter_state.flowrate, flowmeter.pluse_rate());
+    }*/
+}
 
-    uint16_t v = hal.rcin->read(PUMP_CONTROL_CHANNEL);
+void Copter::farming_mode_handle(void)
+{
+    pesticide_remaining_check();
 }
