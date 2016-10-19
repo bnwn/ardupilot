@@ -51,8 +51,8 @@ void Copter::read_control_switch()
 
     if (control_aux10_switch_on && failsafe_disengaged) {
         if (ap.land_complete && (tnow_ms - control_switch_state.last_aux10_edge_time_ms > CONTROL_SWITCH_HOLD_LONG_TIME_MS)) {
-            //if (mission.clear_point_item() == AP_MISSION_POINT_CLEAR_UP) {
-            if (mission.reset_point_item() == AP_MISSION_POINT_SET_CURRENT) {
+            if (mission.clear_point_item() == AP_MISSION_POINT_CLEAR_UP) {
+            //if (mission.reset_point_item() == AP_MISSION_POINT_SET_CURRENT) {
                 AP_Notify::events.tune_save = 1;
             } else {
                 AP_Notify::events.tune_error = 1;

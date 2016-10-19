@@ -87,6 +87,15 @@ void Copter::init_flowmeter(void)
     flowmeter_state.enabled = flowmeter.init();
     flowmeter_state.flowrate_filt.set_cutoff_frequency(FLOWMETER_FILT_HZ);
 #endif
+//    test
+//    while(1) {
+//        usleep(100000);
+//        if (get_pesticide_remaining()) {
+//            printf("flowrate_rel: %d \n  pluse rate: %d \n", flowmeter_state.flowrate, flowmeter.pluse_rate());
+//        } else {
+//            printf("pesticide empty! \n");
+//        }
+//    }
 }
 
 // return flowrate from flowmeter measurement
@@ -103,7 +112,7 @@ void Copter::read_flowmeter(void)
     uint32_t now = AP_HAL::millis();
 
     if (flowmeter_state.healthy) {
-        if (now - flowmeter_state.last_healthy_ms > RANGEFINDER_TIMEOUT_MS) {
+        if (now - flowmeter_state.last_healthy_ms > PESTICIDE_EMPTY_TIMEOUT_MS) {
             // reset filter if we haven't used it within the last second
             flowmeter_state.flowrate_filt.reset(flowmeter_state.flowrate);
         } else {
@@ -130,7 +139,7 @@ bool Copter::get_pesticide_remaining(void)
     if (flowmeter_ok()) {
         uint32_t now = AP_HAL::millis();
 
-        if (flowmeter_state.pesticide_check_valid && flowmeter_state.flowrate <= 0.0f) {
+        if (flowmeter_state.pesticide_check_valid && flowmeter_state.flowrate <= 0) {
             if (flowmeter_state.pesticide_empty_time == 0) {
                 flowmeter_state.pesticide_empty_time = now;
 

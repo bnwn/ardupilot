@@ -24,6 +24,7 @@
 // Maximum number of range finder instances available on this platform
 #define FLOWMETER_ENABLE_FLOWRATE 0.2f
 #define VALID_FLOWRATE_DELTA 1.0f
+#define SAMPLE_INSTANCE 3
 
 class Flowmeter
 {
@@ -41,7 +42,8 @@ public:
 
     // The Flowmeter_State structure is filled in by the backend driver
     struct Flowmeter_State {
-        float               flowrate; // distance: in cm
+        float               flowrate; // flowrate
+        float               pluse_rate;
         enum Flowmeter_Status status;     // sensor status
         uint8_t                range_valid_count;   // number of consecutive valid readings (maxes out at 10)
         bool                enabled;
@@ -51,6 +53,7 @@ public:
     AP_Float _coefficient;
     AP_Float _min_flowrate;
     AP_Float _max_flowrate;
+    AP_Int16  _farming_mode;
 
     static const struct AP_Param::GroupInfo var_info[];
 
@@ -62,15 +65,23 @@ public:
 
 #define _Flowmeter_STATE state
 
-    uint16_t flowrate() const {
-        return _Flowmeter_STATE.flowrate;
+    int16_t flowrate() const {
+        return (int16_t)(_Flowmeter_STATE.flowrate * 100);
     }
 
-    int16_t max_flowrate() const {
+    int16_t pluse_rate() const {
+        return (int16_t)_Flowmeter_STATE.pluse_rate;
+    }
+
+    bool farming_state() const {
+        return (_farming_mode == 233);
+    }
+
+    float max_flowrate() const {
         return _max_flowrate;
     }
 
-    int16_t min_flowrate() const {
+    float min_flowrate() const {
         return _min_flowrate;
     }
 
@@ -87,7 +98,7 @@ public:
         return _Flowmeter_STATE.range_valid_count;
     }
 
-    void set_status(Flowmeter::Flowmeter_Status status);
+    void set_status(Flowmeter::Flowmeter_Status _status);
 
     void update_status(void);
 
@@ -109,8 +120,5 @@ private:
 
     int _fd;
     uint64_t _last_timestamp;
-    uint64_t _last_pulse_time_ms;
-    uint32_t _disable_time_ms;
-    uint32_t _good_sample_count;
-    float _last_sample_flowrate;
+    float _flowrate_array[SAMPLE_INSTANCE];
 };
