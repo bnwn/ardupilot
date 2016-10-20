@@ -43,6 +43,14 @@ const AP_Param::GroupInfo AP_Mission::var_info[] = {
     // @User: Enigma
     AP_GROUPINFO("ATOB_DIR", 4, AP_Mission, _point_atob_direction, 1),
 
+    // @Param RNG_GAIN
+    // @DisplayName: RangeFinder Gain in auto mode
+    // @Description: RangeFinder Gain in auto mode
+    // @Values: float type
+    // @Default: AP_MISSION_RANGEFINDER_GAIN
+    // @User: Enigma
+    AP_GROUPINFO("RNG_GAIN", 5, AP_Mission, _rangefinder_gain_in_auto, AP_MISSION_RANGEFINDER_GAIN),
+
     AP_GROUPEND
 };
 
@@ -136,6 +144,7 @@ point_save_state AP_Mission::clear_point_item()
     if (!write_cmd_to_storage(AP_MISSION_POINT_CURRENT_OFFSET, cmd, AP_MISSION_POINT_ATOB_RUNNING)) {
         return AP_MISSION_POINT_SET_FAILED;
     }
+    _point_flags.save_state = AP_MISSION_POINT_CLEAR_UP;
     return AP_MISSION_POINT_CLEAR_UP;
 }
 
@@ -2054,12 +2063,12 @@ bool AP_Mission::is_valid_point()
     return false;
 }
 
-float AP_Mission::get_current_target_alt(void)
+float AP_Mission::get_current_target_alt(void) const
 {
     if (_point_flags.state == MISSION_RUNNING) {
-        return _point_cmd.content.location.alt;
+        return MAX(_point_atob_altitude * 100.0f, 100.0f);
     } else if (_flags.state == MISSION_RUNNING) {
-        return _nav_cmd.content.location.alt;
+        return _nav_cmd.content.location.alt - _ahrs.get_home().alt;
     }
 
     return 0.0;

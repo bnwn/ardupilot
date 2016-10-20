@@ -48,6 +48,8 @@
 #define AP_MISSION_POINT_B_OFFSET           (AP_MISSION_POINT_ITEM_OFFSET + 1)
 #define AP_MISSION_POINT_CURRENT_OFFSET     (AP_MISSION_POINT_ITEM_OFFSET + 2)
 
+#define AP_MISSION_RANGEFINDER_GAIN         8.0f
+
 // mission state enumeration
 enum point_save_state {
     AP_MISSION_POINT_SET_A=0,
@@ -333,6 +335,9 @@ public:
     /// num_commands_max - returns maximum number of commands that can be stored
     uint16_t num_commands_max() const;
 
+    /// get_rangefinder_gain - returns rangefinder gain in mission
+    float get_rangefinder_gain() const { return _rangefinder_gain_in_auto; }
+
     /// start - resets current commands to point to the beginning of the mission
     ///     To-Do: should we validate the mission first and return true/false?
     void start();
@@ -485,7 +490,7 @@ public:
     static const struct AP_Param::GroupInfo var_info[];
 
     // get current target alt
-    float get_current_target_alt(void);
+    float get_current_target_alt(void) const;
 
 private:
     static StorageAccess _storage;
@@ -571,6 +576,7 @@ private:
     AP_Float                _point_atob_altitude;
     AP_Float                _point_atob_interval;
     AP_Int8                 _point_atob_direction;
+    AP_Float                _rangefinder_gain_in_auto;
 
     // pointer to main program functions
     mission_cmd_fn_t        _cmd_start_fn;  // pointer to function which will be called when a new command is started

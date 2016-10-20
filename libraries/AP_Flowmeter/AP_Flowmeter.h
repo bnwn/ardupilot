@@ -22,7 +22,7 @@
 #include <AP_SerialManager/AP_SerialManager.h>
 
 // Maximum number of range finder instances available on this platform
-#define FLOWMETER_ENABLE_FLOWRATE 0.2f
+#define FLOWMETER_ENABLE_FLOWRATE 1.0f
 #define VALID_FLOWRATE_DELTA 1.0f
 #define SAMPLE_INSTANCE 3
 

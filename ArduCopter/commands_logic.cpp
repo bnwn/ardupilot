@@ -6,10 +6,6 @@
 bool Copter::start_command(const AP_Mission::Mission_Command& _cmd)
 {
     AP_Mission::Mission_Command cmd = _cmd;
-    // To-Do: logging when new commands start/end
-    if (should_log(MASK_LOG_CMD)) {
-        DataFlash.Log_Write_Mission_Cmd(mission, cmd);
-    }
 
     if (rangefinder_alt_ok() && (cmd.id == MAV_CMD_NAV_TAKEOFF || cmd.id == MAV_CMD_NAV_WAYPOINT || cmd.id == MAV_CMD_NAV_SPLINE_WAYPOINT \
                                  || cmd.id == MAV_CMD_NAV_LOITER_UNLIM || cmd.id == MAV_CMD_NAV_LOITER_TURNS || cmd.id == MAV_CMD_NAV_LOITER_TIME)) {
@@ -21,6 +17,11 @@ bool Copter::start_command(const AP_Mission::Mission_Command& _cmd)
     if (control_mode == POINT_ATOB) {
         cmd.p1 = 0;
         cmd.index = 0;
+    }
+
+    // To-Do: logging when new commands start/end
+    if (should_log(MASK_LOG_CMD)) {
+        DataFlash.Log_Write_Mission_Cmd(mission, cmd);
     }
 
     switch(cmd.id) {
