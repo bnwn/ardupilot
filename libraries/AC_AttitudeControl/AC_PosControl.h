@@ -43,6 +43,8 @@
 
 #define POSCONTROL_OVERSPEED_GAIN_Z             2.0f    // gain controlling rate at which z-axis speed is brought back within SPEED_UP and SPEED_DOWN range
 
+#define USE_FEED_FORWARD                        0       // use feed forward control in auto mission if set 1
+
 class AC_PosControl
 {
 public:

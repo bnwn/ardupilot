@@ -327,6 +327,7 @@ bool Copter::mode_requires_GPS(control_mode_t mode) {
         case POSHOLD:
         case BRAKE:
         case AVOID_ADSB:
+        case POINT_ATOB:
         case THROW:
             return true;
         default:

@@ -185,7 +185,7 @@ void Copter::auto_takeoff_run()
         target_climb_rate = get_surface_tracking_climb_rate_in_auto(target_climb_rate, pos_control.get_alt_target(), G_Dt);
     }
 
-    pos_control.set_alt_target_from_climb_rate_ff_in_auto(target_climb_rate, G_Dt, false);
+    pos_control.set_alt_target_from_climb_rate_ff_in_auto(target_climb_rate, G_Dt, true);
     // call z-axis position controller (wpnav should have already updated it's alt target)
     pos_control.update_z_controller();
 
@@ -271,7 +271,7 @@ void Copter::auto_wp_run()
         target_climb_rate = get_surface_tracking_climb_rate_in_auto(target_climb_rate, pos_control.get_alt_target(), G_Dt);
     }
 
-    pos_control.set_alt_target_from_climb_rate_ff_in_auto(target_climb_rate, G_Dt, false);
+    pos_control.set_alt_target_from_climb_rate_ff_in_auto(target_climb_rate, G_Dt, true);
     // call z-axis position controller (wpnav should have already updated it's alt target)
     pos_control.update_z_controller();
 
@@ -354,7 +354,7 @@ void Copter::auto_spline_run()
         target_climb_rate = get_surface_tracking_climb_rate_in_auto(target_climb_rate, pos_control.get_alt_target(), G_Dt);
     }
 
-    pos_control.set_alt_target_from_climb_rate_ff_in_auto(target_climb_rate, G_Dt, false);
+    pos_control.set_alt_target_from_climb_rate_ff_in_auto(target_climb_rate, G_Dt, true);
     // call z-axis position controller (wpnav should have already updated it's alt target)
     pos_control.update_z_controller();
 
@@ -517,7 +517,7 @@ void Copter::auto_circle_run()
         target_climb_rate = get_surface_tracking_climb_rate_in_auto(target_climb_rate, pos_control.get_alt_target(), G_Dt);
     }
 
-    pos_control.set_alt_target_from_climb_rate_ff_in_auto(target_climb_rate, G_Dt, false);
+    pos_control.set_alt_target_from_climb_rate_ff_in_auto(target_climb_rate, G_Dt, true);
     // call z-axis position controller
     pos_control.update_z_controller();
 
@@ -610,7 +610,7 @@ void Copter::auto_loiter_run()
         target_climb_rate = get_surface_tracking_climb_rate_in_auto(target_climb_rate, pos_control.get_alt_target(), G_Dt);
     }
 
-    pos_control.set_alt_target_from_climb_rate_ff_in_auto(target_climb_rate, G_Dt, false);
+    pos_control.set_alt_target_from_climb_rate_ff_in_auto(target_climb_rate, G_Dt, true);
     pos_control.update_z_controller();
     attitude_control.input_euler_angle_roll_pitch_euler_rate_yaw(wp_nav.get_roll(), wp_nav.get_pitch(), target_yaw_rate, get_smoothing_gain());
 }
