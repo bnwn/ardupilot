@@ -230,6 +230,7 @@ void AC_PosControl::set_alt_target_from_climb_rate_ff(float climb_rate_cms, floa
 ///     set force_descend to true during landing to allow target to move low enough to slow the motors
 void AC_PosControl::set_alt_target_from_climb_rate_ff_in_auto(float climb_rate_cms, float dt, bool force_descend)
 {
+#if USE_FEED_FORWARD == 1
     // calculated increased maximum acceleration if over speed
     float accel_z_cms = _accel_z_cms;
     if (_vel_desired.z < _speed_down_cms && !is_zero(_speed_down_cms)) {
@@ -252,8 +253,11 @@ void AC_PosControl::set_alt_target_from_climb_rate_ff_in_auto(float climb_rate_c
     _vel_desired.z = constrain_float(climb_rate_cms, _vel_desired.z-vel_change_limit, _vel_desired.z+vel_change_limit);
     _flags.use_desvel_ff_z = true;
 
-    // adjust desired alt
-    _pos_target.z += _vel_desired.z * dt;
+    // adjust desired alt if motors have not hit their limits
+    // To-Do: add check of _limit.pos_down?
+    if ((_vel_desired.z<0) || (_vel_desired.z>0 && !_limit.pos_up)) {
+        _pos_target.z += _vel_desired.z * dt;
+    }
 
     // do not let target alt get above limit
     if (_alt_max > 0 && _pos_target.z > _alt_max) {
@@ -262,6 +266,25 @@ void AC_PosControl::set_alt_target_from_climb_rate_ff_in_auto(float climb_rate_c
         // decelerate feed forward to zero
         _vel_desired.z = constrain_float(0.0f, _vel_desired.z-vel_change_limit, _vel_desired.z+vel_change_limit);
     }
+
+#else
+    // adjust desired alt if motors have not hit their limits
+    // To-Do: add check of _limit.pos_down?
+    if ((climb_rate_cms<0 && (!_motors.limit.throttle_lower || force_descend)) || (climb_rate_cms>0 && !_limit.pos_up)) {
+        _pos_target.z += climb_rate_cms * dt;
+    }
+
+    // do not let target alt get above limit
+    if (_alt_max > 0 && _pos_target.z > _alt_max) {
+        _pos_target.z = _alt_max;
+        _limit.pos_up = true;
+    }
+
+    // do not use z-axis desired velocity feed forward
+    // vel_desired set to desired climb rate for reporting and land-detector
+    _flags.use_desvel_ff_z = false;
+    _vel_desired.z = climb_rate_cms;
+#endif
 }
 
 /// add_takeoff_climb_rate - adjusts alt target up or down using a climb rate in cm/s

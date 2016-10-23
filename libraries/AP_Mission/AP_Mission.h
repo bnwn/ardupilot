@@ -48,7 +48,7 @@
 #define AP_MISSION_POINT_B_OFFSET           (AP_MISSION_POINT_ITEM_OFFSET + 1)
 #define AP_MISSION_POINT_CURRENT_OFFSET     (AP_MISSION_POINT_ITEM_OFFSET + 2)
 
-#define AP_MISSION_RANGEFINDER_GAIN         8.0f
+#define AP_MISSION_RANGEFINDER_GAIN         2.0f
 
 // mission state enumeration
 enum point_save_state {

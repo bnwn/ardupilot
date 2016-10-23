@@ -29,6 +29,8 @@ bool Copter::point_init(bool ignore_checks)
         // clear guided limits
         guided_limit_clear();
 
+        pos_control.set_desired_velocity_z(inertial_nav.get_velocity_z());
+
         // start/resume the point mission
         mission.point_atob_start();
         return true;
