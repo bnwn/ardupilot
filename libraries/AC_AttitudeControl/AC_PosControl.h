@@ -43,7 +43,7 @@
 
 #define POSCONTROL_OVERSPEED_GAIN_Z             2.0f    // gain controlling rate at which z-axis speed is brought back within SPEED_UP and SPEED_DOWN range
 
-#define USE_FEED_FORWARD                        0       // use feed forward control in auto mission if set 1
+#define USE_FEED_FORWARD                        1       // use feed forward control in auto mission if set 1
 
 class AC_PosControl
 {
@@ -97,6 +97,9 @@ public:
 
     /// get_vel_target_z - returns current vertical speed in cm/s
     float get_vel_target_z() const { return _vel_target.z; }
+
+    /// get_vel_target_z - returns current vertical speed in cm/s
+    float get_vel_desired_z() const { return _vel_desired.z; }
 
     /// set_accel_z - set vertical acceleration in cm/s/s
     ///     leash length will be recalculated the next time update_z_controller() is called

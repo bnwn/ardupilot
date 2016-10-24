@@ -2065,12 +2065,12 @@ bool AP_Mission::is_valid_point()
 
 float AP_Mission::get_current_target_alt(void) const
 {
-    return MAX(_point_atob_altitude * 100.0f, 100.0f);
-//    if (_point_flags.state == MISSION_RUNNING) {
-//        return MAX(_point_atob_altitude * 100.0f, 100.0f);
-//    } else if (_flags.state == MISSION_RUNNING) {
-//        return _nav_cmd.content.location.alt - _ahrs.get_home().alt;
-//    }
+    //return MAX(_point_atob_altitude * 100.0f, 100.0f);
+    if (_point_flags.state == MISSION_RUNNING) {
+        return MAX(_point_atob_altitude * 100.0f, 100.0f);
+    } else if (_flags.state == MISSION_RUNNING) {
+        return _nav_cmd.content.location.alt - _ahrs.get_home().alt;
+    }
 
 //    return 0.0;
 }
