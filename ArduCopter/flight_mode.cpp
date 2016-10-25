@@ -269,6 +269,9 @@ void Copter::exit_mode(control_mode_t old_control_mode, control_mode_t new_contr
     }
 #endif
 
+    // ensure disable imitation flags
+    pos_control.set_imitation_flags(false);
+
     // stop mission when we leave auto mode
     if (old_control_mode == AUTO) {
         if (mission.state() == AP_Mission::MISSION_RUNNING) {

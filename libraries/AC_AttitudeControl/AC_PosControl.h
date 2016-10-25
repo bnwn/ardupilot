@@ -298,6 +298,8 @@ public:
     // time_since_last_xy_update - returns time in seconds since the horizontal position controller was last run
     float time_since_last_xy_update() const;
 
+    void set_imitation_flags(bool state) { _flags.use_auto_imitation = state; }
+
     static const struct AP_Param::GroupInfo var_info[];
 
 private:
@@ -314,6 +316,7 @@ private:
             uint16_t freeze_ff_xy       : 1;    // 1 use to freeze feed forward during step updates
             uint16_t freeze_ff_z        : 1;    // 1 used to freeze velocity to accel feed forward for one iteration
             uint16_t use_desvel_ff_z    : 1;    // 1 to use z-axis desired velocity as feed forward into velocity step
+            uint16_t use_auto_imitation : 1;
     } _flags;
 
     // limit flags structure

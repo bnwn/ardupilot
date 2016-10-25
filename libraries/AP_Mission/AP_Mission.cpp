@@ -27,7 +27,7 @@ const AP_Param::GroupInfo AP_Mission::var_info[] = {
     // @Description: Point A to B flight mode altitude
     // @Values: Default 5(m)
     // @User: Enigma
-    AP_GROUPINFO("ATOB_ALT", 2, AP_Mission, _point_atob_altitude, 5),
+    AP_GROUPINFO("ATOB_ALT", 2, AP_Mission, _point_atob_altitude, 2),
 
     // @Param ATOB_INT
     // @DisplayName: Point AToB interval
@@ -2067,11 +2067,11 @@ float AP_Mission::get_current_target_alt(void) const
 {
     //return MAX(_point_atob_altitude * 100.0f, 100.0f);
     if (_point_flags.state == MISSION_RUNNING) {
-        return MAX(_point_atob_altitude * 100.0f, 100.0f);
+        return (_point_atob_altitude * 100.0f);
     } else if (_flags.state == MISSION_RUNNING) {
-        return _nav_cmd.content.location.alt - _ahrs.get_home().alt;
+        return (_nav_cmd.content.location.alt - _ahrs.get_home().alt);
     }
 
-//    return 0.0;
+    return 0.0;
 }
 
