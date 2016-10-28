@@ -65,6 +65,8 @@ void Copter::read_rangefinder(void)
         rangefinder_state.last_healthy_ms = now;
     }
 
+    rangefinder_state.alt_cm_filter = rangefinder_state.alt_cm_filt.get();
+
     // send rangefinder altitude and health to waypoint navigation library
     wp_nav.set_rangefinder_alt(rangefinder_state.enabled, rangefinder_state.alt_healthy, rangefinder_state.alt_cm_filt.get());
 

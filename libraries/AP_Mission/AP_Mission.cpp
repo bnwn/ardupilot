@@ -34,7 +34,7 @@ const AP_Param::GroupInfo AP_Mission::var_info[] = {
     // @Description: Point A to B flight mode lateral interval
     // @Values: Default 5(m)
     // @User: Enigma
-    AP_GROUPINFO("ATOB_INT", 3, AP_Mission, _point_atob_interval, 5),
+    AP_GROUPINFO("ATOB_INT", 3, AP_Mission, _point_atob_interval, 2),
 
     // @Param ATOB_DIR
     // @DisplayName: Point AToB direction
@@ -2066,9 +2066,9 @@ bool AP_Mission::is_valid_point()
 float AP_Mission::get_current_target_alt(void) const
 {
     //return MAX(_point_atob_altitude * 100.0f, 100.0f);
-    if (_point_flags.state == MISSION_RUNNING) {
+    if (_point_flags.state != MISSION_STOPPED) {
         return (_point_atob_altitude * 100.0f);
-    } else if (_flags.state == MISSION_RUNNING) {
+    } else if (_flags.state != MISSION_STOPPED) {
         return (_nav_cmd.content.location.alt - _ahrs.get_home().alt);
     }
 

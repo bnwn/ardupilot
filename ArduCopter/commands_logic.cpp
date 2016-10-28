@@ -12,6 +12,7 @@ bool Copter::start_command(const AP_Mission::Mission_Command& _cmd)
         struct Location loc;
         ahrs.get_position(loc);
         cmd.content.location.alt = loc.alt;
+        pos_control.set_imitation_flags(true);
     }
 
     if (control_mode == POINT_ATOB) {
