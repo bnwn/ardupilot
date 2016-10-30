@@ -43,6 +43,8 @@ bool Copter::auto_init(bool ignore_checks)
         // clear guided limits
         guided_limit_clear();
 
+        pos_control.set_desired_velocity_z(inertial_nav.get_velocity_z());
+
         // start/resume the mission (based on MIS_RESTART parameter)
         mission.start_or_resume();
         return true;

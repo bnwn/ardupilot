@@ -71,6 +71,7 @@ AC_PosControl::AC_PosControl(const AP_AHRS& ahrs, const AP_InertialNav& inav,
     _flags.freeze_ff_xy = true;
     _flags.freeze_ff_z = true;
     _flags.use_desvel_ff_z = true;
+    _flags.use_auto_imitation = false;
     _limit.pos_up = true;
     _limit.pos_down = true;
     _limit.vel_up = true;
@@ -255,9 +256,7 @@ void AC_PosControl::set_alt_target_from_climb_rate_ff_in_auto(float climb_rate_c
 
     // adjust desired alt if motors have not hit their limits
     // To-Do: add check of _limit.pos_down?
-    if ((_vel_desired.z<0) || (_vel_desired.z>0 && !_limit.pos_up)) {
-        _pos_target.z += _vel_desired.z * dt;
-    }
+    _pos_target.z += _vel_desired.z * dt;
 
     // do not let target alt get above limit
     if (_alt_max > 0 && _pos_target.z > _alt_max) {
@@ -589,8 +588,10 @@ void AC_PosControl::set_pos_target(const Vector3f& position)
 {
     _pos_target = position;
 
-    _flags.use_desvel_ff_z = false;
-    _vel_desired.z = 0.0f;
+    if (!_flags.use_auto_imitation) {
+        _flags.use_desvel_ff_z = false;
+        _vel_desired.z = 0.0f;
+    }
     // initialise roll and pitch to current roll and pitch.  This avoids a twitch between when the target is set and the pos controller is first run
     // To-Do: this initialisation of roll and pitch targets needs to go somewhere between when pos-control is initialised and when it completes it's first cycle
     //_roll_target = constrain_int32(_ahrs.roll_sensor,-_attitude_control.lean_angle_max(),_attitude_control.lean_angle_max());

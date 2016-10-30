@@ -256,16 +256,24 @@ float Copter::get_surface_tracking_climb_rate(int16_t target_rate, float current
 float Copter::get_surface_tracking_climb_rate_in_auto(int16_t target_rate, float current_alt_target, float dt)
 {
 #if RANGEFINDER_ENABLED == ENABLED
+    static uint32_t last_call_ms = 0;
+    static float current_target_rangefinder_alt;
     float distance_error;
     float velocity_correction;
     float current_alt = inertial_nav.get_altitude();
 
-    target_rangefinder_alt = mission.get_current_target_alt();
+    uint32_t now = millis();
 
-    // adjust rangefinder target alt if motors have not hit their limits
-//    if ((target_rate<0 && !motors.limit.throttle_lower) || (target_rate>0 && !motors.limit.throttle_upper)) {
-//        target_rangefinder_alt += target_rate * dt;
-//    }
+    // reset target altitude if this controller has just been engaged
+    if (now - last_call_ms > RANGEFINDER_TIMEOUT_MS) {
+        current_target_rangefinder_alt = mission.get_current_target_alt();
+        target_rangefinder_alt = current_target_rangefinder_alt + current_alt_target - current_alt;
+    }
+    if (mission.get_current_target_alt() != current_target_rangefinder_alt) {
+        target_rangefinder_alt += current_target_rangefinder_alt - mission.get_current_target_alt();
+        current_target_rangefinder_alt = mission.get_current_target_alt();
+    }
+    last_call_ms = now;
 
     // do not let target altitude get too far from current altitude above ground
     // Note: the 750cm limit is perhaps too wide but is consistent with the regular althold limits and helps ensure a smooth transition
@@ -276,6 +284,8 @@ float Copter::get_surface_tracking_climb_rate_in_auto(int16_t target_rate, float
     //velocity_correction = distance_error * mission.get_rangefinder_gain();
     velocity_correction = distance_error * 2.0;
     velocity_correction = constrain_float(velocity_correction, -THR_SURFACE_TRACKING_VELZ_MAX, THR_SURFACE_TRACKING_VELZ_MAX);
+
+    pos_control.set_imitation_flags(true);
 
     // return combined pilot climb rate + rate to correct rangefinder alt error
     return (target_rate + velocity_correction);

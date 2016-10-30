@@ -27,9 +27,9 @@
 #define WPNAV_WP_RADIUS                 200.0f      // default waypoint radius in cm
 
 #define WPNAV_WP_SPEED_UP               250.0f      // default maximum climb velocity
-#define WPNAV_WP_SPEED_DOWN             150.0f      // default maximum descent velocity
+#define WPNAV_WP_SPEED_DOWN             250.0f      // default maximum descent velocity
 
-#define WPNAV_WP_ACCEL_Z_DEFAULT        100.0f      // default vertical acceleration between waypoints in cm/s/s
+#define WPNAV_WP_ACCEL_Z_DEFAULT        250.0f      // default vertical acceleration between waypoints in cm/s/s
 
 #define WPNAV_LEASH_LENGTH_MIN          100.0f      // minimum leash lengths in cm
 
