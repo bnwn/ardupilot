@@ -273,7 +273,8 @@ float Copter::get_surface_tracking_climb_rate_in_auto(int16_t target_rate, float
 
     // calc desired velocity correction from target rangefinder alt vs actual rangefinder alt (remove the error already passed to Altitude controller to avoid oscillations)
     distance_error = (target_rangefinder_alt - rangefinder_state.alt_cm) - (current_alt_target - current_alt);
-    velocity_correction = distance_error * mission.get_rangefinder_gain();
+    //velocity_correction = distance_error * mission.get_rangefinder_gain();
+    velocity_correction = distance_error * 2.0;
     velocity_correction = constrain_float(velocity_correction, -THR_SURFACE_TRACKING_VELZ_MAX, THR_SURFACE_TRACKING_VELZ_MAX);
 
     // return combined pilot climb rate + rate to correct rangefinder alt error
