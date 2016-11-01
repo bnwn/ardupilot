@@ -241,13 +241,14 @@ bool Copter::autotune_start(bool ignore_checks)
         return false;
     }
 
-    // initialize vertical speeds and leash lengths
-    pos_control.set_speed_z(-g.pilot_velocity_z_max, g.pilot_velocity_z_max);
-    pos_control.set_accel_z(g.pilot_accel_z);
+//    // initialize vertical speeds and leash lengths
+//    pos_control.set_speed_z(-g.pilot_velocity_z_max, g.pilot_velocity_z_max);
+//    pos_control.set_accel_z(g.pilot_accel_z);
 
-    // initialise position and desired velocity
-    pos_control.set_alt_target(inertial_nav.get_altitude());
-    pos_control.set_desired_velocity_z(inertial_nav.get_velocity_z());
+//    // initialise position and desired velocity
+//    pos_control.set_alt_target(inertial_nav.get_altitude());
+//    pos_control.set_desired_velocity_z(inertial_nav.get_velocity_z());
+    pos_control.set_alt_target(0);
 
     return true;
 }
@@ -259,10 +260,11 @@ void Copter::autotune_run()
     float target_roll, target_pitch;
     float target_yaw_rate;
     int16_t target_climb_rate;
+    float pilot_throttle_scaled;
 
     // initialize vertical speeds and acceleration
-    pos_control.set_speed_z(-g.pilot_velocity_z_max, g.pilot_velocity_z_max);
-    pos_control.set_accel_z(g.pilot_accel_z);
+//    pos_control.set_speed_z(-g.pilot_velocity_z_max, g.pilot_velocity_z_max);
+//    pos_control.set_accel_z(g.pilot_accel_z);
 
     // if not auto armed or motor interlock not enabled set throttle to zero and exit immediately
     // this should not actually be possible because of the autotune_init() checks
@@ -276,22 +278,39 @@ void Copter::autotune_run()
     // apply SIMPLE mode transform to pilot inputs
     update_simple_mode();
 
-    // get pilot desired lean angles
+    motors.set_desired_spool_state(AP_Motors::DESIRED_THROTTLE_UNLIMITED);
+
+    // apply SIMPLE mode transform to pilot inputs
+    update_simple_mode();
+
+    set_land_complete(false);
+
+    // convert pilot input to lean angles
+    // To-Do: convert get_pilot_desired_lean_angles to return angles as floats
     get_pilot_desired_lean_angles(channel_roll->get_control_in(), channel_pitch->get_control_in(), target_roll, target_pitch, aparm.angle_max);
 
     // get pilot's desired yaw rate
     target_yaw_rate = get_pilot_desired_yaw_rate(channel_yaw->get_control_in());
 
-    // get pilot desired climb rate
-    target_climb_rate = get_pilot_desired_climb_rate(channel_throttle->get_control_in());
+    // get pilot's desired throttle
+    pilot_throttle_scaled = get_pilot_desired_throttle(channel_throttle->get_control_in());
+
+    target_climb_rate = 0;
+
+//    // get pilot desired lean angles
+//    get_pilot_desired_lean_angles(channel_roll->get_control_in(), channel_pitch->get_control_in(), target_roll, target_pitch, aparm.angle_max);
+
+//    // get pilot's desired yaw rate
+//    target_yaw_rate = get_pilot_desired_yaw_rate(channel_yaw->get_control_in());
+
+//    // get pilot desired climb rate
+//    target_climb_rate = get_pilot_desired_climb_rate(channel_throttle->get_control_in());
 
     // check for pilot requested take-off - this should not actually be possible because of autotune_init() checks
-    if (ap.land_complete && target_climb_rate > 0) {
-        // indicate we are taking off
-        set_land_complete(false);
-        // clear i term when we're taking off
-        set_throttle_takeoff();
-    }
+//    if (ap.land_complete && pilot_throttle_scaled > 0) {
+//        // indicate we are taking off
+//        set_land_complete(false);
+//    }
 
     // reset target lean angles and heading while landed
     if (ap.land_complete) {
@@ -304,11 +323,13 @@ void Copter::autotune_run()
         attitude_control.reset_rate_controller_I_terms();
         attitude_control.set_yaw_target_to_current_heading();
         attitude_control.input_euler_angle_roll_pitch_euler_rate_yaw(target_roll, target_pitch, target_yaw_rate, get_smoothing_gain());
-        pos_control.relax_alt_hold_controllers(0.0f);
-        pos_control.update_z_controller();
+        // body-frame rate controller is run directly from 100hz loop
+
+        // output pilot's throttle
+        attitude_control.set_throttle_out(pilot_throttle_scaled, true, g.throttle_filt);
     }else{
         // check if pilot is overriding the controls
-        if (!is_zero(target_roll) || !is_zero(target_pitch) || !is_zero(target_yaw_rate) || target_climb_rate != 0) {
+        if (!is_zero(target_roll) || !is_zero(target_pitch) || !is_zero(target_yaw_rate) || pilot_throttle_scaled != 0.0f) {
             if (!autotune_state.pilot_override) {
                 autotune_state.pilot_override = true;
                 // set gains to their original values
@@ -339,9 +360,13 @@ void Copter::autotune_run()
             autotune_attitude_control();
         }
 
-        // call position controller
-        pos_control.set_alt_target_from_climb_rate_ff(target_climb_rate, G_Dt, false);
-        pos_control.update_z_controller();
+        // call attitude controller
+        attitude_control.input_euler_angle_roll_pitch_euler_rate_yaw(target_roll, target_pitch, target_yaw_rate, get_smoothing_gain());
+
+        // body-frame rate controller is run directly from 100hz loop
+
+        // output pilot's throttle
+        attitude_control.set_throttle_out(pilot_throttle_scaled, true, g.throttle_filt);
     }
 }
 
