@@ -17,6 +17,15 @@ const AP_Param::GroupInfo AC_PosControl::var_info[] = {
     // @User: Advanced
     AP_GROUPINFO("_ACC_XY_FILT", 1, AC_PosControl, _accel_xy_filt_hz, POSCONTROL_ACCEL_FILTER_HZ),
 
+    // @Param: _DT_XY
+    // @DisplayName: XY Controller dt
+    // @Description: position control frequency
+    // @Units: Hz
+    // @Range: 0.0025 0.02
+    // @Increment: 0.0005
+    // @User: Enigma
+    AP_GROUPINFO("_DT_XY", 2, AC_PosControl, _dt_xy, POSCONTROL_DT_50HZ),
+
     AP_GROUPEND
 };
 
@@ -38,7 +47,7 @@ AC_PosControl::AC_PosControl(const AP_AHRS& ahrs, const AP_InertialNav& inav,
     _p_pos_xy(p_pos_xy),
     _pi_vel_xy(pi_vel_xy),
     _dt(POSCONTROL_DT_400HZ),
-    _dt_xy(POSCONTROL_DT_50HZ),
+//    _dt_xy(POSCONTROL_DT_50HZ),
     _last_update_xy_ms(0),
     _last_update_z_ms(0),
     _speed_down_cms(POSCONTROL_SPEED_DOWN),
