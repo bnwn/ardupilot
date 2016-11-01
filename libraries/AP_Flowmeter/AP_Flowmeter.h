@@ -23,6 +23,7 @@
 
 // Maximum number of range finder instances available on this platform
 #define FLOWMETER_ENABLE_FLOWRATE 1.0f
+#define PESTICIDE_SPRAYING_ON_TIME_MS 5000
 #define VALID_FLOWRATE_DELTA 1.0f
 #define SAMPLE_INSTANCE 3
 
@@ -43,7 +44,8 @@ public:
     // The Flowmeter_State structure is filled in by the backend driver
     struct Flowmeter_State {
         float               flowrate; // flowrate
-        float               pluse_rate;
+        float               plue_rate;
+        uint32_t            avoid_erroneous_judgement_time;
         enum Flowmeter_Status status;     // sensor status
         uint8_t                range_valid_count;   // number of consecutive valid readings (maxes out at 10)
         bool                enabled;

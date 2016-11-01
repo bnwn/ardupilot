@@ -117,6 +117,7 @@ void Flowmeter::update(void)
         return;
     }
 
+    uint32_t now = AP_HAL::millis();
     struct pwm_input_s pwm;
     float sum_flowrate = 0.0f;
     float flowrate_max = 0.0f, flowrate_min = HUGE_VALF;
@@ -157,10 +158,17 @@ void Flowmeter::update(void)
 
     state.flowrate = (sum_flowrate - flowrate_max - flowrate_min) / (float)(SAMPLE_INSTANCE - 2);
     state.pluse_rate = pluse_rate_tmp;
+
     // update range_valid state based on distance measured
     update_status();
-    if (state.flowrate > FLOWMETER_ENABLE_FLOWRATE) {
-        enable();
+    if (state.flowrate > FLOWMETER_ENABLE_FLOWRATE && !state.enabled) {
+        if (state.avoid_erroneous_judgement_time == 0) {
+            state.avoid_erroneous_judgement_time = now;
+        } else if (now - state.avoid_erroneous_judgement_time > PESTICIDE_SPRAYING_ON_TIME_MS) {
+            enable();
+        }
+    } else {
+        state.avoid_erroneous_judgement_time = 0;
     }
 }
 
