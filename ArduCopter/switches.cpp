@@ -54,6 +54,7 @@ void Copter::read_control_switch()
             if (mission.clear_point_item() == AP_MISSION_POINT_CLEAR_UP) {
             //if (mission.reset_point_item() == AP_MISSION_POINT_SET_CURRENT) {
                 AP_Notify::events.tune_save = 1;
+                AP_Notify::flags.point_setup_init = 3;
             } else {
                 AP_Notify::events.tune_error = 1;
             }
@@ -67,6 +68,7 @@ void Copter::read_control_switch()
                 if (mission.reset_current_point() == AP_MISSION_POINT_SET_CURRENT) {
                     if (ap.initialised) {
                         AP_Notify::events.tune_save = 1;
+                        AP_Notify::flags.point_setup_success = 3;
                     }
                 } else {
                     if (ap.initialised) {
@@ -79,8 +81,10 @@ void Copter::read_control_switch()
                 if (ap.initialised) {
                     if (ret == AP_MISSION_POINT_SET_A) {
                         AP_Notify::events.tune_started = 1;
+                        AP_Notify::flags.point_setup_init = 3;
                     } else if (ret == AP_MISSION_POINT_SET_B) {
                         AP_Notify::events.tune_save = 1;
+                        AP_Notify::flags.point_setup_success = 3;
                     } else {
                         AP_Notify::events.tune_error = 1;
                     }

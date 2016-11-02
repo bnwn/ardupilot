@@ -44,7 +44,7 @@ public:
     // The Flowmeter_State structure is filled in by the backend driver
     struct Flowmeter_State {
         float               flowrate; // flowrate
-        float               plue_rate;
+        float               pluse_rate;
         uint32_t            avoid_erroneous_judgement_time;
         enum Flowmeter_Status status;     // sensor status
         uint8_t                range_valid_count;   // number of consecutive valid readings (maxes out at 10)

@@ -161,6 +161,8 @@ void Flowmeter::update(void)
 
     // update range_valid state based on distance measured
     update_status();
+
+    // keep a certain extent time to avoid erroneous judgement
     if (state.flowrate > FLOWMETER_ENABLE_FLOWRATE && !state.enabled) {
         if (state.avoid_erroneous_judgement_time == 0) {
             state.avoid_erroneous_judgement_time = now;

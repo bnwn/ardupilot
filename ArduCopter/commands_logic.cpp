@@ -9,11 +9,11 @@ bool Copter::start_command(const AP_Mission::Mission_Command& _cmd)
 
     if (rangefinder_alt_ok() && (cmd.id == MAV_CMD_NAV_TAKEOFF || cmd.id == MAV_CMD_NAV_WAYPOINT || cmd.id == MAV_CMD_NAV_SPLINE_WAYPOINT \
                                  || cmd.id == MAV_CMD_NAV_LOITER_UNLIM || cmd.id == MAV_CMD_NAV_LOITER_TURNS || cmd.id == MAV_CMD_NAV_LOITER_TIME)) {
-//        struct Location loc;
-//        ahrs.get_position(loc);
-//        cmd.content.location.alt = loc.alt;
-        cmd.content.location.alt = inertial_nav.get_altitude() + ahrs.get_home().alt;
-        pos_control.set_imitation_flags(true);
+        struct Location loc;
+        ahrs.get_position(loc);
+        cmd.content.location.alt = loc.alt;
+//        cmd.content.location.alt = inertial_nav.get_altitude() + ahrs.get_home().alt;
+//        pos_control.set_imitation_flags(true);
     }
 
     if (control_mode == POINT_ATOB) {

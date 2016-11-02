@@ -756,7 +756,7 @@ bool AC_WPNav::update_wpnav()
             _flags.new_wp_destination = false;
             _pos_control.freeze_ff_xy();
         }
-        //_pos_control.freeze_ff_z();
+        _pos_control.freeze_ff_z();
 
         _pos_control.update_xy_controller(AC_PosControl::XY_MODE_POS_ONLY, 1.0f, false);
         check_wp_leash_length();
