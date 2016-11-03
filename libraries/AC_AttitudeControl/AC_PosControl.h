@@ -35,6 +35,8 @@
 #define POSCONTROL_DT_200HZ                     0.005f  // time difference in seconds for 200hz update rate
 #define POSCONTROL_DT_400HZ                     0.0025f // time difference in seconds for 400hz update rate
 
+#define POSCONTROL_VEL_COMPENSATE               1.0f
+
 #define POSCONTROL_ACTIVE_TIMEOUT_MS            200     // position controller is considered active if it has been called within the past 0.2 seconds
 
 #define POSCONTROL_VEL_ERROR_CUTOFF_FREQ        4.0f    // low-pass filter on velocity error (unit: hz)
@@ -386,6 +388,7 @@ private:
 
     // parameters
     AP_Float    _accel_xy_filt_hz;      // XY acceleration filter cutoff frequency
+    AP_Float    _vel_compensate;
 
     // internal variables
     float       _dt;                    // time difference (in seconds) between calls from the main program
