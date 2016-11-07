@@ -396,6 +396,8 @@ libraries/AC_InputManager/AC_InputManager.cpp
 libraries/AC_InputManager/AC_InputManager.h
 libraries/AC_InputManager/AC_InputManager_Heli.cpp
 libraries/AC_InputManager/AC_InputManager_Heli.h
+libraries/AC_OilEngine/AC_OilEngine.cpp
+libraries/AC_OilEngine/AC_OilEngine.h
 libraries/AC_PID/examples/AC_PID_test/AC_PID_test.cpp
 libraries/AC_PID/AC_HELI_PID.cpp
 libraries/AC_PID/AC_HELI_PID.h
@@ -9802,6 +9804,8 @@ libraries/AC_InputManager/AC_InputManager.cpp
 libraries/AC_InputManager/AC_InputManager.h
 libraries/AC_InputManager/AC_InputManager_Heli.cpp
 libraries/AC_InputManager/AC_InputManager_Heli.h
+libraries/AC_OilEngine/AC_OilEngine.cpp
+libraries/AC_OilEngine/AC_OilEngine.h
 libraries/AC_PID/examples/AC_PID_test/AC_PID_test.cpp
 libraries/AC_PID/AC_HELI_PID.cpp
 libraries/AC_PID/AC_HELI_PID.h
