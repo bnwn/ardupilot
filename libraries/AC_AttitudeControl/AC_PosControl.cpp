@@ -24,7 +24,7 @@ const AP_Param::GroupInfo AC_PosControl::var_info[] = {
     // @Range: 0.0025 0.02
     // @Increment: 0.0005
     // @User: Enigma
-    AP_GROUPINFO("_DT_XY", 2, AC_PosControl, _dt_xy, POSCONTROL_DT_50HZ),
+    AP_GROUPINFO("_DT_XY", 2, AC_PosControl, _dt_xy, POSCONTROL_DEFAULT_HZ),
 
     // @Param: _VEL_CPS
     // @DisplayName: XYZ Controller vel compensate
@@ -994,8 +994,8 @@ void AC_PosControl::rate_to_accel_xy(float dt, float ekfNavVelGainScaler)
     }
 
     // combine feed forward accel with PID output from velocity error and scale PID output to compensate for optical flow measurement induced EKF noise
-    _accel_target.x = _accel_feedforward.x + (vel_xy_p.x + vel_xy_i.x) * ekfNavVelGainScaler - _vel_target.z * _vel_compensate;
-    _accel_target.y = _accel_feedforward.y + (vel_xy_p.y + vel_xy_i.y) * ekfNavVelGainScaler - _vel_target.z * _vel_compensate;
+    _accel_target.x = _accel_feedforward.x + (vel_xy_p.x + vel_xy_i.x) * ekfNavVelGainScaler;
+    _accel_target.y = _accel_feedforward.y + (vel_xy_p.y + vel_xy_i.y) * ekfNavVelGainScaler;
 }
 
 /// accel_to_lean_angles - horizontal desired acceleration to lean angles

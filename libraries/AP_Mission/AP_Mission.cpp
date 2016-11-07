@@ -27,14 +27,14 @@ const AP_Param::GroupInfo AP_Mission::var_info[] = {
     // @Description: Point A to B flight mode altitude
     // @Values: Default 5(m)
     // @User: Enigma
-    AP_GROUPINFO("ATOB_ALT", 2, AP_Mission, _point_atob_altitude, 2),
+    AP_GROUPINFO("ATOB_ALT", 2, AP_Mission, _point_atob_altitude, 2.5),
 
     // @Param ATOB_INT
     // @DisplayName: Point AToB interval
     // @Description: Point A to B flight mode lateral interval
     // @Values: Default 5(m)
     // @User: Enigma
-    AP_GROUPINFO("ATOB_INT", 3, AP_Mission, _point_atob_interval, 2),
+    AP_GROUPINFO("ATOB_INT", 3, AP_Mission, _point_atob_interval, 4),
 
     // @Param ATOB_DIR
     // @DisplayName: Point AToB direction

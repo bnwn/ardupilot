@@ -31,6 +31,7 @@
 
 #define POSCONTROL_LEASH_LENGTH_MIN             100.0f  // minimum leash lengths in cm
 
+#define POSCONTROL_DEFAULT_HZ                   0.004f
 #define POSCONTROL_DT_50HZ                      0.02f   // time difference in seconds for 50hz update rate
 #define POSCONTROL_DT_200HZ                     0.005f  // time difference in seconds for 200hz update rate
 #define POSCONTROL_DT_400HZ                     0.0025f // time difference in seconds for 400hz update rate
