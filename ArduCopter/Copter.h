@@ -295,11 +295,8 @@ private:
         int8_t debounced_switch_position;   // currently used switch position
         int8_t last_switch_position;        // switch position in previous iteration
         int8_t last_switch_aux10_position;  // aux10 switch position in previous iteration
-        int8_t debounced_switch_aux11_position; // currently aux11 switch position
-        int8_t last_switch_aux11_position;  // aux11 switch position in previous iteration
         uint32_t last_edge_time_ms;         // system time that switch position was last changed
         uint32_t last_aux10_edge_time_ms;   // system time that aux10 switch position was last changed
-        uint32_t last_aux11_edge_time_ms;   // system time that aux11 switch position was last changed
     } control_switch_state;
 
     struct {

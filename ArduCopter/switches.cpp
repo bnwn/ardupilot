@@ -37,14 +37,9 @@ void Copter::read_control_switch()
     if(control_switch_state.last_switch_position != switch_position) {
         control_switch_state.last_edge_time_ms = tnow_ms;
     }
-    if (control_switch_state.last_switch_aux11_position != aux_con.CH11_flag) {
-        // aux11 switch is used to control point A to B flight, priority is lower than rc_5
-        control_switch_state.last_aux11_edge_time_ms = tnow_ms;
-    }
 
     // debounce switch
     bool control_switch_changed = control_switch_state.debounced_switch_position != switch_position;
-    bool control_aux11_switch_on = (aux_con.CH11_flag == AUX_SWITCH_HIGH) && (control_switch_state.debounced_switch_aux11_position != aux_con.CH11_flag);
     bool control_aux10_switch_on = aux_con.CH10_flag == AUX_SWITCH_HIGH;
     bool sufficient_time_elapsed = tnow_ms - control_switch_state.last_edge_time_ms > CONTROL_SWITCH_DEBOUNCE_TIME_MS;
     bool failsafe_disengaged = !failsafe.radio && failsafe.radio_counter == 0;
@@ -125,33 +120,10 @@ void Copter::read_control_switch()
         // set the debounced switch position
         control_switch_state.debounced_switch_position = switch_position;
 
-    } else if (control_aux11_switch_on && failsafe_disengaged && (tnow_ms - control_switch_state.last_aux11_edge_time_ms > CONTROL_SWITCH_DEBOUNCE_TIME_MS)) {
-        // set flight mode and simple mode setting
-        if (set_mode(POINT_ATOB, MODE_REASON_TX_COMMAND)) {
-            // play a tone
-            if (control_switch_state.debounced_switch_aux11_position != -1) {
-                // alert user to mode change failure (except if autopilot is just starting up)
-                if (ap.initialised) {
-                    AP_Notify::events.user_mode_change = 1;
-                }
-            }
-
-        } else if (control_switch_state.last_switch_position != -1) {
-            // alert user to mode change failure
-            AP_Notify::events.user_mode_change_failed = 1;
-        }
-
-        // set the debounced switch position
-        control_switch_state.debounced_switch_aux11_position = aux_con.CH11_flag;
-    }
-
-    if (aux_con.CH11_flag != AUX_SWITCH_HIGH) {
-        control_switch_state.debounced_switch_aux11_position = aux_con.CH11_flag;
     }
 
     control_switch_state.last_switch_position = switch_position;
     control_switch_state.last_switch_aux10_position = aux_con.CH10_flag;
-    control_switch_state.last_switch_aux11_position = aux_con.CH11_flag;
 }
 
 // check_if_auxsw_mode_used - Check to see if any of the Aux Switches are set to a given mode.
@@ -188,7 +160,6 @@ bool Copter::check_duplicate_auxsw(void)
 void Copter::reset_control_switch()
 {
     control_switch_state.last_switch_position = control_switch_state.debounced_switch_position = -1;
-    control_switch_state.last_switch_aux11_position = control_switch_state.debounced_switch_aux11_position = -1;
     control_switch_state.last_switch_aux10_position = -1;
     read_control_switch();
 }
@@ -675,6 +646,24 @@ void Copter::do_aux_switch_function(int8_t ch_function, uint8_t ch_flag)
                 Log_Write_Event(DATA_AVOIDANCE_ADSB_DISABLE);
             }
             break;
+
+        case AUXSW_POINT_ATOB:
+            if (ch_flag == AUX_SWITCH_HIGH) {
+                // set flight mode and simple mode setting
+                if (set_mode(POINT_ATOB, MODE_REASON_TX_COMMAND)) {
+                    if (ap.initialised) {
+                        AP_Notify::events.user_mode_change = 1;
+                    }
+                } else {
+                    // alert user to mode change failure
+                    AP_Notify::events.user_mode_change_failed = 1;
+                }
+            } else {
+                // return to flight mode switch's flight mode if we are currently in throw mode
+                if (control_mode == POINT_ATOB) {
+                    reset_control_switch();
+                }
+            }
     }
 }
 
