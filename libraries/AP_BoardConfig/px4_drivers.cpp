@@ -49,8 +49,8 @@ extern "C" {
     int ll40ls_main(int, char **);
     int trone_main(int, char **);
     int mb12xx_main(int, char **);
-    int m006_main(int, char **);
-    int hz16wa_main(int, char **);
+//    int m006_main(int, char **);
+ //   int hz16wa_main(int, char **);
     int pwm_input_main(int, char **);
     int uavcan_main(int, char **);
     int fmu_main(int, char **);
