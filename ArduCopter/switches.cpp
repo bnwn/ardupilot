@@ -662,6 +662,9 @@ void Copter::do_aux_switch_function(int8_t ch_function, uint8_t ch_flag)
                 // return to flight mode switch's flight mode if we are currently in throw mode
                 if (control_mode == POINT_ATOB) {
                     reset_control_switch();
+                    if (ap.initialised) {
+                        AP_Notify::events.user_mode_change = 1;
+                    }
                 }
             }
     }
