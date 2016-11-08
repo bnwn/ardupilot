@@ -600,6 +600,26 @@
  # define ACCEL_Z_FILT_HZ   20.0f
 #endif
 
+// Oil Engine control gains
+#ifndef OILENGINE_P
+ # define OILENGINE_P 1.0f
+#endif
+#ifndef OILENGINE_I
+ # define OILENGINE_I 0.0f
+#endif
+#ifndef OILENGINE_D
+ # define OILENGINE_D 0.0f
+#endif
+#ifndef OILENGINE_IMAX
+ # define OILENGINE_IMAX 200
+#endif
+#ifndef OILENGINE_FILT_HZ
+ # define OILENGINE_FILT_HZ 5.0f
+#endif
+#ifndef OILENGINE_UPDATE_TIME
+ # define OILENGINE_UPDATE_TIME 0.02f
+#endif
+
 // default maximum vertical velocity and acceleration the pilot may request
 #ifndef PILOT_VELZ_MAX
  # define PILOT_VELZ_MAX    250     // maximum vertical velocity in cm/s
