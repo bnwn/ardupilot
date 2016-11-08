@@ -141,7 +141,7 @@ bool Copter::get_pesticide_remaining(void)
     if (flowmeter_ok()) {
         uint32_t now = AP_HAL::millis();
 
-        if (flowmeter_state.pesticide_check_valid && flowmeter_state.flowrate <= 0) {
+        if (flowmeter_state.pesticide_check_valid && flowmeter_state.flowrate <= PESTICIDE_RTL_REMAINING) {
             if (flowmeter_state.pesticide_empty_time == 0) {
                 flowmeter_state.pesticide_empty_time = now;
 

@@ -21,8 +21,13 @@ void Copter::pesticide_remaining_check()
         // pesticide is empty
         set_mode(RTL, MODE_REASON_PESTICIDE_EMPTY);
     }
+//    static int i = 0;
 //    if (!get_pesticide_remaining()) {
-//        printf("pesticide empty RTL!\n");
+//        i++;
+//        if (i > 10) {
+//            printf("pesticide empty RTL!\n");
+//            i=0;
+//        }
 //    } else {
 //        printf("flowrate_rel: %d \n  pluse rate: %d \n", flowmeter_state.flowrate, flowmeter.pluse_rate());
 //    }

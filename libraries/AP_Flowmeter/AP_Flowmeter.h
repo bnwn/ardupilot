@@ -22,10 +22,10 @@
 #include <AP_SerialManager/AP_SerialManager.h>
 
 // Maximum number of range finder instances available on this platform
-#define FLOWMETER_ENABLE_FLOWRATE 1.0f
+#define FLOWMETER_ENABLE_FLOWRATE 3.0f
 #define PESTICIDE_SPRAYING_ON_TIME_MS 5000
 #define VALID_FLOWRATE_DELTA 1.0f
-#define SAMPLE_INSTANCE 3
+#define SAMPLE_INSTANCE 10
 
 class Flowmeter
 {
