@@ -416,14 +416,14 @@
 // CAMERA TRIGGER AND CONTROL
 //
 #ifndef CAMERA
- # define CAMERA        ENABLED
+ # define CAMERA        DISABLE
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
 // MOUNT (ANTENNA OR CAMERA)
 //
 #ifndef MOUNT
- # define MOUNT         ENABLED
+ # define MOUNT         DISABLE
 #endif
 
 
