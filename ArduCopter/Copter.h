@@ -89,6 +89,7 @@
 #include <AC_InputManager/AC_InputManager_Heli.h>   // Heli specific pilot input handling library
 #include <AP_Button/AP_Button.h>
 #include <AP_Flowmeter/AP_Flowmeter.h>         // Flowmeter library
+#include <AP_OilEngine/AP_OilEngine.h>          // Oil Engine library
 
 // Configuration
 #include "defines.h"
@@ -559,6 +560,10 @@ private:
 #if MOUNT == ENABLED
     // current_loc uses the baro/gps soloution for altitude rather than gps only.
     AP_Mount camera_mount;
+#endif
+
+#if OILENGINE == ENABLED
+    AP_OilEngine oil_engine;
 #endif
 
     // AC_Fence library to reduce fly-aways
