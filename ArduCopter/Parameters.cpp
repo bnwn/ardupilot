@@ -704,6 +704,14 @@ const AP_Param::Info Copter::var_info[] = {
     GOBJECT(camera,           "CAM_", AP_Camera),
 #endif
 
+#if OILENGINE == ENABLED
+    // @Group: OIL_
+    // @Path: ../libraries/AP_OilEngine/AP_OilEngine.cpp
+    GOBJECT(oil_engine,         "OIL_", AP_OilEngine),
+
+    GGROUP(pid_oilengine,           "OIL_PID", AC_PID),
+#endif
+
     // @Group: RELAY_
     // @Path: ../libraries/AP_Relay/AP_Relay.cpp
     GOBJECT(relay,                  "RELAY_", AP_Relay),

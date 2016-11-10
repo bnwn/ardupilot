@@ -908,10 +908,11 @@ void Copter::do_roi(const AP_Mission::Mission_Command& cmd)
     set_auto_yaw_roi(cmd.content.location);
 }
 
+
+#if CAMERA == ENABLED
 // do_digicam_configure Send Digicam Configure message with the camera library
 void Copter::do_digicam_configure(const AP_Mission::Mission_Command& cmd)
 {
-#if CAMERA == ENABLED
     camera.configure(cmd.content.digicam_configure.shooting_mode,
                      cmd.content.digicam_configure.shutter_speed,
                      cmd.content.digicam_configure.aperture,
@@ -919,8 +920,8 @@ void Copter::do_digicam_configure(const AP_Mission::Mission_Command& cmd)
                      cmd.content.digicam_configure.exposure_type,
                      cmd.content.digicam_configure.cmd_id,
                      cmd.content.digicam_configure.engine_cutoff_time);
-#endif
 }
+#endif
 
 // do_digicam_control Send Digicam Control message with the camera library
 void Copter::do_digicam_control(const AP_Mission::Mission_Command& cmd)
