@@ -91,6 +91,9 @@ Copter::Copter(void) :
 #if MOUNT == ENABLED
     camera_mount(ahrs, current_loc),
 #endif
+#if OILENGINE == ENABLED
+    oil_engine(g.pid_oilengine),
+#endif
 #if AC_FENCE == ENABLED
     fence(ahrs, inertial_nav),
 #endif

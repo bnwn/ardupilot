@@ -1349,7 +1349,8 @@ SOURCES += main.cpp \
     ../modules/PX4Firmware/src/systemcmds/tests/tests_main.c \
     ../modules/PX4Firmware/src/systemcmds/top/top.c \
     ../modules/PX4Firmware/src/systemcmds/usb_connected/usb_connected.c \
-    ../modules/PX4Firmware/src/systemcmds/ver/ver.c
+    ../modules/PX4Firmware/src/systemcmds/ver/ver.c \
+    ../libraries/AP_OilEngine/AP_OilEngine.cpp
 
 include(deployment.pri)
 qtcAddDeployment()

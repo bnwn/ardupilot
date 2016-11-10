@@ -11,6 +11,9 @@
 #include <AP_Vehicle/AP_Vehicle.h>         // common vehicle parameters
 #include <AP_Math/AP_Math.h>
 #include <AP_HAL/AP_HAL.h>
+#if CONFIG_HAL_BOARD == HAL_BOARD_PX4
+#include <drivers/drv_hrt.h>
+#endif
 
 #define AC_OIL_ENGINE_PWMIN0_PIN 3  // default is that AUX3,4 use to oil engine pwm input
 #define AC_OIL_ENGINE_PWMIN1_PIN 4
@@ -24,7 +27,7 @@ class AP_OilEngine
 public:
 
     /// Constructor
-    AP_OilEngine(const AP_Motors& motors, AC_PID& pid_motor_speed);
+    AP_OilEngine(AC_PID& pid_motor_speed);
 
     ///
     /// initialisation functions
@@ -67,8 +70,6 @@ private:
             uint16_t use_auto_imitation : 1;
     } _flags;
 
-    const AP_Motors&            _motors;
-
     // references to pid controllers
     AC_PID&     _pid_motor_speed;
 
@@ -95,7 +96,6 @@ private:
     AP_Int16        _servo_on_pwm;      // PWM value to move servo to when shutter is activated
     AP_Int16        _servo_off_pwm;     // PWM value to move servo to when shutter is deactivated
     uint8_t         _trigger_counter;   // count of number of cycles shutter has been held open
-    AP_Relay       *_apm_relay;         // pointer to relay object from the base class Relay.
 
     bool            setup_feedback_callback(void);
 

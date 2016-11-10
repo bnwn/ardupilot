@@ -3,7 +3,6 @@
 #include "AP_OilEngine.h"
 #include <GCS_MAVLink/GCS.h>
 #if CONFIG_HAL_BOARD == HAL_BOARD_PX4
-#include <drivers/drv_hrt.h>
 #include <drivers/drv_input_capture.h>
 #include <drivers/drv_pwm_output.h>
 #include <sys/types.h>
@@ -12,8 +11,7 @@
 #include <unistd.h>
 #endif
 
-// ------------------------------
-#define CAM_DEBUG DISABLED
+extern const AP_HAL::HAL& hal;
 
 const AP_Param::GroupInfo AP_OilEngine::var_info[] = {
 
@@ -32,16 +30,14 @@ const AP_Param::GroupInfo AP_OilEngine::var_info[] = {
     AP_GROUPEND
 };
 
-extern const AP_HAL::HAL& hal;
-
 /*
   static var for PX4 callback
  */
-volatile struct AP_OilEngine::Motor_State AP_OilEngine::_motors_state[OIL_ENGINE_MOTOR_NUM];
+volatile struct AP_OilEngine::motor_state AP_OilEngine::_motors_state[OIL_ENGINE_MOTOR_NUM];
 
-void AP_OilEngine::AP_OilEngine(const AP_Motors &motors, AC_PID &pid_motor_speed) :
-    _motors_state{0},
-    _valid_rpm(flase)
+AP_OilEngine::AP_OilEngine(AC_PID &pid_motor_speed) :
+    _pid_motor_speed(pid_motor_speed),
+    _valid_rpm(false)
 {
     AP_Param::setup_object_defaults(this, var_info);
 }
@@ -77,7 +73,7 @@ void AP_OilEngine::capture0_callback(void *context, uint32_t chan_index,
 {
     hrt_abstime now = hrt_absolute_time();
 
-    uint32_t period = hrt_absolute_time - edge_time;
+    uint32_t period = now - edge_time;
 
     _motors_state[0]._pwm_in_Hz = 1000000UL / period;
     _motors_state[0]._rpm = 3600 * _motors_state[0]._pwm_in_Hz;
@@ -88,7 +84,7 @@ void AP_OilEngine::capture1_callback(void *context, uint32_t chan_index,
 {
     hrt_abstime now = hrt_absolute_time();
 
-    uint32_t period = hrt_absolute_time - edge_time;
+    uint32_t period = now - edge_time;
 
     _motors_state[1]._pwm_in_Hz = 1000000UL / period;
     _motors_state[1]._rpm = 3600 * _motors_state[0]._pwm_in_Hz;
@@ -104,7 +100,7 @@ bool AP_OilEngine::setup_feedback_callback(void)
 {
     if (_pwm_input0_pin < 0 && _pwm_input1_pin < 0) {
         // invalid pin
-        return;
+        return false;
     }
 
     /*
@@ -117,14 +113,16 @@ bool AP_OilEngine::setup_feedback_callback(void)
             return false;
         }
 
-        if (up_input_capture_set(_pwm_input0_pin-1, Falling, 0, capture_callback0, this) != 0) {
+        if (up_input_capture_set(_pwm_input0_pin-1, Falling, 0, capture0_callback, this) != 0) {
             close(fd);
             return false;
         }
-        if (up_input_capture_set(_pwm_input1_pin-1, Falling, 0, capture_callback1, this) != 0) {
+        if (up_input_capture_set(_pwm_input1_pin-1, Falling, 0, capture1_callback, this) != 0) {
             close(fd);
             return false;
         }
         close(fd);
     }
+
+    return true;
 }
