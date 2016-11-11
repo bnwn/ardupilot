@@ -176,6 +176,9 @@ uint8_t Copter::read_3pos_switch(int16_t radio_in)
 void Copter::read_aux_switches()
 {
     uint8_t switch_position;
+#if OILENGINE == ENABLED
+    static int16_t oil_engine_radio_in = 0;
+#endif
 
     // exit immediately during radio failsafe
     if (failsafe.radio || failsafe.radio_counter != 0) {
@@ -202,6 +205,13 @@ void Copter::read_aux_switches()
         do_aux_switch_function(g.ch8_option, aux_con.CH8_flag);
     }
 
+#if OILENGINE == ENABLED
+    if (oil_engine_radio_in != g.rc_9.get_radio_in()) {
+        oil_engine_radio_in = g.rc_9.get_radio_in();
+
+        oil_engine.set_radio_in(oil_engine_radio_in, (int16_t)(g.rc_9.get_radio_max() - g.rc_9.get_radio_min()));
+    }
+#else
     // check if Ch9 switch has changed position
     switch_position = read_3pos_switch(g.rc_9.get_radio_in());
     if (aux_con.CH9_flag != switch_position) {
@@ -211,6 +221,7 @@ void Copter::read_aux_switches()
         // invoke the appropriate function
         do_aux_switch_function(g.ch9_option, aux_con.CH9_flag);
     }
+#endif
 
     // check if Ch10 switch has changed position
     switch_position = read_3pos_switch(g.rc_10.get_radio_in());
@@ -667,6 +678,7 @@ void Copter::do_aux_switch_function(int8_t ch_function, uint8_t ch_flag)
                     }
                 }
             }
+            break;
     }
 }
 

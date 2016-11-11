@@ -15,24 +15,32 @@
 #include <drivers/drv_hrt.h>
 #endif
 
-#define AC_OIL_ENGINE_PWMIN0_PIN 3  // default is that AUX3,4 use to oil engine pwm input
-#define AC_OIL_ENGINE_PWMIN1_PIN 4
+#define OIL_ENGINE_PWMIN0_PIN 3  // default is that AUX3,4 use to oil engine pwm input
+#define OIL_ENGINE_PWMIN1_PIN 4
 
-#define AC_OIL_ENGINE_MAX_PWMOUT 1000
-
+#define OIL_ENGINE_MAX_ANGLE 1000
+#define OIL_ENGINE_MAX_RPM 5000.0f
 #define OIL_ENGINE_MOTOR_NUM 2
+
+#define THROTTLE_TO_RPM_SCALE 200.0f
 
 class AP_OilEngine
 {
 public:
 
     /// Constructor
-    AP_OilEngine(AC_PID& pid_motor_speed);
+    AP_OilEngine(AC_PID& pid_motor1_rpm, AC_PID& pid_motor2_rpm);
 
     ///
     /// initialisation functions
     ///
     void init();
+
+    /// control oil engine servo output
+    void control();
+
+    /// calc rpm vi period
+    void calc_rpm();
 
     /// feedback oil engine motor rpm
     uint32_t feedback_motors_rpm(uint8_t motor_index);
@@ -40,10 +48,11 @@ public:
     /// feedback oil engine motor pwm in Hz
     uint32_t feedback_motors_pwm_Hz(uint8_t motor_index);
 
-    /// set_dt - sets time delta in seconds for all controllers (i.e. 100hz = 0.01, 400hz = 0.0025)
-    ///     updates z axis accel controller's D term filter
-    void set_dt(float delta_sec);
-    float get_dt() const { return _dt; }
+    /// set radio pwm in
+    void set_radio_in(int16_t radio_in, int16_t scale);
+
+    /// desired throttle convert to rpm
+    void throttle_to_rpm();
 
     static const struct AP_Param::GroupInfo var_info[];
 
@@ -51,8 +60,8 @@ private:
 
     struct motor_state {
         // convert period to oil engine motor rpm (r/min)
-        uint32_t _rpm;
-        uint32_t _pwm_in_Hz;
+        float _rpm;
+        float _pwm_in_Hz;
     };
 
     // general purpose flags
@@ -70,33 +79,6 @@ private:
             uint16_t use_auto_imitation : 1;
     } _flags;
 
-    // references to pid controllers
-    AC_PID&     _pid_motor_speed;
-
-    // internal variables
-    float       _dt;                    // time difference (in seconds) between calls from the main program
-    float       _speed_cms;             // max horizontal speed in cm/s
-
-    // position controller internal variables
-    Vector3f    _vel_desired;           // desired velocity in cm/s
-    Vector3f    _vel_target;            // velocity target in cm/s calculated by pos_to_rate step
-    Vector3f    _vel_error;             // error between desired and actual acceleration in cm/s
-    Vector3f    _vel_last;              // previous iterations velocity in cm/s
-    Vector3f    _accel_target;          // desired acceleration in cm/s/s  // To-Do: are xy actually required?
-    Vector3f    _accel_error;           // desired acceleration in cm/s/s  // To-Do: are xy actually required?
-    Vector3f    _accel_feedforward;     // feedforward acceleration in cm/s/s
-    LowPassFilterFloat _vel_error_filter;   // low-pass-filter on z-axis velocity error
-
-    Vector2f    _accel_target_jerk_limited; // acceleration target jerk limited to 100deg/s/s
-    LowPassFilterVector2f _accel_target_filter; // acceleration target filter
-
-    AP_Int8         _trigger_type;      // 0:Servo,1:Relay
-    AP_Int8         _trigger_duration;  // duration in 10ths of a second that the camera shutter is held open
-    AP_Int8         _relay_on;          // relay value to trigger camera
-    AP_Int16        _servo_on_pwm;      // PWM value to move servo to when shutter is activated
-    AP_Int16        _servo_off_pwm;     // PWM value to move servo to when shutter is deactivated
-    uint8_t         _trigger_counter;   // count of number of cycles shutter has been held open
-
     bool            setup_feedback_callback(void);
 
 #if CONFIG_HAL_BOARD == HAL_BOARD_PX4
@@ -106,12 +88,24 @@ private:
                                       hrt_abstime edge_time, uint32_t edge_state, uint32_t overflow);
 #endif
 
+    // references to pid controllers
+    AC_PID&     _pid_motor1_rpm;
+    AC_PID&     _pid_motor2_rpm;
+    float       _throttle_desired;
+    float       _rpm_desired;
+    int16_t     _servo1_angle_desired;
+    int16_t     _servo2_angle_desired;
+
+    AP_Float       _max_rpm;             // max rpm in r/min
+
     // pin number for accurate camera feedback messages
     AP_Int8         _pwm_input0_pin;
     AP_Int8         _pwm_input1_pin;
-    AP_Int16        _max_pwm_out;
+    AP_Int16        _max_angle;
+    AP_Float        _throttle_to_rpm_scale;
 
-    static volatile struct motor_state _motors_state[OIL_ENGINE_MOTOR_NUM];
+    struct motor_state _motors_state[OIL_ENGINE_MOTOR_NUM];
+    volatile static uint32_t _period[OIL_ENGINE_MOTOR_NUM];
 
     bool            _valid_rpm;
 };

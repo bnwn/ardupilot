@@ -219,6 +219,10 @@ void Copter::init_ardupilot()
 
 #if OILENGINE == ENABLED
     // initialise oil engine
+    g.rc_7.set_radio_max(OIL_PWM_MAX);
+    g.rc_8.set_radio_max(OIL_PWM_MAX);
+    g.rc_7.set_radio_min(OIL_PWM_MIN);
+    g.rc_8.set_radio_min(OIL_PWM_MIN);
     oil_engine.init();
 #endif
 

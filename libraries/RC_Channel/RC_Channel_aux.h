@@ -95,6 +95,8 @@ public:
         k_choke                 = 68,
         k_starter               = 69,
         k_throttle              = 70,
+        k_oil_engine1           = 71,
+        k_oil_engine2           = 72,
         k_nr_aux_servo_functions         ///< This must be the last enum value (only add new values _before_ this one)
     } Aux_servo_function_t;
 

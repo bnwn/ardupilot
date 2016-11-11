@@ -70,6 +70,7 @@ enum aux_sw_func {
     AUXSW_THROW =               37,  // change to THROW flight mode
     AUXSW_AVOID_ADSB =          38,  // enable AP_Avoidance library
     AUXSW_POINT_ATOB =          39,
+    AUXSW_OIL_ENGINE_THROTTLE = 40,
     AUXSW_SWITCH_MAX,
 };
 

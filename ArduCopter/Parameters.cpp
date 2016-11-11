@@ -709,7 +709,8 @@ const AP_Param::Info Copter::var_info[] = {
     // @Path: ../libraries/AP_OilEngine/AP_OilEngine.cpp
     GOBJECT(oil_engine,         "OIL_", AP_OilEngine),
 
-    GGROUP(pid_oilengine,           "OIL_PID", AC_PID),
+    GGROUP(pid_oilengine1,           "OIL_PID1", AC_PID),
+    GGROUP(pid_oilengine2,           "OIL_PID2", AC_PID),
 #endif
 
     // @Group: RELAY_

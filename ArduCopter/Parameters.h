@@ -368,11 +368,9 @@ public:
         //
         // 253: oil engine control
         //
-        k_param_pid_oilengine,
-        k_param_oil_engine = 254,
-
-
-        // 255: reserved
+        k_param_pid_oilengine1,
+        k_param_pid_oilengine2,
+        k_param_oil_engine = 255,
 
         // the k_param_* space is 9-bits in size
         // 511: reserved
@@ -500,7 +498,8 @@ public:
     AC_P                    p_vel_z;
     AC_PID                  pid_accel_z;
 
-    AC_PID                  pid_oilengine;
+    AC_PID                  pid_oilengine1;
+    AC_PID                  pid_oilengine2;
     AC_P                    p_pos_xy;
     AC_P                    p_alt_hold;
 
@@ -536,7 +535,8 @@ public:
         p_vel_z                 (VEL_Z_P),
         pid_accel_z             (ACCEL_Z_P,       ACCEL_Z_I,        ACCEL_Z_D,      ACCEL_Z_IMAX,       ACCEL_Z_FILT_HZ,    MAIN_LOOP_SECONDS),
 
-        pid_oilengine           (OILENGINE_P,     OILENGINE_I,      OILENGINE_D,    OILENGINE_IMAX,     OILENGINE_FILT_HZ,  OILENGINE_UPDATE_TIME),
+        pid_oilengine1          (OILENGINE_P,     OILENGINE_I,      OILENGINE_D,    OILENGINE_IMAX,     OILENGINE_FILT_HZ,  OILENGINE_UPDATE_TIME),
+        pid_oilengine2          (OILENGINE_P,     OILENGINE_I,      OILENGINE_D,    OILENGINE_IMAX,     OILENGINE_FILT_HZ,  OILENGINE_UPDATE_TIME),
 
         // P controller	        initial P
         //----------------------------------------------------------------------

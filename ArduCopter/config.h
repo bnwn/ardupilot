@@ -621,10 +621,16 @@
  # define OILENGINE_IMAX 200
 #endif
 #ifndef OILENGINE_FILT_HZ
- # define OILENGINE_FILT_HZ 5.0f
+ # define OILENGINE_FILT_HZ 50.0f
 #endif
 #ifndef OILENGINE_UPDATE_TIME
  # define OILENGINE_UPDATE_TIME 0.02f
+#endif
+#ifndef OIL_PWM_MAX
+ # define OIL_PWM_MAX 2000
+#endif
+#ifndef OIL_PWM_MIN
+ # define OIL_PWM_MIN 1000
 #endif
 
 // default maximum vertical velocity and acceleration the pilot may request
