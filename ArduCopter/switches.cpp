@@ -209,7 +209,7 @@ void Copter::read_aux_switches()
     if (oil_engine_radio_in != g.rc_9.get_radio_in()) {
         oil_engine_radio_in = g.rc_9.get_radio_in();
 
-        oil_engine.set_radio_in(oil_engine_radio_in, (int16_t)(g.rc_9.get_radio_max() - g.rc_9.get_radio_min()));
+        oil_engine.set_radio_in((int16_t)(oil_engine_radio_in - g.rc_9.get_radio_min()), (int16_t)(g.rc_9.get_radio_max() - g.rc_9.get_radio_min()));
     }
 #else
     // check if Ch9 switch has changed position

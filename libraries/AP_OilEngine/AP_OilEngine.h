@@ -24,6 +24,10 @@
 
 #define THROTTLE_TO_RPM_SCALE 200.0f
 
+#define PWM_INPUT_TIMEOUT_US 500000.0f
+
+#define PWM_INPUT_MAX_HZ 500.0f
+
 class AP_OilEngine
 {
 public:
@@ -97,7 +101,7 @@ private:
     int16_t     _servo2_angle_desired;
 
     AP_Float       _max_rpm;             // max rpm in r/min
-
+    AP_Int16       _max_frequency;
     // pin number for accurate camera feedback messages
     AP_Int8         _pwm_input0_pin;
     AP_Int8         _pwm_input1_pin;
@@ -108,4 +112,6 @@ private:
     volatile static uint32_t _period[OIL_ENGINE_MOTOR_NUM];
 
     bool            _valid_rpm;
+
+    volatile static hrt_abstime _last_irq_time[OIL_ENGINE_MOTOR_NUM];
 };

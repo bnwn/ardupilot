@@ -93,7 +93,7 @@ void Copter::init_flowmeter(void)
 //    while(1) {
 //        usleep(100000);
 //        if (get_pesticide_remaining()) {
-//            printf("flowrate_rel: %d \n  pluse rate: %d \n", flowmeter_state.flowrate, flowmeter.pluse_rate());
+//            printf("flowrate_rel: %d \n  pluse rate: %.6f \n", flowmeter_state.flowrate, flowmeter.pluse_rate());
 //        } else {
 //            printf("pesticide empty! \n");
 //        }

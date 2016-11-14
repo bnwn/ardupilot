@@ -38,6 +38,10 @@ const AP_Param::GroupInfo AP_OilEngine::var_info[] = {
     // @User: Enigma
     AP_GROUPINFO("MAX_RPM", 4, AP_OilEngine, _max_rpm, OIL_ENGINE_MAX_RPM),
 
+    // @Param: MAX_FRE
+    // @User: Enigma
+    AP_GROUPINFO("MAX_FRE", 5, AP_OilEngine, _max_frequency, PWM_INPUT_MAX_HZ),
+
     AP_GROUPEND
 };
 
@@ -45,6 +49,7 @@ const AP_Param::GroupInfo AP_OilEngine::var_info[] = {
   static var for PX4 callback
  */
 volatile uint32_t AP_OilEngine::_period[OIL_ENGINE_MOTOR_NUM];
+volatile hrt_abstime AP_OilEngine::_last_irq_time[OIL_ENGINE_MOTOR_NUM];
 
 AP_OilEngine::AP_OilEngine(AC_PID& pid_motor1_rpm, AC_PID& pid_motor2_rpm) :
     _pid_motor1_rpm(pid_motor1_rpm),
@@ -58,6 +63,7 @@ AP_OilEngine::AP_OilEngine(AC_PID& pid_motor1_rpm, AC_PID& pid_motor2_rpm) :
     AP_Param::setup_object_defaults(this, var_info);
     _motors_state[0]._pwm_in_Hz = _motors_state[0]._rpm = _motors_state[1]._pwm_in_Hz = _motors_state[1]._rpm = 0.0f;
     _period[0] = _period[1] = 0;
+    _last_irq_time[0] = _last_irq_time[1] = hrt_absolute_time();
 }
 
 void AP_OilEngine::init()
@@ -102,10 +108,9 @@ void AP_OilEngine::control()
 
 #ifdef TEST_OIL
     static int i = 0;
-    _servo1_angle_desired = 800;
-    _servo2_angle_desired = 200;
     i++;
     if (i > 50) {
+        printf("\nCH9 in: %.6f, desired rpm: %.6f \n", _throttle_desired, _rpm_desired);
         printf("motor1: pwm Hz: %.6f, rpm: %.6f r/min \n", _motors_state[0]._pwm_in_Hz, _motors_state[0]._rpm);
         printf("motor2: pwm Hz: %.6f, rpm: %.6f r/min \n", _motors_state[1]._pwm_in_Hz, _motors_state[1]._rpm);
         i = 0;
@@ -120,9 +125,20 @@ void AP_OilEngine::control()
 void AP_OilEngine::calc_rpm()
 {
     for (int i=0; i<OIL_ENGINE_MOTOR_NUM; i++) {
-        _motors_state[i]._pwm_in_Hz = 1000000.0f / (float)_period[i];
-        _motors_state[i]._rpm = 3600.0f * _motors_state[i]._pwm_in_Hz;
+        if (_period[i] > 0 && (hrt_absolute_time() - _last_irq_time[i] < PWM_INPUT_TIMEOUT_US)) {
+            _motors_state[i]._pwm_in_Hz = 1000000.0f / (float)_period[i];
+
+            if (_motors_state[i]._pwm_in_Hz > _max_frequency) {
+                _motors_state[i]._rpm = 0.0f;
+            } else {
+                _motors_state[i]._rpm = 60.0f * _motors_state[i]._pwm_in_Hz;
+            }
+        } else {
+            _motors_state[i]._rpm = 0.0f;
+            _motors_state[i]._pwm_in_Hz = 0.0f;
+        }
     }
+    throttle_to_rpm();
 }
 
 uint32_t AP_OilEngine::feedback_motors_rpm(uint8_t motor_index)
@@ -153,13 +169,17 @@ void AP_OilEngine::throttle_to_rpm()
 void AP_OilEngine::capture0_callback(void *context, uint32_t chan_index,
                                      hrt_abstime edge_time, uint32_t edge_state, uint32_t overflow)
 {
-    _period[0] = edge_time;
+    hrt_abstime now = hrt_absolute_time();
+    _period[0] = now - _last_irq_time[0];
+    _last_irq_time[0] = now;
 }
 
 void AP_OilEngine::capture1_callback(void *context, uint32_t chan_index,
                                      hrt_abstime edge_time, uint32_t edge_state, uint32_t overflow)
 {
-    _period[1] = edge_time;
+    hrt_abstime now = hrt_absolute_time();
+    _period[1] = now - _last_irq_time[1];
+    _last_irq_time[1] = now;
 }
 
 #endif
@@ -185,11 +205,11 @@ bool AP_OilEngine::setup_feedback_callback(void)
             return false;
         }
 
-        if (up_input_capture_set(_pwm_input0_pin-1, Falling, 0, capture0_callback, this) != 0) {
+        if (up_input_capture_set(_pwm_input0_pin-1, Rising, 0, capture0_callback, this) != 0) {
             close(fd);
             return false;
         }
-        if (up_input_capture_set(_pwm_input1_pin-1, Falling, 0, capture1_callback, this) != 0) {
+        if (up_input_capture_set(_pwm_input1_pin-1, Rising, 0, capture1_callback, this) != 0) {
             close(fd);
             return false;
         }
