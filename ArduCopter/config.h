@@ -420,14 +420,21 @@
 // CAMERA TRIGGER AND CONTROL
 //
 #ifndef CAMERA
- # define CAMERA        ENABLED
+ # define CAMERA        DISABLE
+#endif
+
+//////////////////////////////////////////////////////////////////////////////
+//  OIL ENGINE CONTROL
+//
+#ifndef OILENGINE
+ # define OILENGINE     ENABLED
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
 // MOUNT (ANTENNA OR CAMERA)
 //
 #ifndef MOUNT
- # define MOUNT         ENABLED
+ # define MOUNT         DISABLE
 #endif
 
 
@@ -602,6 +609,32 @@
 #endif
 #ifndef ACCEL_Z_FILT_HZ
  # define ACCEL_Z_FILT_HZ   20.0f
+#endif
+
+// Oil Engine control gains
+#ifndef OILENGINE_P
+ # define OILENGINE_P 1.0f
+#endif
+#ifndef OILENGINE_I
+ # define OILENGINE_I 0.0f
+#endif
+#ifndef OILENGINE_D
+ # define OILENGINE_D 0.0f
+#endif
+#ifndef OILENGINE_IMAX
+ # define OILENGINE_IMAX 200
+#endif
+#ifndef OILENGINE_FILT_HZ
+ # define OILENGINE_FILT_HZ 0.0f
+#endif
+#ifndef OILENGINE_UPDATE_TIME
+ # define OILENGINE_UPDATE_TIME 0.02f
+#endif
+#ifndef OIL_PWM_MAX
+ # define OIL_PWM_MAX 2000
+#endif
+#ifndef OIL_PWM_MIN
+ # define OIL_PWM_MIN 1000
 #endif
 
 // default maximum vertical velocity and acceleration the pilot may request

@@ -71,8 +71,8 @@ public:
         return (int16_t)(_Flowmeter_STATE.flowrate * 100);
     }
 
-    int16_t pluse_rate() const {
-        return (int16_t)_Flowmeter_STATE.pluse_rate;
+    float pluse_rate() const {
+        return _Flowmeter_STATE.pluse_rate;
     }
 
     bool farming_state() const {

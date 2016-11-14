@@ -217,6 +217,15 @@ void Copter::init_ardupilot()
     camera_mount.init(&DataFlash, serial_manager);
 #endif
 
+#if OILENGINE == ENABLED
+    // initialise oil engine
+    g.rc_7.set_radio_max(OIL_PWM_MAX);
+    g.rc_8.set_radio_max(OIL_PWM_MAX);
+    g.rc_7.set_radio_min(OIL_PWM_MIN);
+    g.rc_8.set_radio_min(OIL_PWM_MIN);
+    oil_engine.init();
+#endif
+
 #if PRECISION_LANDING == ENABLED
     // initialise precision landing
     init_precland();

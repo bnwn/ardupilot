@@ -363,9 +363,14 @@ public:
         k_param_rtl_climb_min,
         k_param_rpm_sensor,
         k_param_autotune_min_d, // 251
-        k_param_DataFlash = 253, // 253 - Logging Group
+        k_param_DataFlash = 252, // 252 - Logging Group
 
-        // 254,255: reserved
+        //
+        // 253: oil engine control
+        //
+        k_param_pid_oilengine1,
+        k_param_pid_oilengine2,
+        k_param_oil_engine = 255,
 
         // the k_param_* space is 9-bits in size
         // 511: reserved
@@ -493,6 +498,8 @@ public:
     AC_P                    p_vel_z;
     AC_PID                  pid_accel_z;
 
+    AC_PID                  pid_oilengine1;
+    AC_PID                  pid_oilengine2;
     AC_P                    p_pos_xy;
     AC_P                    p_alt_hold;
 
@@ -500,6 +507,7 @@ public:
     AP_Int8                 autotune_axis_bitmask;
     AP_Float                autotune_aggressiveness;
     AP_Float                autotune_min_d;
+
 
     // Note: keep initializers here in the same order as they are declared
     // above.
@@ -526,6 +534,9 @@ public:
 
         p_vel_z                 (VEL_Z_P),
         pid_accel_z             (ACCEL_Z_P,       ACCEL_Z_I,        ACCEL_Z_D,      ACCEL_Z_IMAX,       ACCEL_Z_FILT_HZ,    MAIN_LOOP_SECONDS),
+
+        pid_oilengine1          (OILENGINE_P,     OILENGINE_I,      OILENGINE_D,    OILENGINE_IMAX,     OILENGINE_FILT_HZ,  OILENGINE_UPDATE_TIME),
+        pid_oilengine2          (OILENGINE_P,     OILENGINE_I,      OILENGINE_D,    OILENGINE_IMAX,     OILENGINE_FILT_HZ,  OILENGINE_UPDATE_TIME),
 
         // P controller	        initial P
         //----------------------------------------------------------------------

@@ -396,6 +396,8 @@ libraries/AC_InputManager/AC_InputManager.cpp
 libraries/AC_InputManager/AC_InputManager.h
 libraries/AC_InputManager/AC_InputManager_Heli.cpp
 libraries/AC_InputManager/AC_InputManager_Heli.h
+libraries/AP_OilEngine/AP_OilEngine.cpp
+libraries/AP_OilEngine/AP_OilEngine.h
 libraries/AC_PID/examples/AC_PID_test/AC_PID_test.cpp
 libraries/AC_PID/AC_HELI_PID.cpp
 libraries/AC_PID/AC_HELI_PID.h
@@ -2969,6 +2971,8 @@ modules/PX4Firmware/src/drivers/stm32/tone_alarm/tone_alarm.cpp
 modules/PX4Firmware/src/drivers/stm32/drv_hrt.c
 modules/PX4Firmware/src/drivers/stm32/drv_input_capture.c
 modules/PX4Firmware/src/drivers/stm32/drv_input_capture.h
+modules/PX4Firmware/src/drivers/stm32/drv_input_pwm.c
+modules/PX4Firmware/src/drivers/stm32/drv_input_pwm.h
 modules/PX4Firmware/src/drivers/stm32/drv_io_timer.c
 modules/PX4Firmware/src/drivers/stm32/drv_io_timer.h
 modules/PX4Firmware/src/drivers/stm32/drv_pwm_servo.c
@@ -2989,6 +2993,7 @@ modules/PX4Firmware/src/drivers/drv_gps.h
 modules/PX4Firmware/src/drivers/drv_gyro.h
 modules/PX4Firmware/src/drivers/drv_hrt.h
 modules/PX4Firmware/src/drivers/drv_input_capture.h
+modules/PX4Firmware/src/drivers/drv_input_pwm.h
 modules/PX4Firmware/src/drivers/drv_io_expander.h
 modules/PX4Firmware/src/drivers/drv_irlock.h
 modules/PX4Firmware/src/drivers/drv_led.h
@@ -9802,6 +9807,8 @@ libraries/AC_InputManager/AC_InputManager.cpp
 libraries/AC_InputManager/AC_InputManager.h
 libraries/AC_InputManager/AC_InputManager_Heli.cpp
 libraries/AC_InputManager/AC_InputManager_Heli.h
+libraries/AP_OilEngine/AP_OilEngine.cpp
+libraries/AP_OilEngine/AP_OilEngine.h
 libraries/AC_PID/examples/AC_PID_test/AC_PID_test.cpp
 libraries/AC_PID/AC_HELI_PID.cpp
 libraries/AC_PID/AC_HELI_PID.h
@@ -12377,6 +12384,8 @@ modules/PX4Firmware/src/drivers/stm32/tone_alarm/tone_alarm.cpp
 modules/PX4Firmware/src/drivers/stm32/drv_hrt.c
 modules/PX4Firmware/src/drivers/stm32/drv_input_capture.c
 modules/PX4Firmware/src/drivers/stm32/drv_input_capture.h
+modules/PX4Firmware/src/drivers/stm32/drv_input_pwm.c
+modules/PX4Firmware/src/drivers/stm32/drv_input_pwm.h
 modules/PX4Firmware/src/drivers/stm32/drv_io_timer.c
 modules/PX4Firmware/src/drivers/stm32/drv_io_timer.h
 modules/PX4Firmware/src/drivers/stm32/drv_pwm_servo.c
@@ -12396,6 +12405,7 @@ modules/PX4Firmware/src/drivers/drv_gps.h
 modules/PX4Firmware/src/drivers/drv_gyro.h
 modules/PX4Firmware/src/drivers/drv_hrt.h
 modules/PX4Firmware/src/drivers/drv_input_capture.h
+modules/PX4Firmware/src/drivers/drv_input_pwm.h
 modules/PX4Firmware/src/drivers/drv_io_expander.h
 modules/PX4Firmware/src/drivers/drv_irlock.h
 modules/PX4Firmware/src/drivers/drv_led.h

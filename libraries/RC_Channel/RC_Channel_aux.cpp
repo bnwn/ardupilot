@@ -136,6 +136,10 @@ void RC_Channel_aux::aux_servo_function_setup(void)
         // fixed wing throttle
         set_range_out(0,100);
         break;
+    case RC_Channel_aux::k_oil_engine1:
+    case RC_Channel_aux::k_oil_engine2:
+        // oil engine throttle
+        set_range_out(0, 1000);
     default:
         break;
     }

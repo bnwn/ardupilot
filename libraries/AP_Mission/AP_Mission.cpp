@@ -2074,7 +2074,7 @@ float AP_Mission::get_current_target_alt(void) const
     if (_flags.state != MISSION_STOPPED) {
         return (_nav_cmd.content.location.alt - _ahrs.get_home().alt);
     } else {
-        return (_point_atob_altitude * 100.0f);
+        return (_point_atob_altitude.get() * 100.0f);
     }
 }
 

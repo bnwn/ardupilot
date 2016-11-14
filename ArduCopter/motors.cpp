@@ -8,6 +8,9 @@
 #define LOST_VEHICLE_DELAY      10  // called at 10hz so 1 second
 
 static uint32_t auto_disarm_begin;
+#if OILENGINE == ENABLED
+    static uint32_t last_oil_engine_update_ms = 0;
+#endif
 
 // arm_motors_check - checks for pilot input to arm or disarm the copter
 // called at 10hz
@@ -297,6 +300,16 @@ void Copter::motors_output()
 
         // send output signals to motors
         motors.output();
+
+#if OILENGINE == ENABLE
+        uint32_t now = millis();
+
+        if (((now - last_oil_engine_update_ms) * 0.001f) > OILENGINE_UPDATE_TIME) {
+            // control oil engine
+            oil_engine.control();
+            last_oil_engine_update_ms = now;
+        }
+#endif
     }
 }
 

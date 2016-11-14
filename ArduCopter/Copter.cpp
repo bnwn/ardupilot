@@ -25,7 +25,7 @@ const AP_HAL::HAL& hal = AP_HAL::get_HAL();
 Copter::Copter(void) :
     DataFlash{FIRMWARE_STRING},
     flight_modes(&g.flight_mode1),
-    mission(ahrs, 
+    mission(ahrs,
             FUNCTOR_BIND_MEMBER(&Copter::start_command, bool, const AP_Mission::Mission_Command &),
             FUNCTOR_BIND_MEMBER(&Copter::verify_command_callback, bool, const AP_Mission::Mission_Command &),
             FUNCTOR_BIND_MEMBER(&Copter::exit_mission, void)),
@@ -90,6 +90,9 @@ Copter::Copter(void) :
 #endif
 #if MOUNT == ENABLED
     camera_mount(ahrs, current_loc),
+#endif
+#if OILENGINE == ENABLED
+    oil_engine(g.pid_oilengine1, g.pid_oilengine2),
 #endif
 #if AC_FENCE == ENABLED
     fence(ahrs, inertial_nav),
