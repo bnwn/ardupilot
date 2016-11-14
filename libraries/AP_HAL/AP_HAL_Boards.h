@@ -12,6 +12,7 @@
 #define HAL_BOARD_LINUX    7
 #define HAL_BOARD_VRBRAIN  8
 #define HAL_BOARD_QURT     9
+#define HAL_BOARD_SUBTYPE_OIL_HEXA 11
 #define HAL_BOARD_EMPTY   99
 
 /* Default board subtype is -1 */
@@ -159,6 +160,9 @@
 #define HAL_STORAGE_SIZE            16384
 #define HAL_HAVE_IMU_HEATER         1 // for Pixhawk2
 #define HAL_IMU_TEMP_DEFAULT       -1 // disabled
+#endif
+#if CONFIG_HAL_BOARD_OIL == HAL_BOARD_SUBTYPE_OIL_HEXA
+#define OIL_ENGINE_HEXA
 #endif
 #define HAL_GPIO_A_LED_PIN        27
 #define HAL_GPIO_B_LED_PIN        26

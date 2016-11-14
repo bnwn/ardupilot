@@ -426,7 +426,7 @@
 //////////////////////////////////////////////////////////////////////////////
 //  OIL ENGINE CONTROL
 //
-#ifndef OILENGINE
+#ifdef OIL_ENGINE_HEXA
  # define OILENGINE     ENABLED
 #endif
 
