@@ -65,7 +65,10 @@
  # define FRAME_CONFIG   QUAD_FRAME
 #endif
 
-#if FRAME_CONFIG == QUAD_FRAME
+#if FRAME_CONFIG == OIL_FRAME
+ # define FRAME_CONFIG_STRING "HEXA"
+ # define OIL_ENGINE_HEXA ENABLED
+#elif FRAME_CONFIG == QUAD_FRAME
  # define FRAME_CONFIG_STRING "QUAD"
 #elif FRAME_CONFIG == TRI_FRAME
  # define FRAME_CONFIG_STRING "TRI"
@@ -428,6 +431,8 @@
 //
 #ifdef OIL_ENGINE_HEXA
  # define OILENGINE     ENABLED
+#else
+ # define OILENGINE     DISABLED
 #endif
 
 //////////////////////////////////////////////////////////////////////////////

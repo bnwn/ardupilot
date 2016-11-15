@@ -301,7 +301,7 @@ void Copter::motors_output()
         // send output signals to motors
         motors.output();
 
-#if OILENGINE == ENABLE
+#if OILENGINE == ENABLED
         uint32_t now = millis();
 
         if (((now - last_oil_engine_update_ms) * 0.001f) > OILENGINE_UPDATE_TIME) {

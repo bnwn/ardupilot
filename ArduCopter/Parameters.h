@@ -498,8 +498,10 @@ public:
     AC_P                    p_vel_z;
     AC_PID                  pid_accel_z;
 
+#if OILENGINE == ENABLED
     AC_PID                  pid_oilengine1;
     AC_PID                  pid_oilengine2;
+#endif
     AC_P                    p_pos_xy;
     AC_P                    p_alt_hold;
 
@@ -535,8 +537,10 @@ public:
         p_vel_z                 (VEL_Z_P),
         pid_accel_z             (ACCEL_Z_P,       ACCEL_Z_I,        ACCEL_Z_D,      ACCEL_Z_IMAX,       ACCEL_Z_FILT_HZ,    MAIN_LOOP_SECONDS),
 
+    #if OILENGINE == ENABLED
         pid_oilengine1          (OILENGINE_P,     OILENGINE_I,      OILENGINE_D,    OILENGINE_IMAX,     OILENGINE_FILT_HZ,  OILENGINE_UPDATE_TIME),
         pid_oilengine2          (OILENGINE_P,     OILENGINE_I,      OILENGINE_D,    OILENGINE_IMAX,     OILENGINE_FILT_HZ,  OILENGINE_UPDATE_TIME),
+    #endif
 
         // P controller	        initial P
         //----------------------------------------------------------------------
