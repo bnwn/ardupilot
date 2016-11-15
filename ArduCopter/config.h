@@ -630,7 +630,7 @@
  # define OILENGINE_IMAX 200
 #endif
 #ifndef OILENGINE_FILT_HZ
- # define OILENGINE_FILT_HZ 0.0f
+ # define OILENGINE_FILT_HZ 20.0f
 #endif
 #ifndef OILENGINE_UPDATE_TIME
  # define OILENGINE_UPDATE_TIME 0.02f
