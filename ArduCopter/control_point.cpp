@@ -35,10 +35,9 @@ bool Copter::point_init(bool ignore_checks)
         mission.point_atob_start();
         return true;
 
-    } else {
-        return false;
     }
-    return ignore_checks;
+
+    return false;
 }
 
 void Copter::point_run()

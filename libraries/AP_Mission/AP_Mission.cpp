@@ -2078,3 +2078,21 @@ float AP_Mission::get_current_target_alt(void) const
     }
 }
 
+inline void AP_Mission::advance_point_num(uint16_t &_index, uint16_t &_p1)
+{
+    _p1++;
+    if (p1 > 255) {
+        _index += 10;
+        _p1 = 0;
+    }
+}
+
+inline void AP_Mission::descend_point_num(uint16_t &_index, uint16_t &_p1)
+{
+    if (0 == _p1 && _index > 10) {
+        _p1 = 254;
+        _index -= 10;
+    } else {
+        _p1--;
+    }
+}

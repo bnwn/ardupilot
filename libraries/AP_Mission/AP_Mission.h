@@ -567,6 +567,12 @@ private:
     /// command list will be cleared if they do not match
     void check_eeprom_version();
 
+    inline uint16_t get_true_index(uint16_t _index) { return (_index & 0x0001); }
+    inline uint16_t get_true_point_num(uint16_t _index, uint16_t _p1) { return ((uint16_t)(_index / 10) * 255 + _p1); }
+    inline void advance_point_num(uint16_t &_index, uint16_t &_p1);
+    inline void descend_point_num(uint16_t &_index, uint16_t &_p1);
+    inline uint16_t advance_index(uint16_t _index) { return (_index ^ 0x0001); }
+
     // references to external libraries
     const AP_AHRS&   _ahrs;      // used only for home position
 
