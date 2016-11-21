@@ -3,16 +3,16 @@
 #define PUMP_CONTROL_CHANNEL 5
 #define PUMP_OUTPUT_CHANNEL 3
 
-void Copter::pump_output_init()
+void Copter::init_farming()
 {
-
+    init_flowmeter();
+    radio_to_pump_output();
 }
 
 // set output throngh radio channel
 void Copter::radio_to_pump_output()
 {
-
-//    RC_Channel_aux::set_servo_out_for(RC_Channel_aux::k_motor_tilt, v);
+    RC_Channel_aux::set_aux_channel_default(RC_Channel_aux::k_manual, CH_9);
 }
 
 void Copter::pesticide_remaining_check()

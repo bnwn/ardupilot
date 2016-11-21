@@ -123,6 +123,10 @@ void AP_Mission::save_break_point()
         break_cmd = _point_cmd;
     }
 
+    uint16_t interval = break_cmd.p1;
+
+    set_true_cmd(break_cmd.index, break_cmd.p1, interval);
+
     if (!write_cmd_to_storage(AP_MISSION_POINT_CURRENT_OFFSET, break_cmd, AP_MISSION_POINT_ATOB_RUNNING)) {
         // not supposed to happen
         return;
@@ -190,12 +194,7 @@ point_save_state AP_Mission::reset_current_point()
                     multiple += 1;
                 }
 
-                cmd_c.p1 = multiple;
-                if (cmd_c.index == 0) {
-                    cmd_c.index = multiple % 2;
-                } else {
-                    cmd_c.index = (multiple % 2) ^ 1;
-                }
+                set_true_cmd(cmd_c.index, cmd_c.p1, multiple);
 
                 location_update(cmd_c.content.location, _point_flags.bearing, (float)(cmd_c.p1 * _point_flags.interval));
                 cmd_c.content.location.alt = _point_flags.flight_alt;
@@ -1776,6 +1775,9 @@ bool AP_Mission::advance_current_point_cmd()
             return false;
         }
         _point_next_cmd = cmd;
+        _point_next_cmd.p1 = get_true_point_num(_point_next_cmd.index, _point_next_cmd.p1);
+        _point_next_cmd.index = get_true_index(_point_next_cmd.index);
+
     } else if (_point_cmd.p1 == 0 && _point_cmd.index == 0) {
         // current point is point B
         _point_next_cmd = _point_cmd_b;
@@ -1790,13 +1792,13 @@ bool AP_Mission::advance_current_point_cmd()
             _point_next_cmd.p1 = _point_cmd.p1;
         }
 
-        if (_point_next_cmd.p1 > 255) {
-            // the largest lateral index is 256
+        if (_point_next_cmd.p1 > 6000) {
+            // the largest lateral index is 6000
             _point_flags.state = MISSION_COMPLETE;
             return false;
         }
 
-        if (_point_next_cmd.p1 % 2 == _point_next_cmd.index) {
+        if ((_point_next_cmd.p1 & 0x0001) == _point_next_cmd.index) {
             _point_next_cmd.content.location = _point_cmd_a.content.location;
         } else {
             _point_next_cmd.content.location = _point_cmd_b.content.location;
@@ -2078,21 +2080,12 @@ float AP_Mission::get_current_target_alt(void) const
     }
 }
 
-inline void AP_Mission::advance_point_num(uint16_t &_index, uint16_t &_p1)
+inline void AP_Mission::set_true_cmd(uint16_t &_index, uint16_t &_p1, uint16_t interval)
 {
-    _p1++;
-    if (p1 > 255) {
-        _index += 10;
-        _p1 = 0;
-    }
-}
-
-inline void AP_Mission::descend_point_num(uint16_t &_index, uint16_t &_p1)
-{
-    if (0 == _p1 && _index > 10) {
-        _p1 = 254;
-        _index -= 10;
+    _p1 = interval & 0x00ff;
+    if (_index == 0) {
+        _index = (interval >> 8) * 10 + (_p1 & 0x0001);
     } else {
-        _p1--;
+        _index = (interval >> 8) * 10 + ((_p1 & 0x0001) ^ 1);
     }
 }

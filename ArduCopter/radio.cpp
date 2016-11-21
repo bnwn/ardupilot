@@ -85,8 +85,6 @@ void Copter::init_rc_out()
 
     // refresh auxiliary channel to function map
     RC_Channel_aux::update_aux_servo_function();
-
-    pump_output_init();
 }
 
 // enable_motor_output() - enable and output lowest possible value to motors

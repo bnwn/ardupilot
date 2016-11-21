@@ -1047,7 +1047,7 @@ private:
     void set_throttle_and_failsafe(uint16_t throttle_pwm);
     void set_throttle_zero_flag(int16_t throttle_control);
     void radio_passthrough_to_motors();
-    void pump_output_init();
+    void init_farming();
     void radio_to_pump_output();
     void pesticide_remaining_check();
     void farming_mode_handle(void);

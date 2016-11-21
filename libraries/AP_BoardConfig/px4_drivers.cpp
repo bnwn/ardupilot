@@ -346,11 +346,12 @@ void AP_BoardConfig::px4_start_fmuv2_sensors(void)
         } else {
             px4_sensor_error("no l3gd20 found");
         }
-        if (px4_start_driver(lsm303d_main, "lsm303d", "-a 16 start")) {
-            printf("lsm303d started OK\n");
-        } else {
-            px4_sensor_error("no lsm303d found");
-        }
+//        if (px4_start_driver(lsm303d_main, "lsm303d", "-a 16 start")) {
+//            printf("lsm303d started OK\n");
+//        } else {
+//            printf("no lsm303d found");
+//            //px4_sensor_error("no lsm303d found");
+//        }
     }
 
     if (have_FMUV3) {
