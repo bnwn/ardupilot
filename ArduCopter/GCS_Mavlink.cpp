@@ -51,6 +51,7 @@ NOINLINE void Copter::send_heartbeat(mavlink_channel_t chan)
     base_mode = MAV_MODE_FLAG_STABILIZE_ENABLED;
     switch (control_mode) {
     case AUTO:
+    case POINT_ATOB:
     case RTL:
     case LOITER:
     case AVOID_ADSB:
@@ -153,6 +154,7 @@ NOINLINE void Copter::send_extended_status1(mavlink_channel_t chan)
     switch (control_mode) {
     case ALT_HOLD:
     case AUTO:
+    case POINT_ATOB:
     case AVOID_ADSB:
     case GUIDED:
     case LOITER:

@@ -112,6 +112,7 @@ enum control_mode_t {
     AVOID_ADSB =   19,  // automatic avoidance of obstacles in the macro scale - e.g. full-sized aircraft
     GUIDED_NOGPS = 20,  // guided mode but only accepts attitude and altitude
     POINT_ATOB =   21,  // drove between point A and B
+    MOTOR_ESTOP =  22,  // set motor emergency stop
 };
 
 enum mode_reason_t {

@@ -115,6 +115,10 @@ bool Copter::set_mode(control_mode_t mode, mode_reason_t reason)
             success = point_init(ignore_checks);
             break;
 
+        case MOTOR_ESTOP:
+            set_motor_emergency_stop(!ignore_checks);
+            break;
+
         default:
             success = false;
             break;
