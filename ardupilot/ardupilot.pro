@@ -1350,7 +1350,8 @@ SOURCES += main.cpp \
     ../modules/PX4Firmware/src/systemcmds/top/top.c \
     ../modules/PX4Firmware/src/systemcmds/usb_connected/usb_connected.c \
     ../modules/PX4Firmware/src/systemcmds/ver/ver.c \
-    ../libraries/AP_OilEngine/AP_OilEngine.cpp
+    ../libraries/AP_OilEngine/AP_OilEngine.cpp \
+    ../libraries/AP_RangeFinder/AP_RangeFinder_MMWRadar.cpp
 
 include(deployment.pri)
 qtcAddDeployment()
@@ -3742,5 +3743,6 @@ HEADERS += \
     ../modules/PX4Firmware/unittests/board_config.h \
     ../modules/PX4Firmware/unittests/debug.h \
     ../modules/PX4Firmware/unittests/queue.h \
-    ../tests/AP_gtest.h
+    ../tests/AP_gtest.h \
+    ../libraries/AP_RangeFinder/AP_RangeFinder_MMWRadar.h
 
