@@ -51,6 +51,28 @@ const AP_Param::GroupInfo AP_Mission::var_info[] = {
     // @User: Enigma
     AP_GROUPINFO("RNG_GAIN", 5, AP_Mission, _rangefinder_gain_in_auto, AP_MISSION_RANGEFINDER_GAIN),
 
+#ifdef POINT_TEST
+    // @Param PNTA_LAT
+    // @Description: Point A coordinate
+    // @User: Enigma
+    AP_GROUPINFO("PNTA_LAT", 6, AP_Mission, _point_a_lat, 0.0f),
+
+    // @Param PNTA_LON
+    // @Description: Point A coordinate
+    // @User: Enigma
+    AP_GROUPINFO("PNTA_LON", 7, AP_Mission, _point_a_lon, 0.0f),
+
+    // @Param PNTB_LAT
+    // @Description: Point B coordinate
+    // @User: Enigma
+    AP_GROUPINFO("PNTB_LAT", 8, AP_Mission, _point_b_lat, 0.0f),
+
+    // @Param PNTB_LON
+    // @Description: Point B coordinate
+    // @User: Enigma
+    AP_GROUPINFO("PNTB_LON", 9, AP_Mission, _point_b_lon, 0.0f),
+#endif
+
     AP_GROUPEND
 };
 
@@ -149,6 +171,14 @@ point_save_state AP_Mission::clear_point_item()
         return AP_MISSION_POINT_SET_FAILED;
     }
     _point_flags.save_state = AP_MISSION_POINT_CLEAR_UP;
+
+#ifdef POINT_TEST
+    _point_a_lat.set(0.0f);
+    _point_a_lon.set(0.0f);
+    _point_b_lat.set(0.0f);
+    _point_b_lon.set(0.0f);
+#endif
+
     return AP_MISSION_POINT_CLEAR_UP;
 }
 
@@ -240,12 +270,20 @@ point_save_state AP_Mission::set_current_point()
         if (write_cmd_to_storage(AP_MISSION_POINT_A_OFFSET, cmd, AP_MISSION_POINT_ATOB_RUNNING)) {
             if (write_cmd_to_storage(AP_MISSION_POINT_CURRENT_OFFSET, cmd, AP_MISSION_POINT_ATOB_RUNNING)) {
                 ret = current_point_set_index;
+#ifdef POINT_TEST
+                _point_a_lat.set(cmd.content.location.lat);
+                _point_a_lon.set(cmd.content.location.lng);
+#endif
                 _point_flags.save_state = AP_MISSION_POINT_SET_B;
             }
         }
     } else if (current_point_set_index == AP_MISSION_POINT_SET_B) {
         if (write_cmd_to_storage(AP_MISSION_POINT_B_OFFSET, cmd, AP_MISSION_POINT_ATOB_RUNNING)) {
             ret = current_point_set_index;
+#ifdef POINT_TEST
+            _point_b_lat.set(cmd.content.location.lat);
+            _point_b_lon.set(cmd.content.location.lng);
+#endif
             _point_flags.save_state = AP_MISSION_POINT_SET_A;
         }
     }
@@ -359,6 +397,22 @@ void AP_Mission::point_atob_start()
         // not supposed to happen
         return;
     }
+
+#ifdef POINT_TEST
+    if (_point_cmd_a.content.location.lat != _point_a_lat.get() ||
+            _point_cmd_a.content.location.lng != _point_a_lon.get() ||
+            _point_cmd_b.content.location.lat != _point_b_lat.get() ||
+            _point_cmd_b.content.location.lng != _point_b_lon.get()) {
+        _point_cmd_a.content.location.lat = _point_a_lat.get();
+        _point_cmd_a.content.location.lng = _point_a_lon.get();
+        _point_cmd_b.content.location.lat = _point_b_lat.get();
+        _point_cmd_b.content.location.lng = _point_b_lon.get();
+
+        write_cmd_to_storage(AP_MISSION_POINT_A_OFFSET, _point_cmd_a, AP_MISSION_POINT_ATOB_RUNNING);
+        write_cmd_to_storage(AP_MISSION_POINT_CURRENT_OFFSET, _point_cmd_a, AP_MISSION_POINT_ATOB_RUNNING);
+        write_cmd_to_storage(AP_MISSION_POINT_B_OFFSET, _point_cmd_b, AP_MISSION_POINT_ATOB_RUNNING);
+    }
+#endif
 
     bearing_cd = get_bearing_cd(_point_cmd_a.content.location, _point_cmd_b.content.location);
     _point_flags.heading = bearing_cd;

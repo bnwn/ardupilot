@@ -50,6 +50,8 @@
 
 #define AP_MISSION_RANGEFINDER_GAIN         1.0f
 
+#define POINT_TEST
+
 // mission state enumeration
 enum point_save_state {
     AP_MISSION_POINT_SET_A=0,
@@ -314,6 +316,18 @@ public:
         _point_flags.flight_alt += _ahrs.get_home().alt;
         _point_flags.save_state = AP_MISSION_POINT_CLEAR_UP;
         _point_flags.is_achieve_point = false;
+
+#ifdef POINT_TEST
+        Mission_Command cmd_a, cmd_b;
+        if (read_cmd_from_storage(AP_MISSION_POINT_A_OFFSET, cmd_a, AP_MISSION_POINT_ATOB_RUNNING)) {
+            if (read_cmd_from_storage(AP_MISSION_POINT_B_OFFSET, cmd_b, AP_MISSION_POINT_ATOB_RUNNING)) {
+                _point_a_lat.set(cmd_a.content.location.lat);
+                _point_a_lon.set(cmd_a.content.location.lng);
+                _point_b_lat.set(cmd_b.content.location.lat);
+                _point_b_lon.set(cmd_b.content.location.lng);
+            }
+        }
+#endif
     }
 
     ///
@@ -581,6 +595,10 @@ private:
     AP_Float                _point_atob_interval;
     AP_Int8                 _point_atob_direction;
     AP_Float                _rangefinder_gain_in_auto;
+    AP_Float                _point_a_lat;
+    AP_Float                _point_a_lon;
+    AP_Float                _point_b_lat;
+    AP_Float                _point_b_lon;
 
     // pointer to main program functions
     mission_cmd_fn_t        _cmd_start_fn;  // pointer to function which will be called when a new command is started
