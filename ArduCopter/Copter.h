@@ -217,11 +217,13 @@ private:
 #if MMWRADAR_ENABLED == ENABLE
     struct {
         bool enabled:1;
-        bool alt_healthy:1; // true if we can trust the altitude from the rangefinder
-        int16_t alt_cm;     // tilt compensated altitude (in cm) from rangefinder
-        int16_t alt_cm_filter;
+        bool range_healthy:1; // true if we can trust the altitude from the rangefinder
+        int16_t range_cm;     // tilt compensated altitude (in cm) from rangefinder
+        int16_t range_cm_filter;
+        int16_t rcs_cm;
+        int16_t snr;
         uint32_t last_healthy_ms;
-        LowPassFilterFloat alt_cm_filt; // altitude filter
+        LowPassFilterFloat range_cm_filt; // altitude filter
     } mmwradar_state = { false, false, 0, 0 };
 #endif
 

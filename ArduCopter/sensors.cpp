@@ -42,6 +42,7 @@ void Copter::read_rangefinder(void)
     rangefinder.update();
 
     rangefinder_state.alt_healthy = ((rangefinder.status() == RangeFinder::RangeFinder_Good) && (rangefinder.range_valid_count() >= RANGEFINDER_HEALTH_MAX));
+    mmwradar_state.range_healthy = ((rangefinder.mmwradar_status() == RangeFinder::RangeFinder_Good) && (rangefinder.mmwradar_valid_count()) >= RANGEFINDER_HEALTH_MAX);
 
     int16_t temp_alt = rangefinder.distance_cm();
 
@@ -70,6 +71,8 @@ void Copter::read_rangefinder(void)
     // send rangefinder altitude and health to waypoint navigation library
     wp_nav.set_rangefinder_alt(rangefinder_state.enabled, rangefinder_state.alt_healthy, rangefinder_state.alt_cm_filt.get());
 
+    // get mmwradar value
+    rangefinder.mmwradar_distance(mmwradar_state.range_cm, mmwradar_state.rcs_cm, mmwradar_state.snr);
 #else
     rangefinder_state.enabled = false;
     rangefinder_state.alt_healthy = false;

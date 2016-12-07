@@ -17,21 +17,21 @@
 /* Message ID */
 #define MMWRADAR_MSGID_CONFIGURATION_H 0x02
 #define MMWRADAR_MSGID_CONFIGURATION_L 0x00
-#define MMWRADAR_MSGID_SENSOR_BACK   0x0400
-#define MMWRADAR_MSGID_SENSOR_STATUS 0x060A
-#define MMWRADAR_MSGID_TARGET_STATUS 0x070B
-#define MMWRADAR_MSGID_TARGET_INFO   0x070C
+#define MMWRADAR_MSGID_SENSOR_BACK    0x400
+#define MMWRADAR_MSGID_SENSOR_STATUS  0x60A
+#define MMWRADAR_MSGID_TARGET_STATUS  0x70B
+#define MMWRADAR_MSGID_TARGET_INFO    0x70C
 // only for sp25
-#define MMWRADAR_MSGID_SPEED_INFO    0x0300
-#define MMWRADAR_MSGID_YAWRATE_INFO  0x0301
-#define MMWRADAR_MSGID_VERSION       0x0800
+#define MMWRADAR_MSGID_SPEED_INFO     0x300
+#define MMWRADAR_MSGID_YAWRATE_INFO   0x301
+#define MMWRADAR_MSGID_VERSION        0x800
 
 /* SENSOR CONFIGURATION */
 // DataType 0 ~ 6 Bit
-#define MMWRADAR_DATATYPE_SENSOR_ID         0x01
-#define MMWRADAR_DATATYPE_SENSOR_VERSION    0x02
-#define MMWRADAR_DATATYPE_SENSOR_SWITCH     0x03
-#define MMWRADAR_DATATYPE_FILTER            0x04
+#define MMWRADAR_DATATYPE_SENSOR_ID         0x1
+#define MMWRADAR_DATATYPE_SENSOR_VERSION    0x2
+#define MMWRADAR_DATATYPE_SENSOR_SWITCH     0x3
+#define MMWRADAR_DATATYPE_FILTER            0x4
 #define MMWRADAR_DATATYPE_INTEST            0x7e
 #define MMWRADAR_DATATYPE_SAVE_PARAMETER    0x7f
 // R/W 7 Bit
@@ -81,15 +81,15 @@ public:
     // update state
     void update(void);
 
-    inline char get_data_from_buf(uint8_t packet, uint8_t offset, uint8_t bit) {
-        return (_valid_data_buf[packet][offset] & bit);
+    inline char get_data_from_buf(int packet, int offset, int bit) {
+        return (char)(_valid_data_buf[packet][offset] & bit);
     }
 
-    inline char get_data_from_buf(uint8_t packet, uint8_t offset) {
+    inline char get_data_from_buf(int packet, int offset) {
         return _valid_data_buf[packet][offset];
     }
 
-    struct Target_Info {
+    struct Target_Info_Type {
         uint8_t  index;
         uint16_t range_cm;
         uint16_t rcs_cm;
@@ -97,7 +97,7 @@ public:
         uint16_t snr;
     };
 
-    struct Target_Status {
+    struct Target_Status_Type {
         uint8_t  target_num;
         uint8_t  rollcount;
     };
@@ -118,7 +118,7 @@ private:
     bool get_sensor_version(uint32_t &sensor_version);
 
     // parse
-    Packet_Form parse();
+    uint8_t parse();
 
     // receive packet from uart
     bool recv_packet();
@@ -130,11 +130,11 @@ private:
 
     char _valid_data_buf[MMWRADAR_DATA_BUFFER_NUM][MMWRADAR_DATA_BUFFER_SIZE];
     uint8_t _valid_data_packet;
-    Target_Status _target_status;
-    Target_Info   _target_info;
-    uint8_t     _master_version;
-    uint8_t     _second_version;
-    uint8_t     _step_version;
+    Target_Status_Type _target_status;
+    Target_Info_Type   _target_info;
+    char     _master_version;
+    char     _second_version;
+    char     _step_version;
     uint32_t    _last_reading_ms;
 };
 

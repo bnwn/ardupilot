@@ -15,7 +15,11 @@ extern const AP_HAL::HAL& hal;
 AP_RangeFinder_MMWRadar::AP_RangeFinder_MMWRadar(RangeFinder &_ranger, uint8_t instance,
                                                                RangeFinder::RangeFinder_State &_state,
                                                                AP_SerialManager &serial_manager) :
-    AP_RangeFinder_Backend(_ranger, instance, _state)
+    AP_RangeFinder_Backend(_ranger, instance, _state),
+    _master_version(0),
+    _second_version(0),
+    _step_version(0),
+    _last_reading_ms(0)
 {
     uart = serial_manager.find_serial(AP_SerialManager::SerialProtocol_MMWRadar, 0);
     if (uart != nullptr) {
@@ -33,14 +37,14 @@ AP_RangeFinder_Backend *AP_RangeFinder_MMWRadar::detect(RangeFinder &ranger, uin
 {
     if (serial_manager.find_serial(AP_SerialManager::SerialProtocol_MMWRadar, 0) != nullptr) {
         AP_RangeFinder_MMWRadar *sensor
-            = new AP_RangeFinder_MMWRadar(_ranger, instance, _state, serial_manager);
+            = new AP_RangeFinder_MMWRadar(ranger, instance, _state, serial_manager);
         uint32_t version;
         if (sensor && sensor->get_sensor_version(version)) {
                 return sensor;
         }
+        delete sensor;
     }
 
-    delete sensor;
     return nullptr;
 }
 
@@ -57,7 +61,7 @@ bool AP_RangeFinder_MMWRadar::get_reading()
         uint8_t packet_form = parse();
 
         if ((packet_form & Packet_Form::Target_Status) == Packet_Form::Target_Status &&
-                _target_status.target_num > 0 && (packet_form & Packet_Form::Target_Info == Packet_Form::Target_Info)) {
+                _target_status.target_num > 0 && (packet_form & Packet_Form::Target_Info) == Packet_Form::Target_Info) {
             return true;
         }
     }
@@ -92,7 +96,7 @@ bool AP_RangeFinder_MMWRadar::get_sensor_version(uint32_t &sensor_version)
     reset_param();
 
     if (recv_packet()) {
-        if (parse() & AP_RangeFinder_MMWRadar::Sensor_Back) {
+        if ((parse() & AP_RangeFinder_MMWRadar::Sensor_Back) == AP_RangeFinder_MMWRadar::Sensor_Back) {
             sensor_version = (_master_version << 16) | (_second_version << 8) | _step_version;
             return true;
         }
@@ -103,17 +107,18 @@ bool AP_RangeFinder_MMWRadar::get_sensor_version(uint32_t &sensor_version)
 
 
 // handle - parse packet
-AP_RangeFinder_MMWRadar::Packet_Form AP_RangeFinder_MMWRadar::parse()
+uint8_t AP_RangeFinder_MMWRadar::parse()
 {
     uint8_t packet_form = 0;
+    char range_h, range_l, datatype, read_status;
     for (int i=0; i<_valid_data_packet; i++)
     {
-        uint16 msgid = _valid_data_buf[i][0] | (_valid_data_buf[i][1] << 8);
+        uint16_t msgid = _valid_data_buf[i][0] | (_valid_data_buf[i][1] << 8);
 
         switch (msgid) {
             case MMWRADAR_MSGID_SENSOR_BACK:
-                uint8_t datatype = get_data_from_buf(i, MMWRADAR_READ_STATUS_OFFSET, ~MMWRADAR_READ_STATUS_BIT);
-                uint8_t read_status = get_data_from_buf(i, MMWRADAR_READ_STATUS_OFFSET, MMWRADAR_READ_STATUS_BIT);
+                datatype = get_data_from_buf(i, MMWRADAR_READ_STATUS_OFFSET, ~MMWRADAR_READ_STATUS_BIT);
+                read_status = get_data_from_buf(i, MMWRADAR_READ_STATUS_OFFSET, MMWRADAR_READ_STATUS_BIT);
                 switch (datatype) {
                     case MMWRADAR_DATATYPE_SENSOR_VERSION:
                         if (read_status == MMWRADAR_READ_STATUS_BIT) {
@@ -147,8 +152,8 @@ AP_RangeFinder_MMWRadar::Packet_Form AP_RangeFinder_MMWRadar::parse()
                 _target_info.index = (uint8_t)get_data_from_buf(i, MMWRADAR_TARGET_INFO_TARGETID_OFFSET);
                 _target_info.rcs_cm = get_data_from_buf(i, MMWRADAR_TARGET_INFO_RCS_OFFSET) * 50 - 5000;
 
-                char range_l = get_data_from_buf(i, MMWRADAR_TARGET_INFO_RANGE_L_OFFSET);
-                char range_h = get_data_from_buf(i, MMWRADAR_TARGET_INFO_RANGE_H_OFFSET);
+                range_l = get_data_from_buf(i, MMWRADAR_TARGET_INFO_RANGE_L_OFFSET);
+                range_h = get_data_from_buf(i, MMWRADAR_TARGET_INFO_RANGE_H_OFFSET);
                 _target_info.range_cm = (range_h << 8) | range_l;
 
                 _target_info.snr = get_data_from_buf(i, MMWRADAR_TARGET_INFO_RCS_OFFSET) - 127;
@@ -160,6 +165,8 @@ AP_RangeFinder_MMWRadar::Packet_Form AP_RangeFinder_MMWRadar::parse()
                 break;
         }
     }
+
+    return packet_form;
 }
 
 // read valid packet from uart
@@ -177,7 +184,7 @@ bool AP_RangeFinder_MMWRadar::recv_packet()
                 nbytes--;
                 overflow++;
 
-                if (uart>read() == MMWRADAR_START_SEQUENCE_H) {
+                if (uart->read() == MMWRADAR_START_SEQUENCE_H) {
                     c = uart->read();
                     char next_c = uart->read();
                     while (!(c == MMWRADAR_END_SEQUENCE_L && next_c == MMWRADAR_END_SEQUENCE_H)) {

@@ -126,13 +126,13 @@ public:
         return distance_cm(primary_instance);
     }
 
-    void mmw_distance(uint8_t instance, uint16_t &range_cm, uint16_t &rcs_cm, uint16_t &snr) {
-        range_cm = _RangeFinder_STATE(instance).distance_cm;
-        rcs_cm = _RangeFinder_STATE(instance).rcs_cm;
-        snr = _RangeFinder_STATE(instance).snr;
+    void mmwradar_distance(uint8_t instance, int16_t &range_cm, int16_t &rcs_cm, int16_t &snr) {
+        range_cm = (int16_t)_RangeFinder_STATE(instance).distance_cm;
+        rcs_cm = (int16_t)_RangeFinder_STATE(instance).rcs_cm;
+        snr = (int16_t)_RangeFinder_STATE(instance).snr;
     }
-    void mmw_distance(uint16_t &range_cm, uint16_t &rcs_cm, uint16_t &snr) {
-        mmw_distance(range_cm, rcs_cm, snr);
+    void mmwradar_distance(int16_t &range_cm, int16_t &rcs_cm, int16_t &snr) {
+        mmwradar_distance(avoid_obstacle, range_cm, rcs_cm, snr);
     }
 
     uint16_t voltage_mv(uint8_t instance) const {
@@ -148,6 +148,9 @@ public:
     int16_t max_distance_cm() const {
         return max_distance_cm(primary_instance);
     }
+    int16_t max_mmwradar_range_cm() const {
+        return max_distance_cm(avoid_obstacle);
+    }
 
     int16_t min_distance_cm(uint8_t instance) const {
         return _min_distance_cm[instance];
@@ -155,6 +158,10 @@ public:
     int16_t min_distance_cm() const {
         return min_distance_cm(primary_instance);
     }
+    int16_t min_mmwradar_range_cm() const {
+        return min_distance_cm(avoid_obstacle);
+    }
+
     int16_t ground_clearance_cm(uint8_t instance) const {
         return _ground_clearance_cm[instance];
     }
@@ -167,11 +174,17 @@ public:
     RangeFinder_Status status(void) const {
         return status(primary_instance);
     }
+    RangeFinder_Status mmwradar_status(void) const {
+        return status(avoid_obstacle);
+    }
 
     // true if sensor is returning data
     bool has_data(uint8_t instance) const;
     bool has_data() const {
         return has_data(primary_instance);
+    }
+    bool has_mmwradar_data() const {
+        return has_data(avoid_obstacle);
     }
 
     // returns count of consecutive good readings
@@ -180,6 +193,9 @@ public:
     }
     uint8_t range_valid_count(uint8_t instance) const {
         return _RangeFinder_STATE(instance).range_valid_count;
+    }
+    uint8_t mmwradar_valid_count() const {
+        return range_valid_count(avoid_obstacle);
     }
 
     /*
