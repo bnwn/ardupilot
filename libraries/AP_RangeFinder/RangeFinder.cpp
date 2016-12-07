@@ -26,6 +26,7 @@
 #include "AP_RangeFinder_Bebop.h"
 #include "AP_RangeFinder_MAVLink.h"
 #include "AP_RangeFinder_LeddarOne.h"
+#include "AP_RangeFinder_MMWRadar.h"
 
 extern const AP_HAL::HAL &hal;
 
@@ -232,7 +233,7 @@ const AP_Param::GroupInfo RangeFinder::var_info[] = {
     // @DisplayName: Third Rangefinder type
     // @Description: What type of rangefinder device that is connected
     // @Values: 0:None,1:Analog,2:APM2-MaxbotixI2C,3:APM2-PulsedLightI2C,4:PX4-I2C,5:PX4-PWM,6:BBB-PRU,7:LightWareI2C,8:LightWareSerial,9:Bebop,10:MAVLink,12:LeddarOne
-    AP_GROUPINFO("3_TYPE",    25, RangeFinder, _type[2], 0),
+    AP_GROUPINFO("3_TYPE",    25, RangeFinder, _type[2], 13),
 
     // @Param: 3_PIN
     // @DisplayName: Rangefinder pin
@@ -257,22 +258,22 @@ const AP_Param::GroupInfo RangeFinder::var_info[] = {
     // @Param: 3_FUNCTION
     // @DisplayName: Rangefinder function
     // @Description: Control over what function is used to calculate distance. For a linear function, the distance is (voltage-offset)*scaling. For a inverted function the distance is (offset-voltage)*scaling. For a hyperbolic function the distance is scaling/(voltage-offset). The functions return the distance in meters.
-    // @Values: 0:Linear,1:Inverted,2:Hyperbolic
-    AP_GROUPINFO("3_FUNCTION",  29, RangeFinder, _function[2], 0),
+    // @Values: 0:Linear,1:Inverted,2:Hyperbolic,3:used to auto avoid obstacle
+    AP_GROUPINFO("3_FUNCTION",  29, RangeFinder, _function[2], 3),
 
     // @Param: 3_MIN_CM
     // @DisplayName: Rangefinder minimum distance
     // @Description: Minimum distance in centimeters that rangefinder can reliably read
 	// @Units: centimeters
     // @Increment: 1
-    AP_GROUPINFO("3_MIN_CM",  30, RangeFinder, _min_distance_cm[2], 20),
+    AP_GROUPINFO("3_MIN_CM",  30, RangeFinder, _min_distance_cm[2], 10),
 
     // @Param: 3_MAX_CM
     // @DisplayName: Rangefinder maximum distance
     // @Description: Maximum distance in centimeters that rangefinder can reliably read
 	// @Units: centimeters
     // @Increment: 1
-    AP_GROUPINFO("3_MAX_CM",  31, RangeFinder, _max_distance_cm[2], 700),
+    AP_GROUPINFO("3_MAX_CM",  31, RangeFinder, _max_distance_cm[2], 5000),
 
     // @Param: 3_STOP_PIN
     // @DisplayName: Rangefinder stop pin
@@ -464,7 +465,11 @@ void RangeFinder::update(void)
     // work out primary instance - first sensor returning good data
     for (int8_t i=num_instances-1; i>=0; i--) {
         if (drivers[i] != NULL && (state[i].status == RangeFinder_Good)) {
-            primary_instance = i;
+            if (_function[i] == 3) {
+                avoid_obstacle = i;
+            } else {
+                primary_instance = i;
+            }
         }
     }
 }
@@ -520,6 +525,9 @@ void RangeFinder::detect_instance(uint8_t instance)
             drivers[instance] = new AP_RangeFinder_PX4_PWM(*this, instance, state[instance]);
             return;
         }
+    }
+    if (type == RangeFinder_TYPE_MMWRadar) {
+        _add_backend(AP_RangeFinder_MMWRadar::detect(*this, instance, state[instance], serial_manager));
     }
 #endif
 #if CONFIG_HAL_BOARD_SUBTYPE == HAL_BOARD_SUBTYPE_LINUX_BBBMINI

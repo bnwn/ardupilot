@@ -22,7 +22,7 @@
 #include <AP_SerialManager/AP_SerialManager.h>
 
 // Maximum number of range finder instances available on this platform
-#define RANGEFINDER_MAX_INSTANCES 2
+#define RANGEFINDER_MAX_INSTANCES 3
 #define RANGEFINDER_GROUND_CLEARANCE_CM_DEFAULT 10
 #define RANGEFINDER_PREARM_ALT_MAX_CM           200
 #define RANGEFINDER_PREARM_REQUIRED_CHANGE_CM   50
@@ -49,7 +49,8 @@ public:
         RangeFinder_TYPE_LWSER  = 8,
         RangeFinder_TYPE_BEBOP  = 9,
         RangeFinder_TYPE_MAVLink = 10,
-        RangeFinder_TYPE_LEDDARONE = 12
+        RangeFinder_TYPE_LEDDARONE = 12,
+        RangeFinder_TYPE_MMWRadar = 13
     };
 
     enum RangeFinder_Function {
@@ -72,6 +73,11 @@ public:
         uint16_t               distance_cm; // distance: in cm
         uint16_t               voltage_mv;  // voltage in millivolts,
                                             // if applicable, otherwise 0
+
+        /* for  mmwradar */
+        uint16_t               rcs_cm;
+        uint16_t               snr;
+
         enum RangeFinder_Status status;     // sensor status
         uint8_t                range_valid_count;   // number of consecutive valid readings (maxes out at 10)
         bool                   pre_arm_check;   // true if sensor has passed pre-arm checks
@@ -118,6 +124,15 @@ public:
     }
     uint16_t distance_cm() const {
         return distance_cm(primary_instance);
+    }
+
+    void mmw_distance(uint8_t instance, uint16_t &range_cm, uint16_t &rcs_cm, uint16_t &snr) {
+        range_cm = _RangeFinder_STATE(instance).distance_cm;
+        rcs_cm = _RangeFinder_STATE(instance).rcs_cm;
+        snr = _RangeFinder_STATE(instance).snr;
+    }
+    void mmw_distance(uint16_t &range_cm, uint16_t &rcs_cm, uint16_t &snr) {
+        mmw_distance(range_cm, rcs_cm, snr);
     }
 
     uint16_t voltage_mv(uint8_t instance) const {
@@ -187,6 +202,7 @@ private:
     AP_RangeFinder_Backend *drivers[RANGEFINDER_MAX_INSTANCES];
     uint8_t primary_instance:3;
     uint8_t num_instances:3;
+    uint8_t avoid_obstacle:3;
     float estimated_terrain_height;
     AP_SerialManager &serial_manager;
 
