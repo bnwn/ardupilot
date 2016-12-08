@@ -27,6 +27,7 @@
 #include "AP_RangeFinder_MAVLink.h"
 #include "AP_RangeFinder_LeddarOne.h"
 #include "AP_RangeFinder_MMWRadar.h"
+#include <stdio.h>
 
 extern const AP_HAL::HAL &hal;
 
@@ -474,16 +475,16 @@ void RangeFinder::update(void)
     }
 }
 
-void RangeFinder::_add_backend(AP_RangeFinder_Backend *backend)
+void RangeFinder::_add_backend(AP_RangeFinder_Backend *backend, uint8_t instance)
 {
     if (!backend) {
         return;
     }
-    if (num_instances == RANGEFINDER_MAX_INSTANCES) {
+    if (instance == RANGEFINDER_MAX_INSTANCES) {
         AP_HAL::panic("Too many RANGERS backends");
     }
 
-    drivers[num_instances++] = backend;
+    drivers[instance] = backend;
 }
     
 /*
@@ -500,15 +501,15 @@ void RangeFinder::detect_instance(uint8_t instance)
     }
 #endif
     if (type == RangeFinder_TYPE_PLI2C) {
-        _add_backend(AP_RangeFinder_PulsedLightLRF::detect(*this, instance, state[instance]));
+        _add_backend(AP_RangeFinder_PulsedLightLRF::detect(*this, instance, state[instance]), instance);
     }
     if (type == RangeFinder_TYPE_MBI2C) {
-        _add_backend(AP_RangeFinder_MaxsonarI2CXL::detect(*this, instance, state[instance]));
+        _add_backend(AP_RangeFinder_MaxsonarI2CXL::detect(*this, instance, state[instance]), instance);
     }
     if (type == RangeFinder_TYPE_LWI2C) {
         if (_address[instance]) {
             _add_backend(AP_RangeFinder_LightWareI2C::detect(*this, instance, state[instance],
-                hal.i2c_mgr->get_device(HAL_RANGEFINDER_LIGHTWARE_I2C_BUS, _address[instance])));
+                hal.i2c_mgr->get_device(HAL_RANGEFINDER_LIGHTWARE_I2C_BUS, _address[instance])), instance);
         }
     }
 #if CONFIG_HAL_BOARD == HAL_BOARD_PX4  || CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN
@@ -527,7 +528,7 @@ void RangeFinder::detect_instance(uint8_t instance)
         }
     }
     if (type == RangeFinder_TYPE_MMWRadar) {
-        _add_backend(AP_RangeFinder_MMWRadar::detect(*this, instance, state[instance], serial_manager));
+        _add_backend(AP_RangeFinder_MMWRadar::detect(*this, instance, state[instance], serial_manager), instance);
     }
 #endif
 #if CONFIG_HAL_BOARD_SUBTYPE == HAL_BOARD_SUBTYPE_LINUX_BBBMINI

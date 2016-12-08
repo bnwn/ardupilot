@@ -8,11 +8,15 @@
 #define MMWRADAR_UPDATE_IN_HZ 50.0f
 #define MMWRADAR_DATA_BUFFER_NUM 5  // max target can achieve 255, but now only can check 1
 #define MMWRADAR_DATA_BUFFER_SIZE 10
+#define MMWRADAR_UART_BUFFER_SIZE 420
 
 #define MMWRADAR_START_SEQUENCE_H      0xAA
 #define MMWRADAR_START_SEQUENCE_L      0xAA
 #define MMWRADAR_END_SEQUENCE_H        0x55
 #define MMWRADAR_END_SEQUENCE_L        0x55
+
+#define MMWRADAR_DATA_REL_OFFSET        1
+#define MMWRADAR_END_REL_OFFSET        11
 
 /* Message ID */
 #define MMWRADAR_MSGID_CONFIGURATION_H 0x02
@@ -43,28 +47,28 @@
 // Result 7 Bit
 #define MMWRADAR_READ_STATUS_OFFSET 2
 #define MMWRADAR_READ_STATUS_BIT 0x80
-#define MMWRADAR_MASTER_VERSION_OFFSET 1
-#define MMWRADAR_SECOND_VERSION_OFFSET 2
-#define MMWRADAR_STEP_VERSION_OFFSET 3
+#define MMWRADAR_MASTER_VERSION_OFFSET 3
+#define MMWRADAR_SECOND_VERSION_OFFSET 4
+#define MMWRADAR_STEP_VERSION_OFFSET 5
 
 /* SYSTEM STATUS */
-#define MMWRADAR_SENSOR_STATUS_ROLLCOUNT_OFFSET 1
+#define MMWRADAR_SENSOR_STATUS_ROLLCOUNT_OFFSET 3
 #define MMWRADAR_SENSOR_STATUS_ROLLCOUNT_BIT    0x03
 
 /* TARGET STATUS */
-#define MMWRADAR_TARGET_STATUS_TARGETNUM_OFFSET 0
-#define MMWRADAR_TARGET_STATUS_ROLLCOUNT_OFFSET 1
+#define MMWRADAR_TARGET_STATUS_TARGETNUM_OFFSET 2
+#define MMWRADAR_TARGET_STATUS_ROLLCOUNT_OFFSET 3
 #define MMWRADAR_TARGET_STATUS_ROLLCOUNT_BIT    0x03
 
 /* TARGET INFO */
-#define MMWRADAR_TARGET_INFO_TARGETID_OFFSET    0
-#define MMWRADAR_TARGET_INFO_RCS_OFFSET         1
-#define MMWRADAR_TARGET_INFO_RANGE_H_OFFSET     2
-#define MMWRADAR_TARGET_INFO_RANGE_L_OFFSET     3
-#define MMWRADAR_TARGET_INFO_VEL_H_OFFSET       5
+#define MMWRADAR_TARGET_INFO_TARGETID_OFFSET    2
+#define MMWRADAR_TARGET_INFO_RCS_OFFSET         3
+#define MMWRADAR_TARGET_INFO_RANGE_H_OFFSET     4
+#define MMWRADAR_TARGET_INFO_RANGE_L_OFFSET     5
+#define MMWRADAR_TARGET_INFO_VEL_H_OFFSET       7
 #define MMWRADAR_TARGET_INFO_VEL_H_BIT          0x07
-#define MMWRADAR_TARGET_INFO_VEL_L_OFFSET       6
-#define MMWRADAR_TARGET_INFO_SNR_OFFSET         7
+#define MMWRADAR_TARGET_INFO_VEL_L_OFFSET       8
+#define MMWRADAR_TARGET_INFO_SNR_OFFSET         9
 
 class AP_RangeFinder_MMWRadar : public AP_RangeFinder_Backend
 {
@@ -107,7 +111,8 @@ public:
         Sensor_Back = 1,
         Sensor_Status = 2,
         Target_Status = 4,
-        Target_Info = 8
+        Target_Info = 8,
+        Status_error = 16
     };
 
 private:
@@ -118,7 +123,7 @@ private:
     bool get_sensor_version(uint32_t &sensor_version);
 
     // parse
-    uint8_t parse();
+    uint16_t parse();
 
     // receive packet from uart
     bool recv_packet();
@@ -129,6 +134,8 @@ private:
     AP_HAL::UARTDriver *uart = nullptr;
 
     char _valid_data_buf[MMWRADAR_DATA_BUFFER_NUM][MMWRADAR_DATA_BUFFER_SIZE];
+    char _data_buf[MMWRADAR_UART_BUFFER_SIZE];
+    int  _data_buf_offset;
     uint8_t _valid_data_packet;
     Target_Status_Type _target_status;
     Target_Info_Type   _target_info;
@@ -136,6 +143,7 @@ private:
     char     _second_version;
     char     _step_version;
     uint32_t    _last_reading_ms;
+    uint16_t  _packet_form;
 };
 
 

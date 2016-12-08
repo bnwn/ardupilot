@@ -73,6 +73,15 @@ void Copter::read_rangefinder(void)
 
     // get mmwradar value
     rangefinder.mmwradar_distance(mmwradar_state.range_cm, mmwradar_state.rcs_cm, mmwradar_state.snr);
+
+    static int i = 0;
+    uiint8_t count = rangefinder.range_valid_count();
+    i++;
+    if (i > 5) {
+        printf("range: %d cm, rcs: %d cm, snr: %d cm healthy: %d\n", mmwradar_state.range_cm, mmwradar_state.rcs_cm, mmwradar_state.snr, mmwradar_state.range_healthy);
+        printf("count:%d \n", count);
+        i = 0;
+    }
 #else
     rangefinder_state.enabled = false;
     rangefinder_state.alt_healthy = false;
