@@ -335,7 +335,7 @@ void Copter::Log_Write_Control_Tuning()
         inav_alt            : inertial_nav.get_altitude() / 100.0f,
         baro_alt            : baro_alt,
         desired_rangefinder_alt : (int16_t)target_rangefinder_alt,
-        rangefinder_alt     : mmwradar_state.range_cm,
+        rangefinder_alt     : (int16_t)(100 * mmwradar_state.range_cm),
         //rangefinder_alt     : rangefinder_state.alt_cm,
         //rangefinder_alt     : rangefinder_state.alt_cm_filter,
         terr_alt            : terr_alt,

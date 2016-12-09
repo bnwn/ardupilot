@@ -220,10 +220,12 @@ private:
         bool range_healthy:1; // true if we can trust the altitude from the rangefinder
         int16_t range_cm;     // tilt compensated altitude (in cm) from rangefinder
         int16_t range_cm_filter;
+        int16_t range_cm_filter_2p;
         int16_t rcs_cm;
         int16_t snr;
         uint32_t last_healthy_ms;
         LowPassFilterFloat range_cm_filt; // altitude filter
+        LowPassFilterFloat2p range_cm_filt_2p;
     } mmwradar_state = { false, false, 0, 0 };
 #endif
 
