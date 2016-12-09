@@ -468,6 +468,8 @@ void RangeFinder::update(void)
         if (drivers[i] != NULL && (state[i].status == RangeFinder_Good)) {
             if (_function[i] == 3) {
                 avoid_obstacle = i;
+                /* avoid obstacle not use */
+                primary_instance = i;
             } else {
                 primary_instance = i;
             }
@@ -485,6 +487,7 @@ void RangeFinder::_add_backend(AP_RangeFinder_Backend *backend, uint8_t instance
     }
 
     drivers[instance] = backend;
+    state[instance].instance = instance;
 }
     
 /*

@@ -5,10 +5,11 @@
 #include "RangeFinder_Backend.h"
 #include <GCS_MAVLink/GCS.h>
 
+#define MMWRADAR_READ_TIMEOUT_MS 1000
 #define MMWRADAR_UPDATE_IN_HZ 50.0f
 #define MMWRADAR_DATA_BUFFER_NUM 5  // max target can achieve 255, but now only can check 1
 #define MMWRADAR_DATA_BUFFER_SIZE 10
-#define MMWRADAR_UART_BUFFER_SIZE 420
+#define MMWRADAR_UART_BUFFER_SIZE 56
 
 #define MMWRADAR_START_SEQUENCE_H      0xAA
 #define MMWRADAR_START_SEQUENCE_L      0xAA

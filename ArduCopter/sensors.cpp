@@ -32,6 +32,11 @@ void Copter::init_rangefinder(void)
    rangefinder.init();
    rangefinder_state.alt_cm_filt.set_cutoff_frequency(RANGEFINDER_WPNAV_FILT_HZ);
    rangefinder_state.enabled = (rangefinder.num_sensors() >= 1);
+
+#if MMWRADAR_ENABLED == ENABLED
+   mmwradar_state.enabled = rangefinder_state.enabled;
+   mmwradar_state.range_cm_filt.set_cutoff_frequency(RANGEFINDER_WPNAV_FILT_HZ);
+#endif
 #endif
 }
 
@@ -42,7 +47,6 @@ void Copter::read_rangefinder(void)
     rangefinder.update();
 
     rangefinder_state.alt_healthy = ((rangefinder.status() == RangeFinder::RangeFinder_Good) && (rangefinder.range_valid_count() >= RANGEFINDER_HEALTH_MAX));
-    mmwradar_state.range_healthy = ((rangefinder.mmwradar_status() == RangeFinder::RangeFinder_Good) && (rangefinder.mmwradar_valid_count()) >= RANGEFINDER_HEALTH_MAX);
 
     int16_t temp_alt = rangefinder.distance_cm();
 
@@ -61,7 +65,7 @@ void Copter::read_rangefinder(void)
             // reset filter if we haven't used it within the last second
             rangefinder_state.alt_cm_filt.reset(rangefinder_state.alt_cm);
         } else {
-            rangefinder_state.alt_cm_filt.apply(rangefinder_state.alt_cm, 0.05f);
+            rangefinder_state.alt_cm_filt.apply(rangefinder_state.alt_cm, 0.02f);
         }
         rangefinder_state.last_healthy_ms = now;
     }
@@ -71,17 +75,30 @@ void Copter::read_rangefinder(void)
     // send rangefinder altitude and health to waypoint navigation library
     wp_nav.set_rangefinder_alt(rangefinder_state.enabled, rangefinder_state.alt_healthy, rangefinder_state.alt_cm_filt.get());
 
+
+#if MMWRADAR_ENABLED == ENABLED
+    mmwradar_state.range_healthy = ((rangefinder.mmwradar_status() == RangeFinder::RangeFinder_Good) && (rangefinder.mmwradar_valid_count()) >= RANGEFINDER_HEALTH_MAX);
+
     // get mmwradar value
     rangefinder.mmwradar_distance(mmwradar_state.range_cm, mmwradar_state.rcs_cm, mmwradar_state.snr);
 
+    if (mmwradar_state.range_healthy) {
+        if (now - mmwradar_state.last_healthy_ms > RANGEFINDER_TIMEOUT_MS) {
+            mmwradar_state.range_cm_filt.reset(mmwradar_state.range_cm);
+        } else {
+            mmwradar_state.range_cm_filt.apply(mmwradar_state.range_cm, 0.02f);
+        }
+        mmwradar_state.last_healthy_ms = now;
+    }
+
+    mmwradar_state.range_cm_filter = mmwradar_state.range_cm_filt.get();
     static int i = 0;
-    uiint8_t count = rangefinder.range_valid_count();
     i++;
-    if (i > 5) {
+    if (i > 3) {
         printf("range: %d cm, rcs: %d cm, snr: %d cm healthy: %d\n", mmwradar_state.range_cm, mmwradar_state.rcs_cm, mmwradar_state.snr, mmwradar_state.range_healthy);
-        printf("count:%d \n", count);
         i = 0;
     }
+#endif
 #else
     rangefinder_state.enabled = false;
     rangefinder_state.alt_healthy = false;

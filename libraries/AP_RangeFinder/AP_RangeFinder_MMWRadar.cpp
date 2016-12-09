@@ -131,7 +131,7 @@ bool AP_RangeFinder_MMWRadar::get_sensor_version(uint32_t &sensor_version)
     char c = uart->read();
     bool is_mmwradar_packet = false;
     while (!is_mmwradar_packet) {
-        if (AP_HAL::millis() - start_times > 200) {
+        if (AP_HAL::millis() - start_times > 500) {
             printf("wait sensor packet timeout.\n");
             return false;
         }
@@ -151,17 +151,17 @@ bool AP_RangeFinder_MMWRadar::get_sensor_version(uint32_t &sensor_version)
         }
     }
 
-    hal.scheduler->delay(20);
-    while (!uart->available()) {
-        if (AP_HAL::millis() - start_times > 200) {
-            printf("wait sensor back timeout.\n");
-            return false;
-        }
-    }
+//    hal.scheduler->delay(20);
+//    while (!uart->available()) {
+//        if (AP_HAL::millis() - start_times > 200) {
+//            printf("wait sensor back timeout.\n");
+//            return false;
+//        }
+//    }
 
-    if (!get_reading()) {
-        return false;
-    }
+//    if (!get_reading()) {
+//        return false;
+//    }
 
     return true;
 }
@@ -202,7 +202,7 @@ bool AP_RangeFinder_MMWRadar::recv_packet()
             break;
         } else {
             // return if packet is not complete.
-            printf("packet recv not complete.\n");
+            // printf("packet recv not complete.\n");
             return false;
         }
     }
@@ -259,8 +259,8 @@ uint16_t AP_RangeFinder_MMWRadar::parse()
                 _target_status.target_num = get_data_from_buf(i, MMWRADAR_TARGET_STATUS_TARGETNUM_OFFSET);
                 _target_status.rollcount = get_data_from_buf(i, MMWRADAR_TARGET_STATUS_ROLLCOUNT_OFFSET, MMWRADAR_TARGET_STATUS_ROLLCOUNT_BIT);
                 if (last_rollcount != -1) {
-                    if ((_target_status.rollcount == 0 && last_rollcount != 3) ||
-                           (_target_status.rollcount - last_rollcount != 1)) {
+                    if (!((_target_status.rollcount == 0 && last_rollcount == 3) ||
+                           (_target_status.rollcount - last_rollcount == 1))) {
                         packet_form |= Packet_Form::Status_error;
                     }
                 }
@@ -309,20 +309,21 @@ void AP_RangeFinder_MMWRadar::reset_param()
 */
 void AP_RangeFinder_MMWRadar::update(void)
 {
+    uint32_t now = AP_HAL::millis();
     if (get_reading()) {
         if (_packet_form & Packet_Form::Target_Info) {
             state.distance_cm = _target_info.range_cm;
             state.snr = _target_info.snr;
             state.rcs_cm = _target_info.rcs_cm;
+            update_status();
+
             // update range_valid state based on distance measured
             _last_reading_ms = AP_HAL::millis();
-            update_status();
         }
         if (_packet_form & Packet_Form::Status_error) {
-            //printf("missed data.\n");
+            printf("missed data.\n");
         }
-    } else if (AP_HAL::millis() - _last_reading_ms > 200) {
-        printf("get data time out.\n");
+    } else if (now - _last_reading_ms > MMWRADAR_READ_TIMEOUT_MS) {
         set_status(RangeFinder::RangeFinder_NoData);
     }
 }
