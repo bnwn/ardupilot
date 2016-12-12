@@ -75,6 +75,7 @@ public:
                                             // if applicable, otherwise 0
 
         /* for  mmwradar */
+        uint16_t               vel_cm;
         uint16_t               rcs_cm;
         uint16_t               snr;
 
@@ -126,13 +127,14 @@ public:
         return distance_cm(primary_instance);
     }
 
-    void mmwradar_distance(uint8_t instance, int16_t &range_cm, int16_t &rcs_cm, int16_t &snr) {
+    void mmwradar_distance(uint8_t instance, int16_t &range_cm, int16_t &rcs_cm, int16_t &snr, int16_t& vel_cm) {
         range_cm = (int16_t)_RangeFinder_STATE(instance).distance_cm;
         rcs_cm = (int16_t)_RangeFinder_STATE(instance).rcs_cm;
         snr = (int16_t)_RangeFinder_STATE(instance).snr;
+        vel_cm = (int16_t)_RangeFinder_STATE(instance).vel_cm;
     }
-    void mmwradar_distance(int16_t &range_cm, int16_t &rcs_cm, int16_t &snr) {
-        mmwradar_distance(avoid_obstacle, range_cm, rcs_cm, snr);
+    void mmwradar_distance(int16_t &range_cm, int16_t &rcs_cm, int16_t &snr, int16_t &vel_cm) {
+        mmwradar_distance(avoid_obstacle, range_cm, rcs_cm, snr, vel_cm);
     }
 
     uint16_t voltage_mv(uint8_t instance) const {

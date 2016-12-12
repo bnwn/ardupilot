@@ -98,7 +98,7 @@ public:
         uint8_t  index;
         uint16_t range_cm;
         uint16_t rcs_cm;
-        uint16_t vel_m;
+        uint16_t vel_cm;
         uint16_t snr;
     };
 

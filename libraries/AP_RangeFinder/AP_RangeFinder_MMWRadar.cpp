@@ -221,8 +221,8 @@ bool AP_RangeFinder_MMWRadar::recv_packet()
 uint16_t AP_RangeFinder_MMWRadar::parse()
 {
     uint8_t packet_form = 0, instance = 0;
-    char range_h, range_l, datatype, read_status;
-    uint16_t sum_range = 0, sum_snr = 0, sum_rcs = 0;
+    char range_h, range_l, datatype, read_status, vel_h, vel_l;
+    uint16_t sum_range = 0, sum_snr = 0, sum_rcs = 0, sum_vel = 0;
     static int last_rollcount = -1;
     for (int i=0; i<_valid_data_packet; i++)
     {
@@ -275,6 +275,10 @@ uint16_t AP_RangeFinder_MMWRadar::parse()
                 range_h = get_data_from_buf(i, MMWRADAR_TARGET_INFO_RANGE_H_OFFSET);
                 sum_range += (range_h << 8) | range_l;
 
+                vel_l = get_data_from_buf(i, MMWRADAR_TARGET_INFO_VEL_L_OFFSET);
+                vel_h = get_data_from_buf(i, MMWRADAR_TARGET_INFO_VEL_H_OFFSET, MMWRADAR_TARGET_INFO_VEL_H_BIT);
+                sum_vel += ((vel_h << 8) | vel_l) * 5 - 3500;
+
                 sum_snr += get_data_from_buf(i, MMWRADAR_TARGET_INFO_SNR_OFFSET) - 127;
                 instance++;
                 packet_form |= Packet_Form::Target_Info;
@@ -287,6 +291,7 @@ uint16_t AP_RangeFinder_MMWRadar::parse()
     _target_info.rcs_cm = sum_rcs / instance;
     _target_info.range_cm = sum_range / instance;
     _target_info.snr = sum_snr / instance;
+    _target_info.vel_cm = sum_vel / instance;
     return packet_form;
 }
 
@@ -315,6 +320,7 @@ void AP_RangeFinder_MMWRadar::update(void)
             state.distance_cm = _target_info.range_cm;
             state.snr = _target_info.snr;
             state.rcs_cm = _target_info.rcs_cm;
+            state.vel_cm = _target_info.vel_cm;
             update_status();
 
             // update range_valid state based on distance measured

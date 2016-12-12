@@ -36,7 +36,8 @@ void Copter::init_rangefinder(void)
 #if MMWRADAR_ENABLED == ENABLED
    mmwradar_state.enabled = rangefinder_state.enabled;
    mmwradar_state.range_cm_filt.set_cutoff_frequency(RANGEFINDER_WPNAV_FILT_HZ);
-   mmwradar_state.range_cm_filt_2p.set_cutoff_frequency(RANGEFINDER_WPNAV_FILT_HZ);
+   mmwradar_state.range_cm_filt_2p.set_cutoff_frequency(0.02f, RANGEFINDER_WPNAV_FILT_HZ);
+   mmwradar_state.range_cm_filt_kalman.set_kalman_param(RANGEFINDER_KALMAN_P, RANGEFINDER_KALMNA_R);
 #endif
 #endif
 }
@@ -81,27 +82,45 @@ void Copter::read_rangefinder(void)
     mmwradar_state.range_healthy = ((rangefinder.mmwradar_status() == RangeFinder::RangeFinder_Good) && (rangefinder.mmwradar_valid_count()) >= RANGEFINDER_HEALTH_MAX);
 
     // get mmwradar value
-    rangefinder.mmwradar_distance(mmwradar_state.range_cm, mmwradar_state.rcs_cm, mmwradar_state.snr);
+    rangefinder.mmwradar_distance(mmwradar_state.range_cm, mmwradar_state.rcs_cm, mmwradar_state.snr, mmwradar_state.vel_cm);
 
     if (mmwradar_state.range_healthy) {
         if (now - mmwradar_state.last_healthy_ms > RANGEFINDER_TIMEOUT_MS) {
             mmwradar_state.range_cm_filt.reset(mmwradar_state.range_cm);
-            mmwradar_state.range_cm_filt_2p.reset(mmwradar_state.range_cm);
+            mmwradar_state.range_cm_filt_2p.reset();
+            mmwradar_state.range_cm_filt_kalman.reset(mmwradar_state.range_cm);
         } else {
             mmwradar_state.range_cm_filt.apply(mmwradar_state.range_cm, 0.02f);
-            mmwradar_state.range_cm_filt_2p.apply(mmwradar_state.range_cm, 0.02f);
+            mmwradar_state.range_cm_filter_2p = mmwradar_state.range_cm_filt_2p.apply(mmwradar_state.range_cm);
+            mmwradar_state.range_cm_filt_kalman.apply(mmwradar_state.range_cm);
         }
         mmwradar_state.last_healthy_ms = now;
     }
 
     mmwradar_state.range_cm_filter = mmwradar_state.range_cm_filt.get();
-    mmwradar_state.range_cm_filter_2p = mmwradar_state.range_cm_filt_2p.get();
-    static int i = 0;
-    i++;
-    if (i > 3) {
-        printf("range: %d cm, healthy: %d\n", mmwradar_state.range_cm, mmwradar_state.rcs_cm, mmwradar_state.snr, mmwradar_state.range_healthy);
-        i = 0;
+    mmwradar_state.range_cm_filter_kalman = mmwradar_state.range_cm_filt_kalman.get();
+
+    switch (g.rangefinder_filter.get()) {
+        case 1:
+            mmwradar_state.range_cm = mmwradar_state.range_cm_filter;
+            break;
+        case 2:
+            mmwradar_state.range_cm = mmwradar_state.range_cm_filter_2p;
+            break;
+        case 3:
+            mmwradar_state.range_cm = mmwradar_state.range_cm_filter_kalman;
+            break;
+        case 0:
+        default:
+            break;
     }
+
+//    static int i = 0;
+//    i++;
+//    if (i > 3) {
+//        printf("range: %d cm, vel: %d cm/s.\n rcs_cm: %d, snr: %d, healthy: %d\n", mmwradar_state.range_cm, mmwradar_state.vel_cm, mmwradar_state.rcs_cm, mmwradar_state.snr, mmwradar_state.range_healthy);
+//        i = 0;
+//    }
 #endif
 #else
     rangefinder_state.enabled = false;

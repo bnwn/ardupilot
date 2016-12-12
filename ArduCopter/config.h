@@ -157,6 +157,8 @@
 
 #ifndef RANGEFINDER_GAIN_DEFAULT
  # define RANGEFINDER_GAIN_DEFAULT 0.8f     // gain for controlling how quickly rangefinder range adjusts target altitude (lower means slower reaction)
+ # define RANGEFINDER_KALMAN_P 10
+ # define RANGEFINDER_KALMNA_R 0.01
 #endif
 
 #ifndef THR_SURFACE_TRACKING_VELZ_MAX

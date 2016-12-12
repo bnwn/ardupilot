@@ -218,6 +218,11 @@ public:
         k_param_gcs3,
         k_param_gcs_pid_mask,    // 126
 
+        // 127 : rangefinder kalman param
+        k_param_rangefinder_kalman_p,
+        k_param_rangefinder_kalman_r,
+        k_param_rangefinder_filter,
+
         //
         // 135 : reserved for Solo until features merged with master
         //
@@ -397,6 +402,10 @@ public:
     AP_Int16        rtl_speed_cms;
     AP_Float        rtl_cone_slope;
     AP_Float        rangefinder_gain;
+
+    AP_Float        rangefinder_kalman_p;
+    AP_Float        rangefinder_kalman_r;
+    AP_Int16        rangefinder_filter;
 
     AP_Int8         failsafe_battery_enabled;   // battery failsafe enabled
     AP_Float        fs_batt_voltage;            // battery voltage below which failsafe will be triggered

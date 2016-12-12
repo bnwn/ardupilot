@@ -221,11 +221,14 @@ private:
         int16_t range_cm;     // tilt compensated altitude (in cm) from rangefinder
         int16_t range_cm_filter;
         int16_t range_cm_filter_2p;
+        int16_t range_cm_filter_kalman;
         int16_t rcs_cm;
         int16_t snr;
+        int16_t vel_cm;
         uint32_t last_healthy_ms;
         LowPassFilterFloat range_cm_filt; // altitude filter
-        LowPassFilterFloat2p range_cm_filt_2p;
+        LowPassFilter2pFloat range_cm_filt_2p;
+        KalmanFilterFloat range_cm_filt_kalman;
     } mmwradar_state = { false, false, 0, 0 };
 #endif
 

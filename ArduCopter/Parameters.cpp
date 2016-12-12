@@ -157,6 +157,29 @@ const AP_Param::Info Copter::var_info[] = {
     // @User: Standard
     GSCALAR(rangefinder_gain, "RNGFND_GAIN", RANGEFINDER_GAIN_DEFAULT),
 
+    // @Param: RNGFND_KM_P
+    // @DisplayName: Rangefinder gain
+    // @Description: Used to adjust the speed with which the target altitude is changed when objects are sensed below the copter
+    // @Range: 0.01 2.0
+    // @Increment: 0.01
+    // @User: Standard
+    GSCALAR(rangefinder_kalman_p, "RNGFND_KM_P", RANGEFINDER_KALMAN_P),
+
+    // @Param: RNGFND_KM_R
+    // @DisplayName: Rangefinder gain
+    // @Description: Used to adjust the speed with which the target altitude is changed when objects are sensed below the copter
+    // @Range: 0.01 2.0
+    // @Increment: 0.01
+    // @User: Standard
+    GSCALAR(rangefinder_kalman_r, "RNGFND_KM_R", RANGEFINDER_KALMNA_R),
+
+    // @Param: RNGFND_FLTR
+    // @DisplayName: Rangefinder filter switch
+    // @Description: Used to adjust the speed with which the target altitude is changed when objects are sensed below the copter
+    // @Range: 0: source, 1: low pass, 2: 2p low pass, 3: kalman.
+    // @User: Standard
+    GSCALAR(rangefinder_filter, "RNGFND_FLTR", 0),
+
     // @Param: FS_BATT_ENABLE
     // @DisplayName: Battery Failsafe Enable
     // @Description: Controls whether failsafe will be invoked when battery voltage or current runs low

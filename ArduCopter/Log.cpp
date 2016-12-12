@@ -334,16 +334,17 @@ void Copter::Log_Write_Control_Tuning()
         desired_alt         : pos_control.get_alt_target() / 100.0f,
         inav_alt            : inertial_nav.get_altitude() / 100.0f,
         baro_alt            : baro_alt,
-        desired_rangefinder_alt : (int16_t)target_rangefinder_alt,
-        rangefinder_alt     : (int16_t)(100 * mmwradar_state.range_cm),
+        //desired_rangefinder_alt : (int16_t)target_rangefinder_alt,
         //rangefinder_alt     : rangefinder_state.alt_cm,
-        //rangefinder_alt     : rangefinder_state.alt_cm_filter,
+        //terr_alt            : terr_alt,
+        //target_climb_rate   : (int16_t)pos_control.get_vel_target_z(),
+        //climb_rate          : climb_rate
+
+        desired_rangefinder_alt : (int16_t)(100 * mmwradar_state.range_cm_filter_kalman),
+        rangefinder_alt     : (int16_t)(100 * mmwradar_state.range_cm),
         terr_alt            : terr_alt,
         target_climb_rate   : mmwradar_state.range_cm_filter,
-        //target_climb_rate   : (int16_t)rangefinder_state.alt_cm_filter,
-        //target_climb_rate   : (int16_t)pos_control.get_vel_desired_z(),
-        //target_climb_rate   : (int16_t)pos_control.get_vel_target_z(),
-        climb_rate          : climb_rate
+        climb_rate          : mmwradar_state.range_cm_filter_2p
     };
     DataFlash.WriteBlock(&pkt, sizeof(pkt));
 }
