@@ -222,6 +222,8 @@ private:
         int16_t range_cm_filter;
         int16_t range_cm_filter_2p;
         int16_t range_cm_filter_kalman;
+        int16_t range_cm_filter_slide;
+        int16_t range_cm_filter_median;
         int16_t rcs_cm;
         int16_t snr;
         int16_t vel_cm;
@@ -229,6 +231,8 @@ private:
         LowPassFilterFloat range_cm_filt; // altitude filter
         LowPassFilter2pFloat range_cm_filt_2p;
         KalmanFilterFloat range_cm_filt_kalman;
+        SlidingFilterFloat range_cm_filt_slide;
+        ModeFilterFloat_Size5 range_cm_filt_median;
     } mmwradar_state = { false, false, 0, 0 };
 #endif
 
@@ -1181,6 +1185,11 @@ private:
     void init_capabilities(void);
     void dataflash_periodic(void);
     void accel_cal_update(void);
+
+#if AVOID_OBSTACLE == ENABLED
+    bool check_obstacle(void);
+    void avoidance_obstacle(void);
+#endif
 
 public:
     void mavlink_delay_cb();

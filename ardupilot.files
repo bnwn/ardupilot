@@ -67,6 +67,7 @@ ArduCopter/position_vector.cpp
 ArduCopter/precision_landing.cpp
 ArduCopter/radio.cpp
 ArduCopter/sensors.cpp
+ArduCopter/simple_avoidance.cpp
 ArduCopter/setup.cpp
 ArduCopter/switches.cpp
 ArduCopter/system.cpp
@@ -972,6 +973,8 @@ libraries/Filter/LowPassFilter.h
 libraries/Filter/LowPassFilter2p.cpp
 libraries/Filter/LowPassFilter2p.h
 libraries/Filter/ModeFilter.h
+libraries/Filter/SlidingFilter.cpp
+libraries/Filter/SlidingFilter.h
 libraries/GCS_Console/examples/Console/Console.cpp
 libraries/GCS_Console/examples/Console/simplegcs.cpp
 libraries/GCS_Console/examples/Console/simplegcs.h

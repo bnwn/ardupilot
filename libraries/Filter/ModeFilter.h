@@ -28,6 +28,7 @@ template <class T, uint8_t FILTER_SIZE>
 class ModeFilter : public FilterWithBuffer<T,FILTER_SIZE>
 {
 public:
+    ModeFilter();
     ModeFilter(uint8_t return_element);
 
     // apply - Add a new raw value to the filter, retrieve the filtered result
@@ -74,6 +75,14 @@ typedef ModeFilter<float,6> ModeFilterFloat_Size6;
 typedef ModeFilter<float,7> ModeFilterFloat_Size7;
 
 // Constructor    //////////////////////////////////////////////////////////////
+template <class T, uint8_t FILTER_SIZE>
+ModeFilter<T,FILTER_SIZE>::ModeFilter() :
+    FilterWithBuffer<T,FILTER_SIZE>(),
+    drop_high_sample(true)
+{
+        _return_element = FILTER_SIZE / 2;
+};
+
 
 template <class T, uint8_t FILTER_SIZE>
 ModeFilter<T,FILTER_SIZE>::ModeFilter(uint8_t return_element) :

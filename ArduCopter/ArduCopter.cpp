@@ -153,6 +153,9 @@ const AP_Scheduler::Task Copter::scheduler_tasks[] = {
     SCHED_TASK(userhook_SuperSlowLoop, 1,   75),
 #endif
     SCHED_TASK(button_update,          5,    100),
+#if AVOID_OBSTACLE == ENABLED
+    SCHED_TASK(avoidance_obstacle,     50,   75),
+#endif
 };
 
 

@@ -340,11 +340,11 @@ void Copter::Log_Write_Control_Tuning()
         //target_climb_rate   : (int16_t)pos_control.get_vel_target_z(),
         //climb_rate          : climb_rate
 
-        desired_rangefinder_alt : (int16_t)(100 * mmwradar_state.range_cm_filter_kalman),
+        desired_rangefinder_alt : (int16_t)(100 * mmwradar_state.range_cm_filter_median),
         rangefinder_alt     : (int16_t)(100 * mmwradar_state.range_cm),
         terr_alt            : terr_alt,
         target_climb_rate   : mmwradar_state.range_cm_filter,
-        climb_rate          : mmwradar_state.range_cm_filter_2p
+        climb_rate          : mmwradar_state.range_cm_filter_slide
     };
     DataFlash.WriteBlock(&pkt, sizeof(pkt));
 }
