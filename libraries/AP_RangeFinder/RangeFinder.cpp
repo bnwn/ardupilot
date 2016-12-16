@@ -469,7 +469,7 @@ void RangeFinder::update(void)
             if (_function[i] == 3) {
                 avoid_obstacle = i;
                 /* avoid obstacle not use */
-                primary_instance = i;
+                //primary_instance = i;
             } else {
                 primary_instance = i;
             }

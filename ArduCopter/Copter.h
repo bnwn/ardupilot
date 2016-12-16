@@ -209,8 +209,14 @@ private:
         bool alt_healthy:1; // true if we can trust the altitude from the rangefinder
         int16_t alt_cm;     // tilt compensated altitude (in cm) from rangefinder
         int16_t alt_cm_filter;
+        int16_t alt_cm_filter_2p;
+        int16_t alt_cm_filter_kalman;
+        int16_t alt_cm_filter_slide;
+        int16_t alt_cm_filter_median;
         uint32_t last_healthy_ms;
         LowPassFilterFloat alt_cm_filt; // altitude filter
+        SlidingFilterFloat alt_cm_filt_slide;
+        ModeFilterFloat_Size5 alt_cm_filt_median;
     } rangefinder_state = { false, false, 0, 0 };
 #endif
 
