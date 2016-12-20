@@ -132,7 +132,7 @@
 #endif
 
 #ifndef MMWRADAR_ENABLED
- # define MMWRADAR_ENABLED ENABLED
+ # define MMWRADAR_ENABLED DISABLED
 #endif
 
 #ifndef FLOWMETER_ENABLED
@@ -140,7 +140,7 @@
 #endif
 
 #ifndef RANGEFINDER_HEALTH_MAX
- # define RANGEFINDER_HEALTH_MAX 3          // number of good reads that indicates a healthy rangefinder
+ # define RANGEFINDER_HEALTH_MAX 1          // number of good reads that indicates a healthy rangefinder
 #endif
 
 #ifndef FLOWMETER_HEALTH_MAX
@@ -339,7 +339,7 @@
 //////////////////////////////////////////////////////////////////////////////
 // Avoid Obstacle - a simple function to avoid obstacle
 #ifndef AVOID_OBSTACLE
- # define AVOID_OBSTACLE ENABLED
+ # define AVOID_OBSTACLE DISABLED
 #endif
 
 //////////////////////////////////////////////////////////////////////////////

@@ -153,16 +153,16 @@ void Copter::read_rangefinder(void)
         case 3:
             rangefinder_state.alt_cm = rangefinder_state.alt_cm_filter_median;
             break;
-        case 4:
-            int16_t temp;
-            bool tem;
-            temp = rangefinder_state.alt_cm;
-            rangefinder_state.alt_cm = mmwradar_state.range_cm;
-            mmwradar_state.range_cm = temp;
+//        case 4:
+//            int16_t temp;
+//            bool tem;
+//            temp = rangefinder_state.alt_cm;
+//            rangefinder_state.alt_cm = mmwradar_state.range_cm;
+//            mmwradar_state.range_cm = temp;
 
-            tem = rangefinder_state.alt_healthy;
-            rangefinder_state.alt_healthy = mmwradar_state.range_healthy;
-            mmwradar_state.range_healthy = tem;
+//            tem = rangefinder_state.alt_healthy;
+//            rangefinder_state.alt_healthy = mmwradar_state.range_healthy;
+//            mmwradar_state.range_healthy = tem;
         case 0:
         default:
             break;
