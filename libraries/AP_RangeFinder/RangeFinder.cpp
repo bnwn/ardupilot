@@ -260,7 +260,7 @@ const AP_Param::GroupInfo RangeFinder::var_info[] = {
     // @DisplayName: Rangefinder function
     // @Description: Control over what function is used to calculate distance. For a linear function, the distance is (voltage-offset)*scaling. For a inverted function the distance is (offset-voltage)*scaling. For a hyperbolic function the distance is scaling/(voltage-offset). The functions return the distance in meters.
     // @Values: 0:Linear,1:Inverted,2:Hyperbolic,3:used to auto avoid obstacle
-    AP_GROUPINFO("3_FUNCTION",  29, RangeFinder, _function[2], 3),
+    AP_GROUPINFO("3_FUNCTION",  29, RangeFinder, _function[2], 0),
 
     // @Param: 3_MIN_CM
     // @DisplayName: Rangefinder minimum distance
