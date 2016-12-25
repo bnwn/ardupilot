@@ -88,36 +88,6 @@ bool AP_RangeFinder_MMWRadar::get_sensor_version(uint32_t &sensor_version)
 
     data_buf[0] = MMWRADAR_START_SEQUENCE_L;
     data_buf[1] = MMWRADAR_START_SEQUENCE_H;
-//    data_buf[2] = MMWRADAR_MSGID_CONFIGURATION_L;
-//    data_buf[3] = MMWRADAR_MSGID_CONFIGURATION_H;
-//    data_buf[4] = MMWRADAR_DATATYPE_SENSOR_VERSION | (MMWRADAR_CON_READ << 7);
-//    data_buf[MMWRADAR_DATA_BUFFER_SIZE+2] = MMWRADAR_END_SEQUENCE_L;
-//    data_buf[MMWRADAR_DATA_BUFFER_SIZE+3] = MMWRADAR_END_SEQUENCE_H;
-
-//    printf("begin write config.\n");
-//    for (int i=0; i<(MMWRADAR_DATA_BUFFER_SIZE+4); i++) {
-//        uart->write(data_buf[i]);
-//        printf("write buf: %02x \n", data_buf[i]);
-//    }
-//    uart->flush();
-
-//    while (!uart->available()) {
-//        if (AP_HAL::millis() - start_times > 200) {
-//            printf("wait sensor back timeout.\n");
-//            return false;
-//        }
-//    }
-
-    // reset all variable before touch uart
-//    reset_param();
-
-//    if (recv_packet()) {
-//        if ((parse() & AP_RangeFinder_MMWRadar::Sensor_Back) == AP_RangeFinder_MMWRadar::Sensor_Back) {
-//            sensor_version = (_master_version << 16) | (_second_version << 8) | _step_version;
-//            printf("read version success. \n master version: %d, second version: %d, step version: %d \n", _master_version, _second_version, _step_version);
-//            return true;
-//        }
-//    }
 
     hal.scheduler->delay(20);
     while (!uart->available()) {
@@ -150,18 +120,6 @@ bool AP_RangeFinder_MMWRadar::get_sensor_version(uint32_t &sensor_version)
             c = uart->read();
         }
     }
-
-//    hal.scheduler->delay(20);
-//    while (!uart->available()) {
-//        if (AP_HAL::millis() - start_times > 200) {
-//            printf("wait sensor back timeout.\n");
-//            return false;
-//        }
-//    }
-
-//    if (!get_reading()) {
-//        return false;
-//    }
 
     return true;
 }

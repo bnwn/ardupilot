@@ -78,6 +78,8 @@ void Copter::read_rangefinder(void)
     }
 
     rangefinder_state.alt_cm_filter = rangefinder_state.alt_cm_filt.get();
+    rangefinder_state.alt_cm_filter_median = rangefinder_state.alt_cm_filt_median.get();
+    rangefinder_state.alt_cm_filter_slide = rangefinder_state.alt_cm_filt_slide.get();
 
     // send rangefinder altitude and health to waypoint navigation library
     wp_nav.set_rangefinder_alt(rangefinder_state.enabled, rangefinder_state.alt_healthy, rangefinder_state.alt_cm_filt.get());
@@ -88,58 +90,6 @@ void Copter::read_rangefinder(void)
 
     // get mmwradar value
     rangefinder.mmwradar_distance(mmwradar_state.range_cm, mmwradar_state.rcs_cm, mmwradar_state.snr, mmwradar_state.vel_cm);
-//    mmwradar_state.range_cm = (float)mmwradar_state.range_cm * MAX(0.707f, ahrs.get_rotation_body_to_ned().c.z);
-
-//    if (mmwradar_state.range_healthy) {
-//        if (now - mmwradar_state.last_healthy_ms > RANGEFINDER_TIMEOUT_MS) {
-//            mmwradar_state.range_cm_filt.reset(mmwradar_state.range_cm);
-//            mmwradar_state.range_cm_filt_2p.reset();
-//  //          mmwradar_state.range_cm_filt_kalman.reset(mmwradar_state.range_cm);
-//            mmwradar_state.range_cm_filt_slide.reset(mmwradar_state.range_cm);
-//            //mmwradar_state.range_cm_filt_median.reset();
-//        } else {
-//            mmwradar_state.range_cm_filt.apply(mmwradar_state.range_cm, 0.02f);
-//            mmwradar_state.range_cm_filter_2p = mmwradar_state.range_cm_filt_2p.apply(mmwradar_state.range_cm);
-//  //          mmwradar_state.range_cm_filt_kalman.apply(mmwradar_state.range_cm);
-//            mmwradar_state.range_cm_filt_slide.apply(mmwradar_state.range_cm);
-//            mmwradar_state.range_cm_filt_median.apply(mmwradar_state.range_cm);
-//        }
-//        mmwradar_state.last_healthy_ms = now;
-//    }
-
-//    mmwradar_state.range_cm_filter = mmwradar_state.range_cm_filt.get();
-//    mmwradar_state.range_cm_filter_kalman = mmwradar_state.range_cm_filt_kalman.get();
-//    mmwradar_state.range_cm_filter_slide = mmwradar_state.range_cm_filt_slide.get();
-//    mmwradar_state.range_cm_filter_median = mmwradar_state.range_cm_filt_median.get();
-
-//    switch (g.rangefinder_filter.get()) {
-//        case 1:
-//            //mmwradar_state.range_cm = mmwradar_state.range_cm_filter;
-//            rangefinder_state.alt_cm = mmwradar_state.range_cm_filter;
-//            break;
-//        case 2:
-//            rangefinder_state.alt_cm = mmwradar_state.range_cm_filter_2p;
-//            break;
-//        case 3:
-//            rangefinder_state.alt_cm = mmwradar_state.range_cm_filter_kalman;
-//            break;
-//        case 4:
-//            rangefinder_state.alt_cm = mmwradar_state.range_cm_filter_slide;
-//            break;
-//        case 5:
-//            rangefinder_state.alt_cm = mmwradar_state.range_cm_filter_median;
-//            break;
-//        case 0:
-//        default:
-//            break;
-//    }
-
-//    static int i = 0;
-//    i++;
-//    if (i > 3) {
-//        printf("range: %d cm, vel: %d cm/s.\n rcs_cm: %d, snr: %d, healthy: %d\n", mmwradar_state.range_cm, mmwradar_state.vel_cm, mmwradar_state.rcs_cm, mmwradar_state.snr, mmwradar_state.range_healthy);
-//        i = 0;
-//    }
 #endif
 
     switch (g.rangefinder_filter.get()) {
@@ -153,16 +103,6 @@ void Copter::read_rangefinder(void)
         case 3:
             rangefinder_state.alt_cm = rangefinder_state.alt_cm_filter_median;
             break;
-//        case 4:
-//            int16_t temp;
-//            bool tem;
-//            temp = rangefinder_state.alt_cm;
-//            rangefinder_state.alt_cm = mmwradar_state.range_cm;
-//            mmwradar_state.range_cm = temp;
-
-//            tem = rangefinder_state.alt_healthy;
-//            rangefinder_state.alt_healthy = mmwradar_state.range_healthy;
-//            mmwradar_state.range_healthy = tem;
         case 0:
         default:
             break;
