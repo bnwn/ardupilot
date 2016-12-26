@@ -245,6 +245,8 @@ libraries/AP_GPS/examples/GPS_UBLOX_passthrough/GPS_UBLOX_passthrough.cpp
 libraries/AP_GPS/tests/test_gps.cpp
 libraries/AP_GPS/AP_GPS.cpp
 libraries/AP_GPS/AP_GPS.h
+libraries/AP_GPS/AP_GPS_DRTK.cpp
+libraries/AP_GPS/AP_GPS_DRTK.h
 libraries/AP_GPS/AP_GPS_ERB.cpp
 libraries/AP_GPS/AP_GPS_ERB.h
 libraries/AP_GPS/AP_GPS_GSOF.cpp
