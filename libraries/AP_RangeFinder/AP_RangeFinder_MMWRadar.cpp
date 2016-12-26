@@ -80,7 +80,7 @@ bool AP_RangeFinder_MMWRadar::get_reading()
     return false;
 }
 
-// get sensor system version
+// get sensor system version -- reserve
 bool AP_RangeFinder_MMWRadar::get_sensor_version(uint32_t &sensor_version)
 {
     char data_buf[MMWRADAR_DATA_BUFFER_SIZE+4] = {0};
