@@ -34,6 +34,7 @@
 #include "AP_GPS_SIRF.h"
 #include "AP_GPS_UBLOX.h"
 #include "AP_GPS_MAV.h"
+#include "AP_GPS_DRTK.h"
 #include "GPS_Backend.h"
 
 extern const AP_HAL::HAL &hal;
@@ -43,7 +44,7 @@ const AP_Param::GroupInfo AP_GPS::var_info[] = {
     // @Param: TYPE
     // @DisplayName: GPS type
     // @Description: GPS type
-    // @Values: 0:None,1:AUTO,2:uBlox,3:MTK,4:MTK19,5:NMEA,6:SiRF,7:HIL,8:SwiftNav,9:PX4-UAVCAN,10:SBF,11:GSOF,12:QURT,13:ERB,14:MAV,15:NOVA
+    // @Values: 0:None,1:AUTO,2:uBlox,3:MTK,4:MTK19,5:NMEA,6:SiRF,7:HIL,8:SwiftNav,9:PX4-UAVCAN,10:SBF,11:GSOF,12:QURT,13:ERB,14:MAV,15:NOVA,16:DRTK
     // @RebootRequired: True
     AP_GROUPINFO("TYPE",    0, AP_GPS, _type[0], 1),
 
@@ -148,10 +149,10 @@ void AP_GPS::init(DataFlash_Class *dataflash, const AP_SerialManager& serial_man
 {
     _DataFlash = dataflash;
     primary_instance = 0;
-
+    _serial_manager = serial_manager;
     // search for serial ports with gps protocol
-    _port[0] = serial_manager.find_serial(AP_SerialManager::SerialProtocol_GPS, 0);
-    _port[1] = serial_manager.find_serial(AP_SerialManager::SerialProtocol_GPS, 1);
+    _port[0] = _serial_manager.find_serial(AP_SerialManager::SerialProtocol_GPS, 0);
+    _port[1] = _serial_manager.find_serial(AP_SerialManager::SerialProtocol_GPS, 1);
     _last_instance_swap_ms = 0;
 }
 
@@ -248,7 +249,11 @@ AP_GPS::detect_instance(uint8_t instance)
 	} else if ((_type[instance] == GPS_TYPE_NOVA)) {
 		_broadcast_gps_type("NOVA", instance, -1); // baud rate isn't valid
 		new_gps = new AP_GPS_NOVA(*this, state[instance], _port[instance]);
-	}
+    } else if ((_type[instance] == GPS_TYPE_DRTK)) {
+        int baudrate = _serial_manager.find_baudrate(AP_SerialManager::SerialProtocol_GPS, instance);
+        _broadcast_gps_type("DRTK", instance, baudrate); // baud rate had saved by mannual
+        new_gps = new AP_GPS_DRTK(*this, state[instance], _port[instance]);
+    }
 
     // record the time when we started detection. This is used to try
     // to avoid initialising a uBlox as a NMEA GPS

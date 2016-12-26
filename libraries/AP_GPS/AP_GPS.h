@@ -46,7 +46,7 @@ public:
     }
 
     /// Startup initialisation.
-    void init(DataFlash_Class *dataflash, const AP_SerialManager& serial_manager);
+    void init(DataFlash_Class *dataflash, const AP_SerialManager& _serial_manager);
 
     /// Update GPS state based on possible bytes received from the module.
     /// This routine must be called periodically (typically at 10Hz or
@@ -71,6 +71,7 @@ public:
         GPS_TYPE_ERB = 13,
         GPS_TYPE_MAV = 14,
 		GPS_TYPE_NOVA = 15,
+        GPS_TYPE_DRTK = 16,
     };
 
     /// GPS status codes
@@ -126,6 +127,7 @@ public:
         bool have_speed_accuracy:1;
         bool have_horizontal_accuracy:1;
         bool have_vertical_accuracy:1;
+        bool have_heading_accuracy:1;
         uint32_t last_gps_time_ms;          ///< the system time we got the last GPS timestamp, milliseconds
     };
 
@@ -375,6 +377,7 @@ private:
     GPS_State state[GPS_MAX_INSTANCES];
     AP_GPS_Backend *drivers[GPS_MAX_INSTANCES];
     AP_HAL::UARTDriver *_port[GPS_MAX_INSTANCES];
+    AP_SerialManager &_serial_manager;
 
     /// primary GPS instance
     uint8_t primary_instance:2;
