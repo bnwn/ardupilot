@@ -14,438 +14,112 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
+//  Novatel/Tersus/ComNav GPS driver for ArduPilot.
+//  Code by Michael Oborne
+//  Derived from http://www.novatel.com/assets/Documents/Manuals/om-20000129.pdf
 
-#include <AP_HAL/AP_HAL.h>
+#pragma once
 
 #include "AP_GPS.h"
 #include "GPS_Backend.h"
 
-/*
- *  try to put a UBlox into binary mode. This is in two parts.
- *
- * First we send a ubx binary message that enables the NAV_SOL message
- * at rate 1. Then we send a NMEA message to set the baud rate to our
- * desired rate. The reason for doing the NMEA message second is if we
- * send it first the second message will be ignored for a baud rate
- * change.
- * The reason we need the NAV_SOL rate message at all is some uBlox
- * modules are configured with all ubx binary messages off, which
- * would mean we would never detect it.
- */
+#define BUF_SIZE 300
+#define MESSAGE_TYPE_FVI 0x465649
+#define START_CHARACTER 0x24
+#define START_SEQ_PSAT 0x50534154
+#define SEPARATOR 0x2C
+#define END_CHARACTER 0x2A
+#define RADIX_POINT 0x2E
+#define MINUS 0x2D
 
+#define UTC_TIME_OFFSET 1
+#define LATTITUDE_OFFSET 2
+#define LONGITUDE_OFFSET 3
+#define ELEVATION_OFFSET 4
+#define LATTITUDE_VARIANCE_OFFSET 5
+#define LONGITUDE_VARIANCE_OFFSET 6
+#define ELEVATION_VARIANCE_OFFSET 7
+#define HEADING_OFFSET 8
+#define HEADING_VARIANCE_OFFSET 9
+#define PITCH_OFFSET 10
+#define PITCH_VARIANCE_OFFSET 11
+#define ROLL_OFFSET 12
+#define ROLL_VARIANCE_OFFSET 13
+#define EAST_SPEED_OFFSET 14
+#define NORTH_SPEED_OFFSET 15
+#define UP_SPEED_OFFSET 16
+#define GROUND_SPEED_OFFSET 17
+#define EAST_COORDINATE_OFFSET 18
+#define NORTH_COORDINATE_OFFSET 19
+#define UP_COORDINATE_OFFSET 20
+#define MASTER_STAR_OFFSET 24
+#define SUB_STAR_OFFSET 25
+#define POSITION_STATUS_OFFSET 26
+#define HEADING_STATUS_OFFSET 27
+#define BASELINE_LENGTH 28
 
 class AP_GPS_DRTK : public AP_GPS_Backend
 {
 public:
     AP_GPS_DRTK(AP_GPS &_gps, AP_GPS::GPS_State &_state, AP_HAL::UARTDriver *_port);
 
+    AP_GPS::GPS_Status highest_supported_status(void) { return AP_GPS::GPS_OK_FIX_3D_RTK; }
+
+    // --reserve
+//    bool _detect(struct DRTK_detect_state &state, uint8_t data);
     // Methods
     bool read();
 
-    AP_GPS::GPS_Status highest_supported_status(void) { return AP_GPS::GPS_OK_FIX_3D_DGPS; }
-
-    static bool _detect(struct UBLOX_detect_state &state, uint8_t data);
-
     void inject_data(uint8_t *data, uint8_t len);
 
-    bool is_configured(void) {
-        if (!gps._auto_config) {
-            return true;
-        } else {
-            return !_unconfigured_messages;
-        }
-    }
-
-    void broadcast_configuration_failure_reason(void) const override;
 private:
-    // u-blox UBX protocol essentials
-    struct PACKED ubx_header {
-        uint8_t preamble1;
-        uint8_t preamble2;
-        uint8_t msg_class;
-        uint8_t msg_id;
-        uint16_t length;
-    };
-#if UBLOX_GNSS_SETTINGS
-    struct PACKED ubx_cfg_gnss {
-        uint8_t msgVer;
-        uint8_t numTrkChHw;
-        uint8_t numTrkChUse;
-        uint8_t numConfigBlocks;
-        PACKED struct configBlock {
-            uint8_t gnssId;
-            uint8_t resTrkCh;
-            uint8_t maxTrkCh;
-            uint8_t reserved1;
-            uint32_t flags;
-        } configBlock[UBLOX_MAX_GNSS_CONFIG_BLOCKS];
-    };
-#endif
-    struct PACKED ubx_cfg_nav_rate {
-        uint16_t measure_rate_ms;
-        uint16_t nav_rate;
-        uint16_t timeref;
-    };
-    struct PACKED ubx_cfg_msg {
-        uint8_t msg_class;
-        uint8_t msg_id;
-    };
-    struct PACKED ubx_cfg_msg_rate {
-        uint8_t msg_class;
-        uint8_t msg_id;
-        uint8_t rate;
-    };
-    struct PACKED ubx_cfg_msg_rate_6 {
-        uint8_t msg_class;
-        uint8_t msg_id;
-        uint8_t rates[6];
-    };
-    struct PACKED ubx_cfg_nav_settings {
-        uint16_t mask;
-        uint8_t dynModel;
-        uint8_t fixMode;
-        int32_t fixedAlt;
-        uint32_t fixedAltVar;
-        int8_t minElev;
-        uint8_t drLimit;
-        uint16_t pDop;
-        uint16_t tDop;
-        uint16_t pAcc;
-        uint16_t tAcc;
-        uint8_t staticHoldThresh;
-        uint8_t res1;
-        uint32_t res2;
-        uint32_t res3;
-        uint32_t res4;
-    };
-    struct PACKED ubx_cfg_prt {
-        uint8_t portID;
-    };
-    struct PACKED ubx_cfg_sbas {
-        uint8_t mode;
-        uint8_t usage;
-        uint8_t maxSBAS;
-        uint8_t scanmode2;
-        uint32_t scanmode1;
-    };
-    struct PACKED ubx_nav_posllh {
-        uint32_t time;                                  // GPS msToW
-        int32_t longitude;
-        int32_t latitude;
-        int32_t altitude_ellipsoid;
-        int32_t altitude_msl;
-        uint32_t horizontal_accuracy;
-        uint32_t vertical_accuracy;
-    };
-    struct PACKED ubx_nav_status {
-        uint32_t time;                                  // GPS msToW
-        uint8_t fix_type;
-        uint8_t fix_status;
-        uint8_t differential_status;
-        uint8_t res;
-        uint32_t time_to_first_fix;
-        uint32_t uptime;                                // milliseconds
-    };
-    struct PACKED ubx_nav_dop {
-        uint32_t time;                                  // GPS msToW
-        uint16_t gDOP;
-        uint16_t pDOP;
-        uint16_t tDOP;
-        uint16_t vDOP;
-        uint16_t hDOP;
-        uint16_t nDOP;
-        uint16_t eDOP;
-    };
-    struct PACKED ubx_nav_solution {
-        uint32_t time;
-        int32_t time_nsec;
-        uint16_t week;
-        uint8_t fix_type;
-        uint8_t fix_status;
-        int32_t ecef_x;
-        int32_t ecef_y;
-        int32_t ecef_z;
-        uint32_t position_accuracy_3d;
-        int32_t ecef_x_velocity;
-        int32_t ecef_y_velocity;
-        int32_t ecef_z_velocity;
-        uint32_t speed_accuracy;
-        uint16_t position_DOP;
-        uint8_t res;
-        uint8_t satellites;
-        uint32_t res2;
-    };
-    struct PACKED ubx_nav_velned {
-        uint32_t time;                                  // GPS msToW
-        int32_t ned_north;
-        int32_t ned_east;
-        int32_t ned_down;
-        uint32_t speed_3d;
-        uint32_t speed_2d;
-        int32_t heading_2d;
-        uint32_t speed_accuracy;
-        uint32_t heading_accuracy;
+
+    void process_message();
+
+    inline int8_t find_char(char *_buf_, char _c);
+    inline void HexToFloat(char *_buf_, int _len, double &_data);
+    inline void get_reality_data(double &_data, char *_buf_, int8_t &_index);
+    inline void get_reality_data(double &_data, char *_buf_, int8_t &_index, int8_t offset);
+
+    uint8_t _init_blob_index = 0;
+    uint32_t _init_blob_time = 0;
+    const char* _initialisation_blob[2] = {
+        "\r\n\r\nunlogall\r\n", // cleanup enviroment
+        "log fvi ontime 0.2\r\n", // get fvi
     };
 
-    // Lea6 uses a 60 byte message
-    struct PACKED ubx_mon_hw_60 {
-        uint32_t pinSel;
-        uint32_t pinBank;
-        uint32_t pinDir;
-        uint32_t pinVal;
-        uint16_t noisePerMS;
-        uint16_t agcCnt;
-        uint8_t aStatus;
-        uint8_t aPower;
-        uint8_t flags;
-        uint8_t reserved1;
-        uint32_t usedMask;
-        uint8_t VP[17];
-        uint8_t jamInd;
-        uint16_t reserved3;
-        uint32_t pinIrq;
-        uint32_t pullH;
-        uint32_t pullL;
-    };
-    // Neo7 uses a 68 byte message
-    struct PACKED ubx_mon_hw_68 {
-        uint32_t pinSel;
-        uint32_t pinBank;
-        uint32_t pinDir;
-        uint32_t pinVal;
-        uint16_t noisePerMS;
-        uint16_t agcCnt;
-        uint8_t aStatus;
-        uint8_t aPower;
-        uint8_t flags;
-        uint8_t reserved1;
-        uint32_t usedMask;
-        uint8_t VP[25];
-        uint8_t jamInd;
-        uint16_t reserved3;
-        uint32_t pinIrq;
-        uint32_t pullH;
-        uint32_t pullL;
-    };
-    struct PACKED ubx_mon_hw2 {
-        int8_t ofsI;
-        uint8_t magI;
-        int8_t ofsQ;
-        uint8_t magQ;
-        uint8_t cfgSource;
-        uint8_t reserved0[3];
-        uint32_t lowLevCfg;
-        uint32_t reserved1[2];
-        uint32_t postStatus;
-        uint32_t reserved2;
-    };
-    struct PACKED ubx_mon_ver {
-        char swVersion[30];
-        char hwVersion[10];
-        char extension; // extensions are not enabled
-    };
-    struct PACKED ubx_nav_svinfo_header {
-        uint32_t itow;
-        uint8_t numCh;
-        uint8_t globalFlags;
-        uint16_t reserved;
-    };
-#if UBLOX_RXM_RAW_LOGGING
-    struct PACKED ubx_rxm_raw {
-        int32_t iTOW;
-        int16_t week;
-        uint8_t numSV;
-        uint8_t reserved1;
-        struct ubx_rxm_raw_sv {
-            double cpMes;
-            double prMes;
-            float doMes;
-            uint8_t sv;
-            int8_t mesQI;
-            int8_t cno;
-            uint8_t lli;
-        } svinfo[UBLOX_MAX_RXM_RAW_SATS];
-    };
-    struct PACKED ubx_rxm_rawx {
-        double rcvTow;
-        uint16_t week;
-        int8_t leapS;
-        uint8_t numMeas;
-        uint8_t recStat;
-        uint8_t reserved1[3];
-        PACKED struct ubx_rxm_rawx_sv {
-            double prMes;
-            double cpMes;
-            float doMes;
-            uint8_t gnssId;
-            uint8_t svId;
-            uint8_t reserved2;
-            uint8_t freqId;
-            uint16_t locktime;
-            uint8_t cno;
-            uint8_t prStdev;
-            uint8_t cpStdev;
-            uint8_t doStdev;
-            uint8_t trkStat;
-            uint8_t reserved3;
-        } svinfo[UBLOX_MAX_RXM_RAWX_SATS];
-    };
-#endif
+    uint32_t last_hdop = 999;
+    uint32_t last_injected_data_ms = 0;
+    char _buf[BUF_SIZE];
+    uint16_t _buf_offset = 0;
 
-    struct PACKED ubx_ack_ack {
-        uint8_t clsID;
-        uint8_t msgID;
-    };
+    struct fvi
+    {
+        double utc_time;
+        double lat;
+        double lng;
+        double hgt;
+        double latsdev;
+        double lngsdev;
+        double hgtsdev;
+        double heading;
+        double headingsdev;
+        double pitch;
+        double pitchsdev;
+        double roll;
+        double rollsdev;
+        double n_vel;
+        double e_vel;
+        double u_vel;    // neu vel (m/s)
+        double ground_speed;
+        double n_cooradinate;
+        double e_cooradinate;
+        double u_cooradinate;
+        double master_antenna_star;
+        double sub_antenna_star;
+        double position_status;
+        double heading_status;
+        double baseline;
+    } fvi_msg;
 
-
-    struct PACKED ubx_cfg_cfg {
-        uint32_t clearMask;
-        uint32_t saveMask;
-        uint32_t loadMask;
-    };
-
-    // Receive buffer
-    union PACKED {
-        DEFINE_BYTE_ARRAY_METHODS
-        ubx_nav_posllh posllh;
-        ubx_nav_status status;
-        ubx_nav_dop dop;
-        ubx_nav_solution solution;
-        ubx_nav_velned velned;
-        ubx_cfg_msg_rate msg_rate;
-        ubx_cfg_msg_rate_6 msg_rate_6;
-        ubx_cfg_nav_settings nav_settings;
-        ubx_cfg_nav_rate nav_rate;
-        ubx_cfg_prt prt;
-        ubx_mon_hw_60 mon_hw_60;
-        ubx_mon_hw_68 mon_hw_68;
-        ubx_mon_hw2 mon_hw2;
-        ubx_mon_ver mon_ver;
-#if UBLOX_GNSS_SETTINGS
-        ubx_cfg_gnss gnss;
-#endif
-        ubx_cfg_sbas sbas;
-        ubx_nav_svinfo_header svinfo_header;
-#if UBLOX_RXM_RAW_LOGGING
-        ubx_rxm_raw rxm_raw;
-        ubx_rxm_rawx rxm_rawx;
-#endif
-        ubx_ack_ack ack;
-    } _buffer;
-
-    enum ubs_protocol_bytes {
-        PREAMBLE1 = 0xb5,
-        PREAMBLE2 = 0x62,
-        CLASS_NAV = 0x01,
-        CLASS_ACK = 0x05,
-        CLASS_CFG = 0x06,
-        CLASS_MON = 0x0A,
-        CLASS_RXM = 0x02,
-        MSG_ACK_NACK = 0x00,
-        MSG_ACK_ACK = 0x01,
-        MSG_POSLLH = 0x2,
-        MSG_STATUS = 0x3,
-        MSG_DOP = 0x4,
-        MSG_SOL = 0x6,
-        MSG_VELNED = 0x12,
-        MSG_CFG_CFG = 0x09,
-        MSG_CFG_RATE = 0x08,
-        MSG_CFG_MSG = 0x01,
-        MSG_CFG_NAV_SETTINGS = 0x24,
-        MSG_CFG_PRT = 0x00,
-        MSG_CFG_SBAS = 0x16,
-        MSG_CFG_GNSS = 0x3E,
-        MSG_MON_HW = 0x09,
-        MSG_MON_HW2 = 0x0B,
-        MSG_MON_VER = 0x04,
-        MSG_NAV_SVINFO = 0x30,
-        MSG_RXM_RAW = 0x10,
-        MSG_RXM_RAWX = 0x15
-    };
-    enum ubx_gnss_identifier {
-        GNSS_GPS     = 0x00,
-        GNSS_SBAS    = 0x01,
-        GNSS_GALILEO = 0x02,
-        GNSS_BEIDOU  = 0x03,
-        GNSS_IMES    = 0x04,
-        GNSS_QZSS    = 0x05,
-        GNSS_GLONASS = 0x06
-    };
-    enum ubs_nav_fix_type {
-        FIX_NONE = 0,
-        FIX_DEAD_RECKONING = 1,
-        FIX_2D = 2,
-        FIX_3D = 3,
-        FIX_GPS_DEAD_RECKONING = 4,
-        FIX_TIME = 5
-    };
-
-    // State machine state
-    uint8_t         _step;
-    uint8_t         _msg_id;
-    uint16_t        _payload_length;
-    uint16_t        _payload_counter;
-
-    uint8_t         _class;
-    bool            _cfg_saved;
-
-    uint32_t        _last_vel_time;
-    uint32_t        _last_pos_time;
-    uint32_t        _last_cfg_sent_time;
-    uint8_t         _num_cfg_save_tries;
-    uint32_t        _last_config_time;
-    uint16_t        _delay_time;
-    uint8_t         _next_message;
-    uint8_t         _ublox_port;
-    bool            _have_version;
-    uint32_t        _unconfigured_messages;
-    uint8_t         _hardware_generation;
-
-
-    // do we have new position information?
-    bool            _new_position:1;
-    // do we have new speed information?
-    bool            _new_speed:1;
-
-    uint8_t         _disable_counter;
-
-    // Buffer parse & GPS state update
-    bool        _parse_gps();
-
-    // used to update fix between status and position packets
-    AP_GPS::GPS_Status next_fix;
-
-    uint32_t _last_5hz_time;
-
-    bool _cfg_needs_save;
-
-    bool noReceivedHdop;
-
-    bool        _configure_message_rate(uint8_t msg_class, uint8_t msg_id, uint8_t rate);
-    void        _configure_rate(void);
-    void        _configure_sbas(bool enable);
-    void        _update_checksum(uint8_t *data, uint16_t len, uint8_t &ck_a, uint8_t &ck_b);
-    void        _send_message(uint8_t msg_class, uint8_t msg_id, void *msg, uint16_t size);
-    void	send_next_rate_update(void);
-    bool        _request_message_rate(uint8_t msg_class, uint8_t msg_id);
-    void        _request_navigation_rate(void);
-    void        _request_next_config(void);
-    void        _request_port(void);
-    void        _request_version(void);
-    void        _save_cfg(void);
-    void        _verify_rate(uint8_t msg_class, uint8_t msg_id, uint8_t rate);
-
-    void unexpected_message(void);
-    void write_logging_headers(void);
-    void log_mon_hw(void);
-    void log_mon_hw2(void);
-    void log_mon_ver(void);
-    void log_rxm_raw(const struct ubx_rxm_raw &raw);
-    void log_rxm_rawx(const struct ubx_rxm_rawx &raw);
-
-    // Calculates the correct log message ID based on what GPS instance is being logged
-    uint8_t _ubx_msg_log_index(uint8_t ubx_msg) {
-        return (uint8_t)(ubx_msg + (state.instance * UBX_MSG_TYPES));
-    }
 };

@@ -145,11 +145,10 @@ const AP_Param::GroupInfo AP_GPS::var_info[] = {
 };
 
 /// Startup initialisation.
-void AP_GPS::init(DataFlash_Class *dataflash, const AP_SerialManager& serial_manager)
+void AP_GPS::init(DataFlash_Class *dataflash)
 {
     _DataFlash = dataflash;
     primary_instance = 0;
-    _serial_manager = serial_manager;
     // search for serial ports with gps protocol
     _port[0] = _serial_manager.find_serial(AP_SerialManager::SerialProtocol_GPS, 0);
     _port[1] = _serial_manager.find_serial(AP_SerialManager::SerialProtocol_GPS, 1);
@@ -249,10 +248,17 @@ AP_GPS::detect_instance(uint8_t instance)
 	} else if ((_type[instance] == GPS_TYPE_NOVA)) {
 		_broadcast_gps_type("NOVA", instance, -1); // baud rate isn't valid
 		new_gps = new AP_GPS_NOVA(*this, state[instance], _port[instance]);
-    } else if ((_type[instance] == GPS_TYPE_DRTK)) {
-        int baudrate = _serial_manager.find_baudrate(AP_SerialManager::SerialProtocol_GPS, instance);
-        _broadcast_gps_type("DRTK", instance, baudrate); // baud rate had saved by mannual
+    }
+
+    // use to startup BDNST DRTK
+    if ((_type[instance] == GPS_TYPE_DRTK)) {
+       uint32_t baudrate = _serial_manager.find_baudrate(AP_SerialManager::SerialProtocol_GPS, instance);
+       _broadcast_gps_type("DRTK", instance, baudrate); // baud rate had set by mannual
+
+       _port[instance]->begin(baudrate);
+       _port[instance]->set_flow_control(AP_HAL::UARTDriver::FLOW_CONTROL_DISABLE);
         new_gps = new AP_GPS_DRTK(*this, state[instance], _port[instance]);
+        goto found_gps;
     }
 
     // record the time when we started detection. This is used to try
@@ -346,7 +352,7 @@ AP_GPS::detect_instance(uint8_t instance)
 		}
 	}
 
-#if CONFIG_HAL_BOARD == HAL_BOARD_PX4 || CONFIG_HAL_BOARD == HAL_BOARD_QURT
+#if CONFIG_HAL_BOARD == HAL_BOARD_PX4 || CONFIG_HAL_BOARD == HAL_BOARD_QURT || BDNST_DRTK_DETECT == 1
 found_gps:
 #endif
 	if (new_gps != NULL) {

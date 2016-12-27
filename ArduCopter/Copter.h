@@ -180,7 +180,7 @@ private:
     // Dataflash
     DataFlash_Class DataFlash;
 
-    AP_GPS gps;
+    AP_GPS gps {serial_manager};
 
     // flight modes convenience array
     AP_Int8 *flight_modes;

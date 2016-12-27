@@ -32,6 +32,8 @@
 #define GPS_MAX_INSTANCES 2
 #define GPS_RTK_INJECT_TO_ALL 127
 
+#define BDNST_DRTK_DETECT 1
+
 class DataFlash_Class;
 class AP_GPS_Backend;
 
@@ -41,12 +43,14 @@ class AP_GPS
 {
 public:
     // constructor
-	AP_GPS() {
+    AP_GPS(AP_SerialManager &serial_manager) :
+        _serial_manager(serial_manager)
+    {
 		AP_Param::setup_object_defaults(this, var_info);
     }
 
     /// Startup initialisation.
-    void init(DataFlash_Class *dataflash, const AP_SerialManager& _serial_manager);
+    void init(DataFlash_Class *dataflash);
 
     /// Update GPS state based on possible bytes received from the module.
     /// This routine must be called periodically (typically at 10Hz or
@@ -114,6 +118,8 @@ public:
         uint32_t time_week_ms;              ///< GPS time (milliseconds from start of GPS week)
         uint16_t time_week;                 ///< GPS week number
         Location location;                  ///< last fix location
+        int16_t heading;                    ///< centre degrees
+        uint16_t baseline_cm;                  ///< baseline length in cm
         float ground_speed;                 ///< ground speed in m/sec
         float ground_course;                ///< ground course in degrees
         uint16_t hdop;                      ///< horizontal dilution of precision in cm
@@ -312,6 +318,22 @@ public:
         return have_vertical_velocity(primary_instance);
     }
 
+    // return true if the GPS supports heading
+    bool have_heading_accuracy(uint8_t instance) const {
+        return state[instance].have_heading_accuracy;
+    }
+    bool have_heading_accuracy(void) const {
+        return have_heading_accuracy(primary_instance);
+    }
+
+    // return heading value
+    int16_t get_heading(uint8_t instance) const {
+        return state[instance].heading;
+    }
+    int16_t get_heading(void) const {
+        return get_heading(primary_instance);
+    }
+
     // the expected lag (in seconds) in the position and velocity readings from the gps
     float get_lag() const { return 0.2f; }
 
@@ -400,6 +422,7 @@ private:
         struct NMEA_detect_state nmea_detect_state;
         struct SBP_detect_state sbp_detect_state;
         struct ERB_detect_state erb_detect_state;
+        struct DRTK_detect_state drtk_detect_state;
     } detect_state[GPS_MAX_INSTANCES];
 
     struct {

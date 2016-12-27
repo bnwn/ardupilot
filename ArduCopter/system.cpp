@@ -188,7 +188,7 @@ void Copter::init_ardupilot()
     hal.scheduler->register_timer_failsafe(failsafe_check_static, 1000);
 
     // Do GPS init
-    gps.init(&DataFlash, serial_manager);
+    gps.init(&DataFlash);
 
     if(g.compass_enabled)
         init_compass();
