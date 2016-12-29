@@ -383,7 +383,8 @@ void Copter::Log_Write_Attitude()
 {
     Vector3f targets = attitude_control.get_att_target_euler_cd();
     targets.z = wrap_360_cd(targets.z);
-    DataFlash.Log_Write_Attitude(ahrs, targets);
+    uint16_t heading = (uint16_t)gps.get_heading();
+    DataFlash.Log_Write_Attitude(ahrs, targets, heading);
 
  #if OPTFLOW == ENABLED
     DataFlash.Log_Write_EKF(ahrs,optflow.enabled());

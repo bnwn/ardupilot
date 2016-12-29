@@ -253,10 +253,15 @@ AP_GPS::detect_instance(uint8_t instance)
     // use to startup BDNST DRTK
     if ((_type[instance] == GPS_TYPE_DRTK)) {
        uint32_t baudrate = _serial_manager.find_baudrate(AP_SerialManager::SerialProtocol_GPS, instance);
-       _broadcast_gps_type("DRTK", instance, baudrate); // baud rate had set by mannual
+       int index = 0;
+       for (; index<7; index++) {
+           if (baudrate == _baudrates[index]) {
+               break;
+           }
+       }
+       _broadcast_gps_type("DRTK", instance, index); // baud rate had set by mannual
 
        _port[instance]->begin(baudrate);
-       _port[instance]->set_flow_control(AP_HAL::UARTDriver::FLOW_CONTROL_DISABLE);
         new_gps = new AP_GPS_DRTK(*this, state[instance], _port[instance]);
         goto found_gps;
     }

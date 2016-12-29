@@ -44,11 +44,11 @@ AP_GPS_DRTK::AP_GPS_DRTK(AP_GPS &_gps, AP_GPS::GPS_State &_state,
     AP_GPS_Backend(_gps, _state, _port),
     _buf{0}
 {
-    const char *init_str = _initialisation_blob[0];
-    const char *init_str1 = _initialisation_blob[1];
+//    const char *init_str = _initialisation_blob[0];
+//    const char *init_str1 = _initialisation_blob[1];
 
-    port->write((const uint8_t*)init_str, strlen(init_str));
-    port->write((const uint8_t*)init_str1, strlen(init_str1));
+//    port->write((const uint8_t*)init_str, strlen(init_str));
+//    port->write((const uint8_t*)init_str1, strlen(init_str1));
 }
 
 /*

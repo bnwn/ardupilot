@@ -84,8 +84,8 @@ private:
     uint8_t _init_blob_index = 0;
     uint32_t _init_blob_time = 0;
     const char* _initialisation_blob[2] = {
-        "\r\n\r\nunlogall\r\n", // cleanup enviroment
-        "log fvi ontime 0.2\r\n", // get fvi
+        "unlogall\r\n", // cleanup enviroment
+        "log fvi ontime 0.1\r\n", // get fvi
     };
 
     uint32_t last_hdop = 999;
