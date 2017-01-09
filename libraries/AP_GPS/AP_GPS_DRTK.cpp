@@ -96,10 +96,11 @@ bool AP_GPS_DRTK::read(void)
     printf("\n");
 
     int8_t offset = find_char(_buf, START_CHARACTER);
+    printf("offset:%d", offset);
     if (-1 != offset) {
         int end_offset = find_char(_buf+offset+1, END_CHARACTER);
         if (end_offset != -1) {
-            printf("packet comlete\n");
+            printf("packet comlete, end_offset: %d\n", end_offset);
             // do nothing if packet isn't complete
             int data_len = find_char(_buf+offset+1, SEPARATOR);
             int64_t start_seq = 0;
@@ -176,7 +177,7 @@ bool AP_GPS_DRTK::read(void)
             memset(_buf+data_len, '\0', (BUF_SIZE - data_len) * sizeof(char));
             _buf_offset = data_len;
         }
-    } else if (_buf_offset >= BUF_SIZE){
+    } else if (_buf_offset > BUF_SIZE){
         memset(_buf, '\0', (BUF_SIZE) * sizeof(char));
     }
 
