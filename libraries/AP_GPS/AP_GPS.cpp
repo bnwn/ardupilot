@@ -211,6 +211,25 @@ AP_GPS::detect_instance(uint8_t instance)
     struct detect_state *dstate = &detect_state[instance];
     uint32_t now = AP_HAL::millis();
 
+#if BDNST_DRTK_DETECT == 1
+    // use to startup BDNST DRTK
+    uint32_t baudrate_tmp = 0;
+    int8_t index = 0;
+    if (_type[instance] == GPS_TYPE_DRTK) {
+        baudrate_tmp = _serial_manager.find_baudrate(AP_SerialManager::SerialProtocol_GPS, instance);
+        for (; index<7; index++) {
+           if (baudrate_tmp == _baudrates[index]) {
+               break;
+           }
+        }
+        _broadcast_gps_type("DRTK", instance, index); // baud rate had set by mannual
+        _port[instance]->begin(baudrate_tmp);
+        _port[instance]->set_flow_control(AP_HAL::UARTDriver::FLOW_CONTROL_DISABLE);
+        new_gps = new AP_GPS_DRTK(*this, state[instance], _port[instance]);
+        goto found_gps;
+    }
+#endif
+
 #if CONFIG_HAL_BOARD == HAL_BOARD_PX4
     if (_type[instance] == GPS_TYPE_PX4) {
         // check for explicitely chosen PX4 GPS beforehand
@@ -228,7 +247,7 @@ AP_GPS::detect_instance(uint8_t instance)
         goto found_gps;
     }
 #endif
-    
+
     if (_port[instance] == NULL) {
         // UART not available
         return;
@@ -248,22 +267,6 @@ AP_GPS::detect_instance(uint8_t instance)
 	} else if ((_type[instance] == GPS_TYPE_NOVA)) {
 		_broadcast_gps_type("NOVA", instance, -1); // baud rate isn't valid
 		new_gps = new AP_GPS_NOVA(*this, state[instance], _port[instance]);
-    }
-
-    // use to startup BDNST DRTK
-    if ((_type[instance] == GPS_TYPE_DRTK)) {
-       uint32_t baudrate = _serial_manager.find_baudrate(AP_SerialManager::SerialProtocol_GPS, instance);
-       int index = 0;
-       for (; index<7; index++) {
-           if (baudrate == _baudrates[index]) {
-               break;
-           }
-       }
-       _broadcast_gps_type("DRTK", instance, index); // baud rate had set by mannual
-
-       _port[instance]->begin(baudrate);
-        new_gps = new AP_GPS_DRTK(*this, state[instance], _port[instance]);
-        goto found_gps;
     }
 
     // record the time when we started detection. This is used to try

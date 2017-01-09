@@ -76,7 +76,7 @@ private:
 
     void process_message();
 
-    inline int8_t find_char(char *_buf_, char _c);
+    inline int find_char(char *_buf_, char _c);
     inline void HexToFloat(char *_buf_, int _len, double &_data);
     inline void get_reality_data(double &_data, char *_buf_, int8_t &_index);
     inline void get_reality_data(double &_data, char *_buf_, int8_t &_index, int8_t offset);

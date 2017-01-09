@@ -253,8 +253,7 @@ NOINLINE void Copter::send_extended_status1(mavlink_channel_t chan)
     if (rangefinder.num_sensors() > 0) {
         control_sensors_present |= MAV_SYS_STATUS_SENSOR_LASER_POSITION;
         control_sensors_enabled |= MAV_SYS_STATUS_SENSOR_LASER_POSITION;
-//        if (rangefinder.has_data()) {
-        if (rangefinder.has_mmwradar_data()) {
+        if (rangefinder.has_data()) {
             control_sensors_health |= MAV_SYS_STATUS_SENSOR_LASER_POSITION;
         }
     }
@@ -404,17 +403,12 @@ void NOINLINE Copter::send_current_waypoint(mavlink_channel_t chan)
 void NOINLINE Copter::send_rangefinder(mavlink_channel_t chan)
 {
     // exit immediately if rangefinder is disabled
-//    if (!rangefinder.has_data()) {
-//        return;
-//    }
-    if (!rangefinder.has_mmwradar_data()) {
+    if (!rangefinder.has_data()) {
         return;
     }
     mavlink_msg_rangefinder_send(
             chan,
- //           rangefinder.distance_cm() * 0.01f;
-                /* send mmwradar data */
-            rangefinder.distance_cm(2) * 0.01f,
+            rangefinder.distance_cm() * 0.01f,
             rangefinder.voltage_mv() * 0.001f);
 }
 #endif

@@ -21,6 +21,7 @@
 #include "AP_GPS.h"
 #include "AP_GPS_DRTK.h"
 #include <DataFlash/DataFlash.h>
+#include <stdio.h>
 
 extern const AP_HAL::HAL& hal;
 
@@ -45,10 +46,10 @@ AP_GPS_DRTK::AP_GPS_DRTK(AP_GPS &_gps, AP_GPS::GPS_State &_state,
     _buf{0}
 {
 //    const char *init_str = _initialisation_blob[0];
-//    const char *init_str1 = _initialisation_blob[1];
+    const char *init_str1 = _initialisation_blob[1];
 
-//    port->write((const uint8_t*)init_str, strlen(init_str));
-//    port->write((const uint8_t*)init_str1, strlen(init_str1));
+//  port->write((const uint8_t*)init_str, strlen(init_str));
+    port->write((const uint8_t*)init_str1, strlen(init_str1));
 }
 
 /*
@@ -75,15 +76,30 @@ bool AP_GPS_DRTK::read(void)
     bool ret = false;
     int read_len = port->available();
 
-    for (int i=0; i<read_len; i++) {
-        _buf[_buf_offset+i] = port->read();
+    int i = 0;
+    for (; i<read_len; i++) {
+        if ((i+_buf_offset) < BUF_SIZE) {
+            _buf[i+_buf_offset] = port->read();
+        } else {
+            break;
+        }
     }
 
-    _buf_offset += read_len;
+    _buf_offset += i;
+
+    printf("\n");
+    printf("start..\n");
+    for (i=0; i<_buf_offset; i++) {
+        printf("%c", _buf[i]);
+    }
+    printf("packet end\n");
+    printf("\n");
+
     int8_t offset = find_char(_buf, START_CHARACTER);
     if (-1 != offset) {
-        int end_offset = find_char(_buf, END_CHARACTER);
+        int end_offset = find_char(_buf+offset+1, END_CHARACTER);
         if (end_offset != -1) {
+            printf("packet comlete\n");
             // do nothing if packet isn't complete
             int data_len = find_char(_buf+offset+1, SEPARATOR);
             int64_t start_seq = 0;
@@ -142,20 +158,26 @@ bool AP_GPS_DRTK::read(void)
                     // ending code
                     end_offset += 2;
                     data_len = _buf_offset-end_offset-1;
-                    for (int i=0; i<data_len; i++) {
+                    for (i=0; i<data_len; i++) {
                         _buf[i] = _buf[end_offset+i+1];
                     }
-                    memset(_buf+data_len, 0, (BUF_SIZE - data_len) * sizeof(char));
+                    memset(_buf+data_len, '\0', (BUF_SIZE - data_len) * sizeof(char));
                     _buf_offset = data_len;
 
                     process_message();
 
                     break;
             }
+        } else {
+            int data_len = _buf_offset - offset;
+            for (i=0; i<data_len; i++) {
+                _buf[i] = _buf[offset+i];
+            }
+            memset(_buf+data_len, '\0', (BUF_SIZE - data_len) * sizeof(char));
+            _buf_offset = data_len;
         }
     } else if (_buf_offset >= BUF_SIZE){
-        memset(_buf, 0, BUF_SIZE * sizeof(char));
-        _buf_offset = 0;
+        memset(_buf, '\0', (BUF_SIZE) * sizeof(char));
     }
 
     return ret;
@@ -163,6 +185,9 @@ bool AP_GPS_DRTK::read(void)
 
 void AP_GPS_DRTK::process_message(void)
 {
+    printf ("lat:%.7f, lng:%.7f, hgt:%.6f\n", fvi_msg.lat, fvi_msg.lng, fvi_msg.hgt);
+    printf ("baseline:%.6f, heading:%.6f, master_stas:%f, sub_stas:%f\n",
+            fvi_msg.baseline, fvi_msg.heading, fvi_msg.master_antenna_star, fvi_msg.sub_antenna_star);
     state.time_week = 0;
     state.time_week_ms = (uint32_t) fvi_msg.utc_time * 1000;
     uint8_t HH = state.time_week_ms / 10000000;
@@ -226,7 +251,7 @@ void AP_GPS_DRTK::inject_data(uint8_t *data, uint8_t len)
     }
 }
 
-inline int8_t AP_GPS_DRTK::find_char(char *_buf_, char _c)
+inline int AP_GPS_DRTK::find_char(char *_buf_, char _c)
 {
     int data_len = 0;
     char *p = _buf_;
