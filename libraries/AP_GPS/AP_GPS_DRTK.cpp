@@ -87,26 +87,20 @@ bool AP_GPS_DRTK::read(void)
 
     _buf_offset += i;
 
-    printf("\n");
-    printf("start..\n");
-    for (i=0; i<_buf_offset; i++) {
-        printf("%c", _buf[i]);
-    }
-    printf("packet end\n");
-    printf("\n");
-
-    int8_t offset = find_char(_buf, START_CHARACTER);
-    printf("offset:%d", offset);
+    int16_t offset = 0;
+    find_char(_buf, START_CHARACTER, offset);
     if (-1 != offset) {
-        int end_offset = find_char(_buf+offset+1, END_CHARACTER);
+        int16_t end_offset = 0;
+        find_char(_buf+offset+1, END_CHARACTER, end_offset);
         if (end_offset != -1) {
-            printf("packet comlete, end_offset: %d\n", end_offset);
+            end_offset += (offset + 1);
             // do nothing if packet isn't complete
-            int data_len = find_char(_buf+offset+1, SEPARATOR);
+            int16_t data_len = 0;
+            find_char(_buf+offset+1, SEPARATOR, data_len);
             int64_t start_seq = 0;
             for (int j=1; j<=data_len; j++) {
-                start_seq = start_seq << 8;
-                start_seq += _buf[offset+j];
+                start_seq <<= 8;
+                start_seq |= _buf[offset+j];
             }
 
             // need to add when get start_seq
@@ -114,12 +108,12 @@ bool AP_GPS_DRTK::read(void)
 
             switch (start_seq) {
                 case START_SEQ_PSAT:
-                    data_len = find_char(_buf+offset+1, SEPARATOR);
+                    find_char(_buf+offset+1, SEPARATOR, data_len);
                     int64_t msg_type = 0;
 
                     for (int j=1; j<=data_len; j++) {
-                        msg_type = msg_type << 8;
-                        msg_type += _buf[offset+j];
+                        msg_type <<= 8;
+                        msg_type |= _buf[offset+j];
                     }
 
                     // need to add when get start_seq
@@ -157,7 +151,7 @@ bool AP_GPS_DRTK::read(void)
                     }
 
                     // ending code
-                    end_offset += 2;
+                    end_offset += 4;
                     data_len = _buf_offset-end_offset-1;
                     for (i=0; i<data_len; i++) {
                         _buf[i] = _buf[end_offset+i+1];
@@ -167,6 +161,7 @@ bool AP_GPS_DRTK::read(void)
 
                     process_message();
 
+                    ret = true;
                     break;
             }
         } else {
@@ -177,8 +172,9 @@ bool AP_GPS_DRTK::read(void)
             memset(_buf+data_len, '\0', (BUF_SIZE - data_len) * sizeof(char));
             _buf_offset = data_len;
         }
-    } else if (_buf_offset > BUF_SIZE){
+    } else if (_buf_offset >= BUF_SIZE){
         memset(_buf, '\0', (BUF_SIZE) * sizeof(char));
+        _buf_offset = 0;
     }
 
     return ret;
@@ -186,9 +182,9 @@ bool AP_GPS_DRTK::read(void)
 
 void AP_GPS_DRTK::process_message(void)
 {
-    printf ("lat:%.7f, lng:%.7f, hgt:%.6f\n", fvi_msg.lat, fvi_msg.lng, fvi_msg.hgt);
-    printf ("baseline:%.6f, heading:%.6f, master_stas:%f, sub_stas:%f\n",
-            fvi_msg.baseline, fvi_msg.heading, fvi_msg.master_antenna_star, fvi_msg.sub_antenna_star);
+//    printf ("lat:%.7f, lng:%.7f, hgt:%.6f\n", fvi_msg.lat, fvi_msg.lng, fvi_msg.hgt);
+//    printf ("baseline:%.6f, heading:%.6f, master_stas:%f, sub_stas:%f\n",
+//            fvi_msg.baseline, fvi_msg.heading, fvi_msg.master_antenna_star, fvi_msg.sub_antenna_star);
     state.time_week = 0;
     state.time_week_ms = (uint32_t) fvi_msg.utc_time * 1000;
     uint8_t HH = state.time_week_ms / 10000000;
@@ -201,7 +197,7 @@ void AP_GPS_DRTK::process_message(void)
     state.location.lng = (int32_t) (fvi_msg.lng*1e7);
     state.location.alt = (int32_t) (fvi_msg.hgt*1e2);
 
-    state.num_sats = (fvi_msg.master_antenna_star + fvi_msg.sub_antenna_star) / 2;
+    state.num_sats = fvi_msg.master_antenna_star;
 
     state.horizontal_accuracy = (float) ((fvi_msg.latsdev + fvi_msg.lngsdev)/2);
     state.vertical_accuracy = (float) fvi_msg.hgtsdev;
@@ -233,13 +229,18 @@ void AP_GPS_DRTK::process_message(void)
     state.have_vertical_velocity = true;
 
     state.baseline_cm = fvi_msg.baseline * 100;
-
-    if ((uint8_t)fvi_msg.heading_status) {
+    state.heading = fvi_msg.heading * 100;
+    if ((uint8_t)fvi_msg.heading_status != 0) {
         state.have_heading_accuracy = true;
         state.heading = fvi_msg.heading * 100;
     } else {
         state.have_heading_accuracy = false;
     }
+
+//    printf ("before..lat:%d, lng:%d, hgt:%d\n", state.location.lat, state.location.lng, state.location.alt);
+//    printf ("baseline:%d cm, heading:%d, master_stas:%d\n",
+//            state.baseline_cm, state.heading, state.num_sats);
+
 }
 
 void AP_GPS_DRTK::inject_data(uint8_t *data, uint8_t len)
@@ -252,22 +253,22 @@ void AP_GPS_DRTK::inject_data(uint8_t *data, uint8_t len)
     }
 }
 
-inline int AP_GPS_DRTK::find_char(char *_buf_, char _c)
+inline void AP_GPS_DRTK::find_char(char *_buf_, char _c, int16_t &_len)
 {
-    int data_len = 0;
-    char *p = _buf_;
+    _len = 0;
 
-    while (*p) {
-        if (*p == _c) {
-            return data_len;
+    while (*(_buf_+_len)) {
+        if (*(_buf_+_len) == _c) {
+            return;
         }
-        data_len++;
-        p++;
+        _len++;
     }
-    return -1;
+
+    // if not found _c, return _len as -1
+    _len = -1;
 }
 
-inline void AP_GPS_DRTK::HexToFloat(char *_buf_, int _len, double &_data)
+inline void AP_GPS_DRTK::HexToFloat(char *_buf_, int16_t _len, double &_data)
 {
     double tmp = 0.0f;
     bool reverse = false;
@@ -303,22 +304,23 @@ inline void AP_GPS_DRTK::HexToFloat(char *_buf_, int _len, double &_data)
     }
 }
 
-inline void AP_GPS_DRTK::get_reality_data(double &_data, char *_buf_, int8_t &_index)
+inline void AP_GPS_DRTK::get_reality_data(double &_data, char *_buf_, int16_t &_index)
 {
-    int data_len = find_char(_buf_+_index+1, SEPARATOR);
-    HexToFloat(_buf_+_index+1, data_len, _data);
-    _index += (data_len + 1);
+    int16_t _len = 0;
+    find_char(_buf_+_index+1, SEPARATOR, _len);
+    HexToFloat(_buf_+_index+1, _len, _data);
+    _index += (_len + 1);
 }
 
-inline void AP_GPS_DRTK::get_reality_data(double &_data, char *_buf_, int8_t &_index, int8_t offset)
+inline void AP_GPS_DRTK::get_reality_data(double &_data, char *_buf_, int16_t &_index, int8_t offset)
 {
-    int data_len;
+    int16_t _len = 0;
 
     for (int j=0; j<offset; j++) {
-        data_len = find_char(_buf_+_index+1, SEPARATOR);
+        find_char(_buf_+_index+1, SEPARATOR, _len);
         if (j == (offset - 1)) {
-            HexToFloat(_buf_+_index+1, data_len, _data);
+            HexToFloat(_buf_+_index+1, _len, _data);
         }
-        _index += (data_len + 1);
+        _index += (_len + 1);
     }
 }

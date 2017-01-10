@@ -23,7 +23,7 @@
 #include "AP_GPS.h"
 #include "GPS_Backend.h"
 
-#define BUF_SIZE 300
+#define BUF_SIZE 400
 #define MESSAGE_TYPE_FVI 0x465649
 #define START_CHARACTER 0x24
 #define START_SEQ_PSAT 0x50534154
@@ -76,10 +76,10 @@ private:
 
     void process_message();
 
-    inline int find_char(char *_buf_, char _c);
-    inline void HexToFloat(char *_buf_, int _len, double &_data);
-    inline void get_reality_data(double &_data, char *_buf_, int8_t &_index);
-    inline void get_reality_data(double &_data, char *_buf_, int8_t &_index, int8_t offset);
+    inline void find_char(char *_buf_, char _c, int16_t &_len);
+    inline void HexToFloat(char *_buf_, int16_t _len, double &_data);
+    inline void get_reality_data(double &_data, char *_buf_, int16_t &_index);
+    inline void get_reality_data(double &_data, char *_buf_, int16_t &_index, int8_t offset);
 
     uint8_t _init_blob_index = 0;
     uint32_t _init_blob_time = 0;

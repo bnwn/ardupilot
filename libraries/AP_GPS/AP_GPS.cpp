@@ -224,7 +224,6 @@ AP_GPS::detect_instance(uint8_t instance)
         }
         _broadcast_gps_type("DRTK", instance, index); // baud rate had set by mannual
         _port[instance]->begin(baudrate_tmp);
-        _port[instance]->set_flow_control(AP_HAL::UARTDriver::FLOW_CONTROL_DISABLE);
         new_gps = new AP_GPS_DRTK(*this, state[instance], _port[instance]);
         goto found_gps;
     }
