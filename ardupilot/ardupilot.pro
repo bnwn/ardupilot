@@ -1352,7 +1352,8 @@ SOURCES += main.cpp \
     ../modules/PX4Firmware/src/systemcmds/ver/ver.c \
     ../libraries/AP_OilEngine/AP_OilEngine.cpp \
     ../libraries/AP_RangeFinder/AP_RangeFinder_MMWRadar.cpp \
-    ../libraries/AP_GPS/AP_GPS_DRTK.cpp
+    ../libraries/AP_GPS/AP_GPS_DRTK.cpp \
+    ../libraries/Filter/SlidingFilter.cpp
 
 include(deployment.pri)
 qtcAddDeployment()

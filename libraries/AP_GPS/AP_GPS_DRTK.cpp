@@ -97,8 +97,9 @@ bool AP_GPS_DRTK::read(void)
             end_offset += (offset + 1);
             // do nothing if packet isn't complete
             int16_t data_len = 0;
-            find_char(_buf+offset+1, SEPARATOR, data_len);
             int64_t start_seq = 0;
+            int64_t msg_type = 0;
+            find_char(_buf+offset+1, SEPARATOR, data_len);
             for (int j=1; j<=data_len; j++) {
                 start_seq <<= 8;
                 start_seq |= _buf[offset+j];
@@ -110,7 +111,6 @@ bool AP_GPS_DRTK::read(void)
             switch (start_seq) {
                 case START_SEQ_PSAT:
                     find_char(_buf+offset+1, SEPARATOR, data_len);
-                    int64_t msg_type = 0;
 
                     for (int j=1; j<=data_len; j++) {
                         msg_type <<= 8;
@@ -165,15 +165,13 @@ bool AP_GPS_DRTK::read(void)
                     ret = true;
                     break;
 
-                case 0x4E474741:
+                case START_SEQ_GNGGA:
                     current_offset = GGA_PDOP_OFFSET;
                     get_reality_data(gga_msg.pdop, _buf, offset, current_offset);
                     get_reality_data(gga_msg.elevation, _buf, offset);
 
                     process_message(AP_GPS_DRTK::GNGGA);
                     ret = true;
-                    break;
-                default:
                     break;
             }
         } else {
@@ -195,6 +193,8 @@ bool AP_GPS_DRTK::read(void)
 void AP_GPS_DRTK::process_message(enum packet_type _packet)
 {
     switch (_packet) {
+        case AP_GPS_DRTK::NONE:
+            return;
         case AP_GPS_DRTK::GNGGA:
             state.hdop = gga_msg.pdop * 100;
             break;
@@ -257,8 +257,6 @@ void AP_GPS_DRTK::process_message(enum packet_type _packet)
         //    printf ("before..lat:%d, lng:%d, hgt:%d\n", state.location.lat, state.location.lng, state.location.alt);
         //    printf ("baseline:%d cm, heading:%d, master_stas:%d\n",
         //            state.baseline_cm, state.heading, state.num_sats);
-            break;
-        default:
             break;
     }
 

@@ -1,6 +1,6 @@
 #include "SlidingFilter.h"
 #include "algorithm"
-#include "string.h"
+#include <string>
 using namespace std;
 /// @file SlidingFilter.cpp
 /// @brief  A class to implement a low pass filter without losing precision even for int types
