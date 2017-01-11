@@ -45,10 +45,10 @@ AP_GPS_DRTK::AP_GPS_DRTK(AP_GPS &_gps, AP_GPS::GPS_State &_state,
     AP_GPS_Backend(_gps, _state, _port),
     _buf{0}
 {
-//    const char *init_str = _initialisation_blob[0];
+    const char *init_str = _initialisation_blob[0];
     const char *init_str1 = _initialisation_blob[1];
 
-//  port->write((const uint8_t*)init_str, strlen(init_str));
+    port->write((const uint8_t*)init_str, strlen(init_str));
     port->write((const uint8_t*)init_str1, strlen(init_str1));
 }
 
@@ -91,6 +91,7 @@ bool AP_GPS_DRTK::read(void)
     find_char(_buf, START_CHARACTER, offset);
     if (-1 != offset) {
         int16_t end_offset = 0;
+        int8_t current_offset;
         find_char(_buf+offset+1, END_CHARACTER, end_offset);
         if (end_offset != -1) {
             end_offset += (offset + 1);
@@ -139,7 +140,7 @@ bool AP_GPS_DRTK::read(void)
                             get_reality_data(fvi_msg.u_vel, _buf, offset);
                             get_reality_data(fvi_msg.ground_speed, _buf, offset);
 
-                            int8_t current_offset = MASTER_STAR_OFFSET - GROUND_SPEED_OFFSET;
+                            current_offset = FVI_MASTER_STAR_OFFSET - FVI_GROUND_SPEED_OFFSET;
                             get_reality_data(fvi_msg.master_antenna_star, _buf, offset, current_offset);
                             get_reality_data(fvi_msg.sub_antenna_star, _buf, offset);
                             get_reality_data(fvi_msg.position_status, _buf, offset);
@@ -159,9 +160,20 @@ bool AP_GPS_DRTK::read(void)
                     memset(_buf+data_len, '\0', (BUF_SIZE - data_len) * sizeof(char));
                     _buf_offset = data_len;
 
-                    process_message();
+                    process_message(AP_GPS_DRTK::PSAT_FVI);
 
                     ret = true;
+                    break;
+
+                case 0x4E474741:
+                    current_offset = GGA_PDOP_OFFSET;
+                    get_reality_data(gga_msg.pdop, _buf, offset, current_offset);
+                    get_reality_data(gga_msg.elevation, _buf, offset);
+
+                    process_message(AP_GPS_DRTK::GNGGA);
+                    ret = true;
+                    break;
+                default:
                     break;
             }
         } else {
@@ -180,66 +192,75 @@ bool AP_GPS_DRTK::read(void)
     return ret;
 }
 
-void AP_GPS_DRTK::process_message(void)
+void AP_GPS_DRTK::process_message(enum packet_type _packet)
 {
-//    printf ("lat:%.7f, lng:%.7f, hgt:%.6f\n", fvi_msg.lat, fvi_msg.lng, fvi_msg.hgt);
-//    printf ("baseline:%.6f, heading:%.6f, master_stas:%f, sub_stas:%f\n",
-//            fvi_msg.baseline, fvi_msg.heading, fvi_msg.master_antenna_star, fvi_msg.sub_antenna_star);
-    state.time_week = 0;
-    state.time_week_ms = (uint32_t) fvi_msg.utc_time * 1000;
-    uint8_t HH = state.time_week_ms / 10000000;
-    uint8_t MM = (state.time_week_ms - HH) / 100000;
-    uint8_t SS = (state.time_week_ms - HH - MM) / 1000;
-    state.time_week_ms = ((HH * 60 + MM) * 60 + SS) * 1000 + (state.time_week_ms - HH - MM - SS);
-    state.last_gps_time_ms = state.time_week_ms;
-
-    state.location.lat = (int32_t) (fvi_msg.lat*1e7);
-    state.location.lng = (int32_t) (fvi_msg.lng*1e7);
-    state.location.alt = (int32_t) (fvi_msg.hgt*1e2);
-
-    state.num_sats = fvi_msg.master_antenna_star;
-
-    state.horizontal_accuracy = (float) ((fvi_msg.latsdev + fvi_msg.lngsdev)/2);
-    state.vertical_accuracy = (float) fvi_msg.hgtsdev;
-    state.have_horizontal_accuracy = true;
-    state.have_vertical_accuracy = true;
-
-    switch ((uint8_t)fvi_msg.position_status)
-    {
-        case 1:
-            state.status = AP_GPS::GPS_OK_FIX_3D;
+    switch (_packet) {
+        case AP_GPS_DRTK::GNGGA:
+            state.hdop = gga_msg.pdop * 100;
             break;
-        case 2:
-            state.status = AP_GPS::GPS_OK_FIX_3D_DGPS;
+        case AP_GPS_DRTK::PSAT_FVI:
+            printf ("lat:%.7f, lng:%.7f, hgt:%.6f\n", fvi_msg.lat, fvi_msg.lng, fvi_msg.hgt);
+            printf ("baseline:%.6f, heading:%.6f, master_stas:%f, sub_stas:%f\n",
+                    fvi_msg.baseline, fvi_msg.heading, fvi_msg.master_antenna_star, fvi_msg.sub_antenna_star);
+            state.time_week = 0;
+            state.time_week_ms = (uint32_t) fvi_msg.utc_time * 1000;
+            uint8_t HH = state.time_week_ms / 10000000;
+            uint8_t MM = (state.time_week_ms - HH) / 100000;
+            uint8_t SS = (state.time_week_ms - HH - MM) / 1000;
+            state.time_week_ms = ((HH * 60 + MM) * 60 + SS) * 1000 + (state.time_week_ms - HH - MM - SS);
+            state.last_gps_time_ms = state.time_week_ms;
+
+            state.location.lat = (int32_t) (fvi_msg.lat*1e7);
+            state.location.lng = (int32_t) (fvi_msg.lng*1e7);
+            state.location.alt = (int32_t) (fvi_msg.hgt*1e2);
+
+            state.num_sats = fvi_msg.master_antenna_star;
+
+            state.horizontal_accuracy = (float) ((fvi_msg.latsdev + fvi_msg.lngsdev)/2);
+            state.vertical_accuracy = (float) fvi_msg.hgtsdev;
+            state.have_horizontal_accuracy = true;
+            state.have_vertical_accuracy = true;
+
+            switch ((uint8_t)fvi_msg.position_status)
+            {
+                case 1:
+                    state.status = AP_GPS::GPS_OK_FIX_3D;
+                    break;
+                case 2:
+                    state.status = AP_GPS::GPS_OK_FIX_3D_DGPS;
+                    break;
+                case 4:
+                case 5:
+                    state.status = AP_GPS::GPS_OK_FIX_3D_RTK;
+                    break;
+                case 0: // NONE
+                default:
+                    state.status = AP_GPS::NO_FIX;
+                    break;
+            }
+
+            state.ground_speed = (float) fvi_msg.ground_speed;
+            state.velocity.x = (float) fvi_msg.n_vel;
+            state.velocity.y = (float) fvi_msg.e_vel;
+            state.velocity.z = -(float) fvi_msg.u_vel;
+            state.have_vertical_velocity = true;
+
+            state.baseline_cm = fvi_msg.baseline * 100;
+            state.heading = fvi_msg.heading * 100;
+            if ((uint8_t)fvi_msg.heading_status != 0) {
+                state.have_heading_accuracy = true;
+                state.heading = fvi_msg.heading * 100;
+            } else {
+                state.have_heading_accuracy = false;
+            }
+
+        //    printf ("before..lat:%d, lng:%d, hgt:%d\n", state.location.lat, state.location.lng, state.location.alt);
+        //    printf ("baseline:%d cm, heading:%d, master_stas:%d\n",
+        //            state.baseline_cm, state.heading, state.num_sats);
             break;
-        case 4:
-        case 5:
-            state.status = AP_GPS::GPS_OK_FIX_3D_RTK;
-            break;
-        case 0: // NONE
         default:
-            state.status = AP_GPS::NO_FIX;
             break;
     }
-
-    state.ground_speed = (float) fvi_msg.ground_speed;
-    state.velocity.x = (float) fvi_msg.n_vel;
-    state.velocity.y = (float) fvi_msg.e_vel;
-    state.velocity.z = -(float) fvi_msg.u_vel;
-    state.have_vertical_velocity = true;
-
-    state.baseline_cm = fvi_msg.baseline * 100;
-    state.heading = fvi_msg.heading * 100;
-    if ((uint8_t)fvi_msg.heading_status != 0) {
-        state.have_heading_accuracy = true;
-        state.heading = fvi_msg.heading * 100;
-    } else {
-        state.have_heading_accuracy = false;
-    }
-
-//    printf ("before..lat:%d, lng:%d, hgt:%d\n", state.location.lat, state.location.lng, state.location.alt);
-//    printf ("baseline:%d cm, heading:%d, master_stas:%d\n",
-//            state.baseline_cm, state.heading, state.num_sats);
 
 }
 

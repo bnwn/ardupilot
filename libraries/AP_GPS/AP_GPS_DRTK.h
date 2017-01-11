@@ -26,37 +26,43 @@
 #define BUF_SIZE 400
 #define MESSAGE_TYPE_FVI 0x465649
 #define START_CHARACTER 0x24
+//#define START_SEQ_GNGGA 0x474E474741
 #define START_SEQ_PSAT 0x50534154
 #define SEPARATOR 0x2C
 #define END_CHARACTER 0x2A
 #define RADIX_POINT 0x2E
 #define MINUS 0x2D
 
-#define UTC_TIME_OFFSET 1
-#define LATTITUDE_OFFSET 2
-#define LONGITUDE_OFFSET 3
-#define ELEVATION_OFFSET 4
-#define LATTITUDE_VARIANCE_OFFSET 5
-#define LONGITUDE_VARIANCE_OFFSET 6
-#define ELEVATION_VARIANCE_OFFSET 7
-#define HEADING_OFFSET 8
-#define HEADING_VARIANCE_OFFSET 9
-#define PITCH_OFFSET 10
-#define PITCH_VARIANCE_OFFSET 11
-#define ROLL_OFFSET 12
-#define ROLL_VARIANCE_OFFSET 13
-#define EAST_SPEED_OFFSET 14
-#define NORTH_SPEED_OFFSET 15
-#define UP_SPEED_OFFSET 16
-#define GROUND_SPEED_OFFSET 17
-#define EAST_COORDINATE_OFFSET 18
-#define NORTH_COORDINATE_OFFSET 19
-#define UP_COORDINATE_OFFSET 20
-#define MASTER_STAR_OFFSET 24
-#define SUB_STAR_OFFSET 25
-#define POSITION_STATUS_OFFSET 26
-#define HEADING_STATUS_OFFSET 27
-#define BASELINE_LENGTH 28
+// use to fvi message
+#define FVI_UTC_TIME_OFFSET 1
+#define FVI_LATTITUDE_OFFSET 2
+#define FVI_LONGITUDE_OFFSET 3
+#define FVI_ELEVATION_OFFSET 4
+#define FVI_LATTITUDE_VARIANCE_OFFSET 5
+#define FVI_LONGITUDE_VARIANCE_OFFSET 6
+#define FVI_ELEVATION_VARIANCE_OFFSET 7
+#define FVI_HEADING_OFFSET 8
+#define FVI_HEADING_VARIANCE_OFFSET 9
+#define FVI_PITCH_OFFSET 10
+#define FVI_PITCH_VARIANCE_OFFSET 11
+#define FVI_ROLL_OFFSET 12
+#define FVI_ROLL_VARIANCE_OFFSET 13
+#define FVI_EAST_SPEED_OFFSET 14
+#define FVI_NORTH_SPEED_OFFSET 15
+#define FVI_UP_SPEED_OFFSET 16
+#define FVI_GROUND_SPEED_OFFSET 17
+#define FVI_EAST_COORDINATE_OFFSET 18
+#define FVI_NORTH_COORDINATE_OFFSET 19
+#define FVI_UP_COORDINATE_OFFSET 20
+#define FVI_MASTER_STAR_OFFSET 23
+#define FVI_SUB_STAR_OFFSET 24
+#define FVI_POSITION_STATUS_OFFSET 25
+#define FVI_HEADING_STATUS_OFFSET 26
+#define FVI_BASELINE_LENGTH 27
+
+// use to gngga message
+#define GGA_PDOP_OFFSET 8
+#define GGA_ELEVATION_OFFSET 9
 
 class AP_GPS_DRTK : public AP_GPS_Backend
 {
@@ -72,9 +78,15 @@ public:
 
     void inject_data(uint8_t *data, uint8_t len);
 
+    enum packet_type {
+        NONE = 0,
+        GNGGA = 1,
+        PSAT_FVI = 2,
+    };
+
 private:
 
-    void process_message();
+    void process_message(enum packet_type _packet);
 
     inline void find_char(char *_buf_, char _c, int16_t &_len);
     inline void HexToFloat(char *_buf_, int16_t _len, double &_data);
@@ -84,7 +96,7 @@ private:
     uint8_t _init_blob_index = 0;
     uint32_t _init_blob_time = 0;
     const char* _initialisation_blob[2] = {
-        "unlogall\r\n", // cleanup enviroment
+        "log gga ontime 0.1\r\n", // get gngga
         "log fvi ontime 0.1\r\n", // get fvi
     };
 
@@ -121,5 +133,10 @@ private:
         double heading_status;
         double baseline;
     } fvi_msg;
+
+    struct gga {
+        double pdop;
+        double elevation;
+    } gga_msg;
 
 };

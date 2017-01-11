@@ -50,7 +50,7 @@
 
 #define AP_MISSION_RANGEFINDER_GAIN         1.0f
 
-//define POINT_TEST
+//#define POINT_TEST
 
 // mission state enumeration
 enum point_save_state {

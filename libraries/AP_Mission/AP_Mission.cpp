@@ -173,10 +173,10 @@ point_save_state AP_Mission::clear_point_item()
     _point_flags.save_state = AP_MISSION_POINT_CLEAR_UP;
 
 #ifdef POINT_TEST
-    _point_a_lat.set(0.0f);
-    _point_a_lon.set(0.0f);
-    _point_b_lat.set(0.0f);
-    _point_b_lon.set(0.0f);
+    _point_a_lat.set_and_save(0.0f);
+    _point_a_lon.set_and_save(0.0f);
+    _point_b_lat.set_and_save(0.0f);
+    _point_b_lon.set_and_save(0.0f);
 #endif
 
     return AP_MISSION_POINT_CLEAR_UP;
@@ -271,8 +271,8 @@ point_save_state AP_Mission::set_current_point()
             if (write_cmd_to_storage(AP_MISSION_POINT_CURRENT_OFFSET, cmd, AP_MISSION_POINT_ATOB_RUNNING)) {
                 ret = current_point_set_index;
 #ifdef POINT_TEST
-                _point_a_lat.set(cmd.content.location.lat);
-                _point_a_lon.set(cmd.content.location.lng);
+                _point_a_lat.set_and_save(cmd.content.location.lat);
+                _point_a_lon.set_and_save(cmd.content.location.lng);
 #endif
                 _point_flags.save_state = AP_MISSION_POINT_SET_B;
             }
@@ -281,8 +281,8 @@ point_save_state AP_Mission::set_current_point()
         if (write_cmd_to_storage(AP_MISSION_POINT_B_OFFSET, cmd, AP_MISSION_POINT_ATOB_RUNNING)) {
             ret = current_point_set_index;
 #ifdef POINT_TEST
-            _point_b_lat.set(cmd.content.location.lat);
-            _point_b_lon.set(cmd.content.location.lng);
+            _point_b_lat.set_and_save(cmd.content.location.lat);
+            _point_b_lon.set_and_save(cmd.content.location.lng);
 #endif
             _point_flags.save_state = AP_MISSION_POINT_SET_A;
         }
@@ -399,10 +399,10 @@ void AP_Mission::point_atob_start()
     }
 
 #ifdef POINT_TEST
-    if (_point_cmd_a.content.location.lat != _point_a_lat.get() ||
-            _point_cmd_a.content.location.lng != _point_a_lon.get() ||
-            _point_cmd_b.content.location.lat != _point_b_lat.get() ||
-            _point_cmd_b.content.location.lng != _point_b_lon.get()) {
+    if ((_point_cmd_a.content.location.lat != _point_a_lat.get()) ||
+            (_point_cmd_a.content.location.lng != _point_a_lon.get()) ||
+            (_point_cmd_b.content.location.lat != _point_b_lat.get()) ||
+            (_point_cmd_b.content.location.lng != _point_b_lon.get())) {
         _point_cmd_a.content.location.lat = _point_a_lat.get();
         _point_cmd_a.content.location.lng = _point_a_lon.get();
         _point_cmd_b.content.location.lat = _point_b_lat.get();
