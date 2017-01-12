@@ -46,10 +46,10 @@ AP_GPS_DRTK::AP_GPS_DRTK(AP_GPS &_gps, AP_GPS::GPS_State &_state,
     _buf{0}
 {
     const char *init_str = _initialisation_blob[0];
-    const char *init_str1 = _initialisation_blob[1];
+  //  const char *init_str1 = _initialisation_blob[1];
 
     port->write((const uint8_t*)init_str, strlen(init_str));
-    port->write((const uint8_t*)init_str1, strlen(init_str1));
+ //   port->write((const uint8_t*)init_str1, strlen(init_str1));
 }
 
 /*
@@ -91,7 +91,7 @@ bool AP_GPS_DRTK::read(void)
     find_char(_buf, START_CHARACTER, offset);
     if (-1 != offset) {
         int16_t end_offset = 0;
-        int8_t current_offset;
+        int8_t current_offset = 0;
         find_char(_buf+offset+1, END_CHARACTER, end_offset);
         if (end_offset != -1) {
             end_offset += (offset + 1);
@@ -101,6 +101,9 @@ bool AP_GPS_DRTK::read(void)
             int64_t msg_type = 0;
             find_char(_buf+offset+1, SEPARATOR, data_len);
             for (int j=1; j<=data_len; j++) {
+                if (j == 5) {
+                    break;
+                }
                 start_seq <<= 8;
                 start_seq |= _buf[offset+j];
             }
@@ -151,25 +154,12 @@ bool AP_GPS_DRTK::read(void)
                         // reserve
                     }
 
-                    // ending code
-                    end_offset += 4;
-                    data_len = _buf_offset-end_offset-1;
-                    for (i=0; i<data_len; i++) {
-                        _buf[i] = _buf[end_offset+i+1];
-                    }
-                    memset(_buf+data_len, '\0', (BUF_SIZE - data_len) * sizeof(char));
-                    _buf_offset = data_len;
-
                     process_message(AP_GPS_DRTK::PSAT_FVI);
 
                     ret = true;
                     break;
 
-<<<<<<< HEAD
-                case 0:
-=======
                 case START_SEQ_GNGGA:
->>>>>>> 75b8e3639be2d313785827cc56e35d3a732b15af
                     current_offset = GGA_PDOP_OFFSET;
                     get_reality_data(gga_msg.pdop, _buf, offset, current_offset);
                     get_reality_data(gga_msg.elevation, _buf, offset);
@@ -177,11 +167,15 @@ bool AP_GPS_DRTK::read(void)
                     process_message(AP_GPS_DRTK::GNGGA);
                     ret = true;
                     break;
-<<<<<<< HEAD
-                default:
-=======
->>>>>>> 75b8e3639be2d313785827cc56e35d3a732b15af
             }
+            // ending code
+            end_offset += 4;
+            data_len = _buf_offset-end_offset-1;
+            for (i=0; i<data_len; i++) {
+                _buf[i] = _buf[end_offset+i+1];
+            }
+            memset(_buf+data_len, '\0', (BUF_SIZE - data_len) * sizeof(char));
+            _buf_offset = data_len;
         } else {
             int data_len = _buf_offset - offset;
             for (i=0; i<data_len; i++) {
@@ -204,18 +198,19 @@ void AP_GPS_DRTK::process_message(enum packet_type _packet)
         case AP_GPS_DRTK::NONE:
             return;
         case AP_GPS_DRTK::GNGGA:
+//            printf ("gga pdop: %.2f\n", gga_msg.pdop);
             state.hdop = gga_msg.pdop * 100;
             break;
         case AP_GPS_DRTK::PSAT_FVI:
-            printf ("lat:%.7f, lng:%.7f, hgt:%.6f\n", fvi_msg.lat, fvi_msg.lng, fvi_msg.hgt);
-            printf ("baseline:%.6f, heading:%.6f, master_stas:%f, sub_stas:%f\n",
-                    fvi_msg.baseline, fvi_msg.heading, fvi_msg.master_antenna_star, fvi_msg.sub_antenna_star);
+//            printf ("utc_time:%.2f, lat:%.7f, lng:%.7f, hgt:%.6f\n", fvi_msg.lat, fvi_msg.lng, fvi_msg.hgt);
+//            printf ("baseline:%.6f, heading:%.6f, master_stas:%f, sub_stas:%f\n",
+//                    fvi_msg.utc_time, fvi_msg.baseline, fvi_msg.heading, fvi_msg.master_antenna_star, fvi_msg.sub_antenna_star);
             state.time_week = 0;
-            state.time_week_ms = (uint32_t) fvi_msg.utc_time * 1000;
+            state.time_week_ms = (uint32_t)(fvi_msg.utc_time * 1000);
             uint8_t HH = state.time_week_ms / 10000000;
-            uint8_t MM = (state.time_week_ms - HH) / 100000;
-            uint8_t SS = (state.time_week_ms - HH - MM) / 1000;
-            state.time_week_ms = ((HH * 60 + MM) * 60 + SS) * 1000 + (state.time_week_ms - HH - MM - SS);
+            uint8_t MM = (state.time_week_ms % 10000000) / 100000;
+            uint8_t SS = (state.time_week_ms % 100000) / 1000;
+            state.time_week_ms = ((HH * 60 + MM) * 60 + SS) * 1000 + (state.time_week_ms % 1000);
             state.last_gps_time_ms = state.time_week_ms;
 
             state.location.lat = (int32_t) (fvi_msg.lat*1e7);
@@ -262,12 +257,11 @@ void AP_GPS_DRTK::process_message(enum packet_type _packet)
                 state.have_heading_accuracy = false;
             }
 
-        //    printf ("before..lat:%d, lng:%d, hgt:%d\n", state.location.lat, state.location.lng, state.location.alt);
-        //    printf ("baseline:%d cm, heading:%d, master_stas:%d\n",
-        //            state.baseline_cm, state.heading, state.num_sats);
+//            printf ("before..time_ms:%d, lat:%d, lng:%d, hgt:%d\n", state.time_week_ms, state.location.lat, state.location.lng, state.location.alt);
+//            printf ("baseline:%d cm, heading:%d, master_stas:%d\n",
+//                    state.baseline_cm, state.heading, state.num_sats);
             break;
     }
-
 }
 
 void AP_GPS_DRTK::inject_data(uint8_t *data, uint8_t len)

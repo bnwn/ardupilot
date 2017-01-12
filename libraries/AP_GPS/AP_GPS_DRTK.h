@@ -23,10 +23,10 @@
 #include "AP_GPS.h"
 #include "GPS_Backend.h"
 
-#define BUF_SIZE 400
+#define BUF_SIZE 500
 #define MESSAGE_TYPE_FVI 0x465649
 #define START_CHARACTER 0x24
-#define START_SEQ_GNGGA 0x474E474741
+#define START_SEQ_GNGGA 0x474E4747
 #define START_SEQ_PSAT 0x50534154
 #define SEPARATOR 0x2C
 #define END_CHARACTER 0x2A
@@ -54,11 +54,11 @@
 #define FVI_EAST_COORDINATE_OFFSET 18
 #define FVI_NORTH_COORDINATE_OFFSET 19
 #define FVI_UP_COORDINATE_OFFSET 20
-#define FVI_MASTER_STAR_OFFSET 23
-#define FVI_SUB_STAR_OFFSET 24
+#define FVI_MASTER_STAR_OFFSET 24
+#define FVI_SUB_STAR_OFFSET 25
 #define FVI_POSITION_STATUS_OFFSET 25
-#define FVI_HEADING_STATUS_OFFSET 26
-#define FVI_BASELINE_LENGTH 27
+#define FVI_HEADING_STATUS_OFFSET 27
+#define FVI_BASELINE_LENGTH 28
 
 // use to gngga message
 #define GGA_PDOP_OFFSET 8
@@ -96,7 +96,7 @@ private:
     uint8_t _init_blob_index = 0;
     uint32_t _init_blob_time = 0;
     const char* _initialisation_blob[2] = {
-        "log gga ontime 0.1\r\n", // get gngga
+        "log gga ontime 0.1\r\nlog fvi ontime 0.1\r\n", // get gngga and fvi
         "log fvi ontime 0.1\r\n", // get fvi
     };
 
