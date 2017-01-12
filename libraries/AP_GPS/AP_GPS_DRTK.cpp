@@ -165,7 +165,7 @@ bool AP_GPS_DRTK::read(void)
                     ret = true;
                     break;
 
-                case 0x4E474741:
+                case 0:
                     current_offset = GGA_PDOP_OFFSET;
                     get_reality_data(gga_msg.pdop, _buf, offset, current_offset);
                     get_reality_data(gga_msg.elevation, _buf, offset);
@@ -174,7 +174,6 @@ bool AP_GPS_DRTK::read(void)
                     ret = true;
                     break;
                 default:
-                    break;
             }
         } else {
             int data_len = _buf_offset - offset;
