@@ -246,10 +246,11 @@ void AP_GPS_DRTK::process_message(enum packet_type _packet)
             state.velocity.x = (float) fvi_msg.n_vel;
             state.velocity.y = (float) fvi_msg.e_vel;
             state.velocity.z = -(float) fvi_msg.u_vel;
+            state.ground_course = wrap_360(degrees(atan2f(state.velocity.y, state.velocity.x)));
             state.have_vertical_velocity = true;
 
             state.baseline_cm = fvi_msg.baseline * 100;
-            state.heading = fvi_msg.heading * 100;
+//            state.heading = fvi_msg.heading * 100;
             if ((uint8_t)fvi_msg.heading_status != 0) {
                 state.have_heading_accuracy = true;
                 state.heading = fvi_msg.heading * 100;
