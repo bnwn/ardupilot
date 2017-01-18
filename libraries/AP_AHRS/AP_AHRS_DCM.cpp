@@ -431,7 +431,29 @@ AP_AHRS_DCM::drift_correction_yaw(void)
     float yaw_error;
     float yaw_deltat;
 
-    if (AP_AHRS_DCM::use_compass()) {
+    if (have_gps() && _gps.have_heading_accuracy()) {
+        /* 
+         * use gps heading if have heading accuracy
+         */
+        if (_gps.last_fix_time_ms() != _gps_last_update) {
+            yaw_deltat = (_gps.last_fix_time_ms() - _gps_last_update) * 1.0e-3f;
+            _gps_last_update = _gps.last_fix_time_ms();
+            new_value = true;
+            float gps_heading_rad = ToRad(_gps.get_heading() * 0.01f);
+            float yaw_error_rad = wrap_PI(gps_heading_rad - yaw);
+            yaw_error = sinf(yaw_error_rad);
+            
+            if (!_flags.have_initial_yaw ||
+                yaw_deltat > 20 || 
+                    fabsf(yaw_error_rad) >= 1.047f) {
+                // reset DCM matrix based on current yaw
+                _dcm_matrix.from_euler(roll, pitch, gps_heading_rad);
+                _omega_yaw_P.zero();
+                _flags.have_initial_yaw = true;
+                yaw_error = 0;                                                                         
+            }
+        }
+    } else if (AP_AHRS_DCM::use_compass()) {
         /*
           we are using compass for yaw
          */

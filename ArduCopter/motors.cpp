@@ -236,7 +236,6 @@ void Copter::init_disarm_motors()
             }
         }
     }
-
 #if AUTOTUNE_ENABLED == ENABLED
     // save auto tuned parameters
     autotune_save_tuning_gains();

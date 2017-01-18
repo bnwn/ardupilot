@@ -138,8 +138,8 @@ bool AP_GPS_DRTK::read(void)
                             get_reality_data(fvi_msg.pitchsdev, _buf, offset);
                             get_reality_data(fvi_msg.roll, _buf, offset);
                             get_reality_data(fvi_msg.rollsdev, _buf, offset);
-                            get_reality_data(fvi_msg.n_vel, _buf, offset);
                             get_reality_data(fvi_msg.e_vel, _buf, offset);
+                            get_reality_data(fvi_msg.n_vel, _buf, offset);
                             get_reality_data(fvi_msg.u_vel, _buf, offset);
                             get_reality_data(fvi_msg.ground_speed, _buf, offset);
 

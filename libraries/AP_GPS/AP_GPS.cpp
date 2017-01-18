@@ -53,7 +53,7 @@ const AP_Param::GroupInfo AP_GPS::var_info[] = {
     // @Description: GPS type of 2nd GPS
     // @Values: 0:None,1:AUTO,2:uBlox,3:MTK,4:MTK19,5:NMEA,6:SiRF,7:HIL,8:SwiftNav,9:PX4-UAVCAN,10:SBF,11:GSOF
     // @RebootRequired: True
-    AP_GROUPINFO("TYPE2",   1, AP_GPS, _type[1], 0),
+    AP_GROUPINFO("TYPE2",   1, AP_GPS, _type[1], 1),
 
     // @Param: NAVFILTER
     // @DisplayName: Navigation filter setting
@@ -215,7 +215,8 @@ AP_GPS::detect_instance(uint8_t instance)
     // use to startup BDNST DRTK
     uint32_t baudrate_tmp = 0;
     int8_t index = 0;
-    if (_type[instance] == GPS_TYPE_DRTK) {
+    if (_type[instance] == GPS_TYPE_DRTK &&
+            _port[instance] != nullptr) {
         baudrate_tmp = _serial_manager.find_baudrate(AP_SerialManager::SerialProtocol_GPS, instance);
         for (; index<7; index++) {
            if (baudrate_tmp == _baudrates[index]) {
