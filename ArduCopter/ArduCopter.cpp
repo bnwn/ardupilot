@@ -186,6 +186,9 @@ void Copter::compass_accumulate(void)
 {
     if (g.compass_enabled) {
         compass.accumulate();
+        if (compass.learn_offsets_enabled()) {
+            compass.learn_offsets();
+        }
     }
 }
 

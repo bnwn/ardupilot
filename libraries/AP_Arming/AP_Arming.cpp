@@ -75,11 +75,12 @@ const AP_Param::GroupInfo AP_Arming::var_info[] = {
 
 //The function point is particularly hacky, hacky, tacky
 //but I don't want to reimplement messaging to GCS at the moment:
-AP_Arming::AP_Arming(const AP_AHRS &ahrs_ref, const AP_Baro &baro, Compass &compass,
+AP_Arming::AP_Arming(const AP_AHRS &ahrs_ref, const AP_Baro &baro, Compass &compass, AP_GPS &gps,
                      const AP_BattMonitor &battery, const enum HomeState &home_set) :
     ahrs(ahrs_ref),
     barometer(baro),
     _compass(compass),
+    _gps(gps),
     _battery(battery),
     home_is_set(home_set),
     armed(false),
@@ -262,6 +263,13 @@ bool AP_Arming::compass_checks(bool report)
     if ((checks_to_perform) & ARMING_CHECK_ALL ||
         (checks_to_perform) & ARMING_CHECK_COMPASS) {
 
+        if (have_gps() && _gps.have_heading_accuracy()) {
+            if (report) {
+                GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_NOTICE, "Use heading from D-GPS");
+            }
+            return true;
+        }
+
         if (!_compass.use_for_yaw()) {
             // compass use is disabled
             return true;
@@ -319,7 +327,7 @@ bool AP_Arming::compass_checks(bool report)
         if (!_compass.consistent()) {
             if (report) {
                 GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_CRITICAL,"PreArm: Compasses inconsistent");
-    }
+             }
             return false;
         }
     }

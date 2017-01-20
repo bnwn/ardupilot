@@ -320,7 +320,7 @@ public:
 
     // return true if the GPS supports heading
     bool have_heading_accuracy(uint8_t instance) const {
-        return state[instance].have_heading_accuracy;
+        return (state[instance].have_heading_accuracy && (_use_for_yaw.get() == 1));
     }
     bool have_heading_accuracy(void) const {
         return have_heading_accuracy(primary_instance);
@@ -364,6 +364,7 @@ public:
     AP_Int8 _gnss_mode[2];
     AP_Int8 _save_config;
     AP_Int8 _auto_config;
+    AP_Int8 _use_for_yaw;
     
     // handle sending of initialisation strings to the GPS
     void send_blob_start(uint8_t instance, const char *_blob, uint16_t size);

@@ -23,6 +23,8 @@
  */
 #include "AP_AHRS.h"
 #include <AP_HAL/AP_HAL.h>
+#include <GCS_MAVLink/GCS_MAVLink.h>
+#include <GCS_MAVLink/GCS.h>
 
 extern const AP_HAL::HAL& hal;
 
@@ -435,6 +437,7 @@ AP_AHRS_DCM::drift_correction_yaw(void)
         /* 
          * use gps heading if have heading accuracy
          */
+        GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "use D-GPS for correct yaw");
         if (_gps.last_fix_time_ms() != _gps_last_update) {
             yaw_deltat = (_gps.last_fix_time_ms() - _gps_last_update) * 1.0e-3f;
             _gps_last_update = _gps.last_fix_time_ms();
@@ -457,6 +460,7 @@ AP_AHRS_DCM::drift_correction_yaw(void)
         /*
           we are using compass for yaw
          */
+        GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "use compass for correct yaw");
         if (_compass->last_update_usec() != _compass_last_update) {
             yaw_deltat = (_compass->last_update_usec() - _compass_last_update) * 1.0e-6f;
             _compass_last_update = _compass->last_update_usec();
