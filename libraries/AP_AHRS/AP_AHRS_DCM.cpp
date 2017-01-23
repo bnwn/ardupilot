@@ -437,7 +437,6 @@ AP_AHRS_DCM::drift_correction_yaw(void)
         /* 
          * use gps heading if have heading accuracy
          */
-        GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "use D-GPS for correct yaw");
         if (_gps.last_fix_time_ms() != _gps_last_update) {
             yaw_deltat = (_gps.last_fix_time_ms() - _gps_last_update) * 1.0e-3f;
             _gps_last_update = _gps.last_fix_time_ms();
@@ -446,6 +445,9 @@ AP_AHRS_DCM::drift_correction_yaw(void)
             float yaw_error_rad = wrap_PI(gps_heading_rad - yaw);
             yaw_error = sinf(yaw_error_rad);
             
+
+            GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "use DGPS,yaw_er:%.2f,head:%d", yaw_error, _gps.get_heading());
+
             if (!_flags.have_initial_yaw ||
                 yaw_deltat > 20 || 
                     fabsf(yaw_error_rad) >= 1.047f) {
