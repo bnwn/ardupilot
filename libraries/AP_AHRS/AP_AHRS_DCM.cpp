@@ -4,7 +4,7 @@
  *
  *       AHRS system using DCM matrices
  *
- *       Based on DCM code by Doug Weibel, Jordi Muñoz and Jose Julio. DIYDrones.com
+ *       Based on DCM code by Doug Weibel, Jordi Mu?oz and Jose Julio. DIYDrones.com
  *
  *       Adapted for the general ArduPilot AHRS interface by Andrew Tridgell
 
@@ -275,7 +275,7 @@ AP_AHRS_DCM::renorm(Vector3f const &a, Vector3f &result)
  *  to approximations rather than identities. In effect, the axes in the two frames of reference no
  *  longer describe a rigid body. Fortunately, numerical error accumulates very slowly, so it is a
  *  simple matter to stay ahead of it.
- *  We call the process of enforcing the orthogonality conditions ÒrenormalizationÓ.
+ *  We call the process of enforcing the orthogonality conditions ?renormalization?.
  */
 void
 AP_AHRS_DCM::normalize(void)
@@ -462,7 +462,6 @@ AP_AHRS_DCM::drift_correction_yaw(void)
         /*
           we are using compass for yaw
          */
-        GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "use compass for correct yaw");
         if (_compass->last_update_usec() != _compass_last_update) {
             yaw_deltat = (_compass->last_update_usec() - _compass_last_update) * 1.0e-6f;
             _compass_last_update = _compass->last_update_usec();

@@ -177,6 +177,7 @@ bool Copter::get_pesticide_remaining(void)
 {
     read_flowmeter();
 
+//    GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "rate:%.2f", flowmeter_state.flowrate * 0.01f);
     if (flowmeter_ok()) {
         uint32_t now = AP_HAL::millis();
 
