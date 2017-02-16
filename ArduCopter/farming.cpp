@@ -17,8 +17,8 @@ void Copter::radio_to_pump_output()
 
 void Copter::pesticide_remaining_check()
 {
-    if (flowmeter.farming_state() && !ap.land_complete && !get_pesticide_remaining()) {
-        // pesticide is empty
+    if (control_mode == POINT_ATOB && flowmeter.farming_state() && !ap.land_complete && !get_pesticide_remaining()) {
+        // only return home when pesticide is empty
         set_mode(RTL, MODE_REASON_PESTICIDE_EMPTY);
     }
 //    static int i = 0;

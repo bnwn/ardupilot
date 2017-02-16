@@ -462,7 +462,9 @@ void Copter::three_hz_loop()
 #endif // AC_FENCE_ENABLED
 
 #if SPRAYER == ENABLED
-    sprayer.update();
+    if (control_mode == POINT_ATOB || ap.land_complete) { // in point a to b mode control pump
+        sprayer.update();
+    }
 #endif
 
     update_events();

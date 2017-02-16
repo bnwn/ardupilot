@@ -100,6 +100,7 @@ public:
     AP_Int8  _ground_clearance_cm[RANGEFINDER_MAX_INSTANCES];
     AP_Int8  _address[RANGEFINDER_MAX_INSTANCES];
     AP_Int16 _powersave_range;
+    AP_Int8  _tilt[RANGEFINDER_MAX_INSTANCES];
 
     static const struct AP_Param::GroupInfo var_info[];
     
@@ -125,6 +126,10 @@ public:
     }
     uint16_t distance_cm() const {
         return distance_cm(primary_instance);
+    }
+
+    uint8_t service_tilt() const {
+        return _tilt[primary_instance].get();
     }
 
     void mmwradar_distance(uint8_t instance, int16_t &range_cm, int16_t &rcs_cm, int16_t &snr, int16_t& vel_cm) {

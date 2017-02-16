@@ -70,6 +70,7 @@ AC_Sprayer::AC_Sprayer(const AP_InertialNav* inav) :
     _flags.testing = false;
 
     // To-Do: ensure that the pump and spinner servo channels are enabled
+    enable(false);
 }
 
 void AC_Sprayer::enable(bool true_false)

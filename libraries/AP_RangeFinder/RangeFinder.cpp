@@ -133,6 +133,13 @@ const AP_Param::GroupInfo RangeFinder::var_info[] = {
     // @User: Standard
     AP_GROUPINFO("_ADDR", 23, RangeFinder, _address[0], 0),
 
+    // @Param: _TILT
+    // @DisplayName: degree tilt of sensor
+    // @Range: 0 45
+    // @Increment: 1
+    // @User: Standard
+    AP_GROUPINFO("_TILT", 25, RangeFinder, _tilt[0], 30),
+
 #if RANGEFINDER_MAX_INSTANCES > 1
     // @Param: 2_TYPE
     // @DisplayName: Second Rangefinder type
@@ -225,6 +232,13 @@ const AP_Param::GroupInfo RangeFinder::var_info[] = {
     // @Increment: 1
     // @User: Advanced
     AP_GROUPINFO("2_ADDR", 24, RangeFinder, _address[1], 0),
+
+    // @Param: 2_TILT
+    // @DisplayName: degree tilt of sensor
+    // @Range: 0 45
+    // @Increment: 1
+    // @User: Standard
+    AP_GROUPINFO("2_TILT", 26, RangeFinder, _tilt[1], 30),
 
 #endif
 

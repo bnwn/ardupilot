@@ -55,8 +55,19 @@ void Copter::read_rangefinder(void)
     int16_t temp_alt = rangefinder.distance_cm();
 
  #if RANGEFINDER_TILT_CORRECTION == ENABLED
-    // correct alt for angle of the rangefinder
-    temp_alt = (float)temp_alt * MAX(0.707f, ahrs.get_rotation_body_to_ned().c.z);
+    if (rangefinder.service_tilt() != 0) { // is mmwradar
+        rangefinder_state.tilt_angle = rangefinder.service_tilt() * M_PI / 180 + ahrs.pitch;
+        if (rangefinder_state.tilt_angle < 0) {
+            rangefinder_state.tilt_angle += M_2PI;
+        } else if (rangefinder_state.tilt_angle > M_2PI) {
+            rangefinder_state.tilt_angle -= M_2PI;
+        }
+        temp_alt = (float)temp_alt * MAX(0.707f, cos(rangefinder_state.tilt_angle) * cos(ahrs.roll));
+    } else {
+        // correct alt for angle of the rangefinder
+        temp_alt = (float)temp_alt * MAX(0.707f, ahrs.get_rotation_body_to_ned().c.z);
+        rangefinder_state.tilt_angle = ahrs.pitch;
+    }
  #endif
 
     rangefinder_state.alt_cm = temp_alt;
