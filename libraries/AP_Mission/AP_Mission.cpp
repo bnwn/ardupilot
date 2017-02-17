@@ -5,6 +5,7 @@
 
 #include "AP_Mission.h"
 #include <AP_Terrain/AP_Terrain.h>
+#include <AC_Sprayer/AC_Sprayer.h>
 
 const AP_Param::GroupInfo AP_Mission::var_info[] = {
 
@@ -593,6 +594,9 @@ void AP_Mission::update(uint8_t mission_type)
                     point_complete();
                     return;
                 }
+            }
+            if (_point_cmd.id == MAV_CMD_NAV_WAYPOINT) {
+                AC_Sprayer::enable(true);
             }
             //market _nav_cmd as complete
             _point_flags.nav_cmd_loaded = false;

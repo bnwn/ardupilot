@@ -290,6 +290,7 @@ void Copter::exit_mode(control_mode_t old_control_mode, control_mode_t new_contr
         if (mission.point_state() == AP_Mission::MISSION_RUNNING) {
             mission.stop();
             mission.save_break_point();
+            sprayer.enable(false);
         }
     }
 

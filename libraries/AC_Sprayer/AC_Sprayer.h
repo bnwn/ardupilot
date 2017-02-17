@@ -42,13 +42,13 @@ public:
     AC_Sprayer(const AP_InertialNav* inav);
 
     /// enable - allows sprayer to be enabled/disabled.  Note: this does not update the eeprom saved value
-    void enable(bool true_false);
+    static void enable(bool true_false);
 
     /// enabled - returns true if sprayer is enabled
     bool enabled() const { return _enabled; }
 
     /// test_pump - set to true to turn on pump as if travelling at 1m/s as a test
-    void test_pump(bool true_false) { _flags.testing = true_false; }
+    void test_pump(uint8_t _ch_flag);
 
     /// To-Do: add function to decode pilot input from channel 6 tuning knob
 
@@ -59,6 +59,8 @@ public:
     void update();
 
     static const struct AP_Param::GroupInfo var_info[];
+
+    static bool  _sprayer_enable;
 
 private:
     const AP_InertialNav* const _inav;      ///< pointers to other objects we depend upon

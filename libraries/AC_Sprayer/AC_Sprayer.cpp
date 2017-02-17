@@ -50,6 +50,8 @@ const AP_Param::GroupInfo AC_Sprayer::var_info[] = {
     AP_GROUPEND
 };
 
+bool  AC_Sprayer::_sprayer_enable;
+
 AC_Sprayer::AC_Sprayer(const AP_InertialNav* inav) :
     _inav(inav),
     _speed_over_min_time(0),
@@ -69,6 +71,7 @@ AC_Sprayer::AC_Sprayer(const AP_InertialNav* inav) :
     _flags.spraying = false;
     _flags.testing = false;
 
+    _sprayer_enable = _enabled;
     // To-Do: ensure that the pump and spinner servo channels are enabled
     enable(false);
 }
@@ -76,15 +79,15 @@ AC_Sprayer::AC_Sprayer(const AP_InertialNav* inav) :
 void AC_Sprayer::enable(bool true_false)
 {
     // return immediately if no change
-    if (true_false == _enabled) {
+    if (true_false == _sprayer_enable) {
         return;
     }
 
     // set enabled/disabled parameter (in memory only)
-    _enabled = true_false;
+    _sprayer_enable = true_false;
 
     // turn off the pump and spinner servos if necessary
-    if (!_enabled) {
+    if (!_sprayer_enable) {
         // send output to pump channel
         // To-Do: change 0 below to radio_min of pump servo
         RC_Channel_aux::set_radio_to_min(RC_Channel_aux::k_sprayer_pump);
@@ -103,7 +106,7 @@ AC_Sprayer::update()
     float ground_speed;
 
     // exit immediately if we are disabled (perhaps set pwm values back to defaults)
-    if (!_enabled) {
+    if (!_sprayer_enable) {
         return;
     }
 
@@ -163,9 +166,15 @@ AC_Sprayer::update()
     if (_flags.spraying || _flags.testing) {        
         RC_Channel_aux::move_servo(RC_Channel_aux::k_sprayer_pump, MIN(MAX(ground_speed * _pump_pct_1ms, 100 *_pump_min_pct),10000),0,10000);
         RC_Channel_aux::set_radio(RC_Channel_aux::k_sprayer_spinner, _spinner_pwm);
-    }else{
+    } else {
         // ensure sprayer and spinner are off
         RC_Channel_aux::set_radio_to_min(RC_Channel_aux::k_sprayer_pump);
         RC_Channel_aux::set_radio_to_min(RC_Channel_aux::k_sprayer_spinner);
     }
+}
+
+void AC_Sprayer::test_pump(uint8_t _ch_flag)
+{
+    RC_Channel_aux::move_servo(RC_Channel_aux::k_sprayer_pump, _ch_flag * 5000, 0, 10000);
+    RC_Channel_aux::set_radio(RC_Channel_aux::k_sprayer_spinner, _spinner_pwm);
 }
