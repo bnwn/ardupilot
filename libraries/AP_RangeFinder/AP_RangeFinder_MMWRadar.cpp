@@ -89,7 +89,7 @@ bool AP_RangeFinder_MMWRadar::get_sensor_version(uint32_t &sensor_version)
     data_buf[0] = MMWRADAR_START_SEQUENCE_L;
     data_buf[1] = MMWRADAR_START_SEQUENCE_H;
 
-    hal.scheduler->delay(20);
+    hal.scheduler->delay(500);
     while (!uart->available()) {
         if (AP_HAL::millis() - start_times > 200) {
             printf("wait sensor back timeout.\n");
