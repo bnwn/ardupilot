@@ -442,7 +442,7 @@ void RangeFinder::init(void)
     }
     for (uint8_t i=0; i<RANGEFINDER_MAX_INSTANCES; i++) {
         detect_instance(i);
-        if (drivers[i] != NULL) {
+        if (_type[i] != RangeFinder_TYPE_NONE) {
             // we loaded a driver for this instance, so it must be
             // present (although it may not be healthy)
             num_instances = i+1;
@@ -474,6 +474,8 @@ void RangeFinder::update(void)
             }
             drivers[i]->update();
             update_pre_arm_check(i);
+        } else if (_type[i] != RangeFinder_TYPE_NONE) {
+            detect_instance(i);
         }
     }
 

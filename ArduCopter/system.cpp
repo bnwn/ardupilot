@@ -264,11 +264,11 @@ void Copter::init_ardupilot()
     //-----------------------------
     init_barometer(true);
 
-    // initialise rangefinder
-    init_rangefinder();
-
     // initialise flowmeter
     init_farming();
+
+    // initialise rangefinder
+    init_rangefinder();
 
     // initialise AP_RPM library
     rpm_sensor.init();
