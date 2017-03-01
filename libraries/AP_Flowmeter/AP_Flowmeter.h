@@ -75,6 +75,10 @@ public:
         return _Flowmeter_STATE.pluse_rate;
     }
 
+    float coefficient() const {
+        return (float)(16.0f / _coefficient);
+    }
+
     bool farming_state() const {
         return (_farming_mode == 233);
     }
