@@ -12,7 +12,7 @@ void Copter::init_farming()
 // set output throngh radio channel
 void Copter::radio_to_pump_output()
 {
-    RC_Channel_aux::set_aux_channel_default(RC_Channel_aux::k_manual, CH_9);
+    RC_Channel_aux::set_aux_channel_default(RC_Channel_aux::k_sprayer_pump, CH_8);
 }
 
 void Copter::pesticide_remaining_check()

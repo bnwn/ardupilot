@@ -130,7 +130,13 @@ void Copter::read_rangefinder(void)
 // return true if rangefinder_alt can be used
 bool Copter::rangefinder_alt_ok()
 {
-    return (rangefinder_state.enabled && rangefinder_state.alt_healthy);
+    //return (rangefinder_state.enabled && rangefinder_state.alt_healthy);
+    return rangefinder_alt_ok_auto();
+}
+
+bool Copter::rangefinder_alt_ok_auto()
+{
+    return rangefinder_state.alt_healthy;
 }
 
 void Copter::init_flowmeter(void)

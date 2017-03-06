@@ -1083,6 +1083,7 @@ private:
     void init_rangefinder(void);
     void read_rangefinder(void);
     bool rangefinder_alt_ok();
+    bool rangefinder_alt_ok_auto();
     void init_flowmeter(void);
     void read_flowmeter(void);
     bool get_pesticide_remaining(void);

@@ -38,7 +38,7 @@ const AP_Param::GroupInfo RangeFinder::var_info[] = {
     // @Description: What type of rangefinder device that is connected
     // @Values: 0:None,1:Analog,2:APM2-MaxbotixI2C,3:APM2-PulsedLightI2C,4:PX4-I2C,5:PX4-PWM,6:BBB-PRU,7:LightWareI2C,8:LightWareSerial,9:Bebop,10:MAVLink,12:LeddarOne
     // @User: Standard
-    AP_GROUPINFO("_TYPE",    0, RangeFinder, _type[0], 0),
+    AP_GROUPINFO("_TYPE",    0, RangeFinder, _type[0], 13),
 
     // @Param: _PIN
     // @DisplayName: Rangefinder pin
@@ -76,7 +76,7 @@ const AP_Param::GroupInfo RangeFinder::var_info[] = {
 	// @Units: centimeters
     // @Increment: 1
     // @User: Standard
-    AP_GROUPINFO("_MIN_CM",  5, RangeFinder, _min_distance_cm[0], 20),
+    AP_GROUPINFO("_MIN_CM",  5, RangeFinder, _min_distance_cm[0], 10),
 
     // @Param: _MAX_CM
     // @DisplayName: Rangefinder maximum distance
@@ -84,7 +84,7 @@ const AP_Param::GroupInfo RangeFinder::var_info[] = {
 	// @Units: centimeters
     // @Increment: 1
     // @User: Standard
-    AP_GROUPINFO("_MAX_CM",  6, RangeFinder, _max_distance_cm[0], 700),
+    AP_GROUPINFO("_MAX_CM",  6, RangeFinder, _max_distance_cm[0], 5000),
 
     // @Param: _STOP_PIN
     // @DisplayName: Rangefinder stop pin
@@ -138,7 +138,7 @@ const AP_Param::GroupInfo RangeFinder::var_info[] = {
     // @Range: 0 45
     // @Increment: 1
     // @User: Standard
-    AP_GROUPINFO("_TILT", 25, RangeFinder, _tilt[0], 30),
+    AP_GROUPINFO("_TILT", 25, RangeFinder, _tilt[0], 20),
 
 #if RANGEFINDER_MAX_INSTANCES > 1
     // @Param: 2_TYPE
