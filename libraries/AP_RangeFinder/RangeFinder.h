@@ -129,7 +129,10 @@ public:
     }
 
     uint8_t service_tilt() const {
-        return _tilt[primary_instance].get();
+        return service_tilt(primary_instance);
+    }
+    uint8_t service_tilt(uint8_t instance) const {
+        return _tilt[instance].get();
     }
 
     void mmwradar_distance(uint8_t instance, int16_t &range_cm, int16_t &rcs_cm, int16_t &snr, int16_t& vel_cm) {

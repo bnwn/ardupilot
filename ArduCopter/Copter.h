@@ -212,7 +212,7 @@ private:
         int16_t alt_cm_filter_slide;
         int16_t alt_cm_filter_median;
         uint32_t last_healthy_ms;
-        int16_t tilt_angle;
+        float tilt_angle;
         LowPassFilterFloat alt_cm_filt; // altitude filter
         SlidingFilterFloat alt_cm_filt_slide;
         ModeFilterFloat_Size5 alt_cm_filt_median;

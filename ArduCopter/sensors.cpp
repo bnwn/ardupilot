@@ -48,15 +48,21 @@ void Copter::init_rangefinder(void)
 void Copter::read_rangefinder(void)
 {
 #if RANGEFINDER_ENABLED == ENABLED
+    uint8_t rngfnd_num = 0;
+    float vehicle_tilt = ahrs.pitch;
     rangefinder.update();
 
-    rangefinder_state.alt_healthy = ((rangefinder.status() == RangeFinder::RangeFinder_Good) && (rangefinder.range_valid_count() >= RANGEFINDER_HEALTH_MAX));
+    if (ahrs.pitch_sensor < 0 || ahrs.pitch_sensor > 18000) {
+        rngfnd_num = 1;
+        vehicle_tilt *= -1;
+    }
+    rangefinder_state.alt_healthy = ((rangefinder.status(rngfnd_num) == RangeFinder::RangeFinder_Good) && (rangefinder.range_valid_count(rngfnd_num) >= RANGEFINDER_HEALTH_MAX));
 
-    int16_t temp_alt = rangefinder.distance_cm();
+    int16_t temp_alt = rangefinder.distance_cm(rngfnd_num);
 
  #if RANGEFINDER_TILT_CORRECTION == ENABLED
-    if (rangefinder.service_tilt() != 0) { // is mmwradar
-        rangefinder_state.tilt_angle = rangefinder.service_tilt() * M_PI / 180 + ahrs.pitch;
+    if (rangefinder.service_tilt(rngfnd_num) != 0) { // is mmwradar
+        rangefinder_state.tilt_angle = rangefinder.service_tilt(rngfnd_num) * M_PI / 180 + vehicle_tilt;
         if (rangefinder_state.tilt_angle < 0) {
             rangefinder_state.tilt_angle += M_2PI;
         } else if (rangefinder_state.tilt_angle > M_2PI) {
