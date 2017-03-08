@@ -52,7 +52,7 @@ void Copter::read_rangefinder(void)
     float vehicle_tilt = ahrs.pitch;
     rangefinder.update();
 
-    if (ahrs.pitch_sensor < 0 || ahrs.pitch_sensor > 18000) {
+    if (ahrs.pitch_sensor > 0 && ahrs.pitch_sensor < 18000) {
         rngfnd_num = 1;
         vehicle_tilt *= -1;
     }
