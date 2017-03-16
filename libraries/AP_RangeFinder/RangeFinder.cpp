@@ -138,7 +138,7 @@ const AP_Param::GroupInfo RangeFinder::var_info[] = {
     // @Range: 0 45
     // @Increment: 1
     // @User: Standard
-    AP_GROUPINFO("_TILT", 25, RangeFinder, _tilt[0], 20),
+    AP_GROUPINFO("_TILT", 25, RangeFinder, _tilt[0], 15),
 
 #if RANGEFINDER_MAX_INSTANCES > 1
     // @Param: 2_TYPE
@@ -238,7 +238,7 @@ const AP_Param::GroupInfo RangeFinder::var_info[] = {
     // @Range: 0 45
     // @Increment: 1
     // @User: Standard
-    AP_GROUPINFO("2_TILT", 26, RangeFinder, _tilt[1], 20),
+    AP_GROUPINFO("2_TILT", 26, RangeFinder, _tilt[1], 15),
 
 #endif
 

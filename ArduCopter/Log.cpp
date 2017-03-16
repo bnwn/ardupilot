@@ -340,8 +340,8 @@ void Copter::Log_Write_Control_Tuning()
         //target_climb_rate   : (int16_t)pos_control.get_vel_target_z(),
         //climb_rate          : climb_rate
 
-        desired_rangefinder_alt : (int16_t)(100 * rangefinder_state.alt_cm_filter_median),
-        rangefinder_alt     : (int16_t)(100 * rangefinder_state.alt_cm),
+        desired_rangefinder_alt : (int16_t)(rangefinder_state.alt_cm_filter_median),
+        rangefinder_alt     : (int16_t)(rangefinder_state.alt_cm),
         terr_alt            : terr_alt,
         target_climb_rate   : rangefinder_state.alt_cm_filter,
         climb_rate          : rangefinder_state.alt_cm_filter_slide
