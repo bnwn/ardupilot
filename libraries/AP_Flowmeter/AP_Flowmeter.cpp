@@ -63,6 +63,13 @@ const AP_Param::GroupInfo Flowmeter::var_info[] = {
     // @User: Enigma
     AP_GROUPINFO("_FARMING",  3, Flowmeter, _farming_mode, 233),
 
+    // @Param: _RTL_RATE
+    // @DisplayName: farming mode switch
+    // @Description: control farming mode on/off
+    // @Default: 233(on)
+    // @User: Enigma
+    AP_GROUPINFO("_RTL_RATE",  4, Flowmeter, _rtl_flowrate, PESTICIDE_RTL_REMAINING),
+
     AP_GROUPEND
 };
 

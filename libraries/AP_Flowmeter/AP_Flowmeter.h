@@ -27,6 +27,10 @@
 #define VALID_FLOWRATE_DELTA 1.0f
 #define SAMPLE_INSTANCE 10
 
+#ifndef PESTICIDE_RTL_REMAINING
+ # define PESTICIDE_RTL_REMAINING 100
+#endif
+
 class Flowmeter
 {
 public:
@@ -55,7 +59,8 @@ public:
     AP_Float _coefficient;
     AP_Float _min_flowrate;
     AP_Float _max_flowrate;
-    AP_Int16  _farming_mode;
+    AP_Int16 _farming_mode;
+    AP_Float _rtl_flowrate;
 
     static const struct AP_Param::GroupInfo var_info[];
 
@@ -77,6 +82,10 @@ public:
 
     float coefficient() const {
         return (float)(16.0f / _coefficient);
+    }
+
+    float rtl_flowrate() const {
+        return _rtl_flowrate.get();
     }
 
     bool farming_state() const {
