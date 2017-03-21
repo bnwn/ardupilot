@@ -57,7 +57,7 @@ void Copter::read_rangefinder(void)
 
     int16_t temp_alt;
     float vehicle_tilt = ahrs.pitch;
-    if (rangefinder.service_tilt(0) == 0 && rangefinder.service_tilt(1) == 0) { // is mmwradar
+    if (rangefinder.service_tilt(0) == 0 && rangefinder.service_tilt(1) == 0) { // isn't mmwradar
         // correct alt for angle of the rangefinder
         temp_alt = (float)rangefinder.distance_cm() * MAX(0.707f, ahrs.get_rotation_body_to_ned().c.z);
         rangefinder_state.tilt_angle = ahrs.pitch;
@@ -68,7 +68,7 @@ void Copter::read_rangefinder(void)
         float back_tilt = rangefinder.service_tilt(1) * M_PI / 180 - vehicle_tilt;
 
         rangefinder_state.tilt_angle = MAX(fabs(advance_tilt), fabs(advance_tilt));
-        temp_alt = (advance_alt * MAX(0.707f, cos(advance_tilt) * cos(ahrs.roll)) + back_alt * MAX(0.707f, cos(back_tilt) * cos(ahrs.roll))) / 2;
+        temp_alt = (advance_alt * MAX(0.707f, cos(advance_tilt) * cos(ahrs.roll)) + back_alt * MAX(0.707f, cos(back_tilt) * cos(ahrs.roll))) / rangefinder.fuse_correct();
     } else {
         uint8_t rngfnd_num = 0;
         if (ahrs.pitch_sensor > 0 && ahrs.pitch_sensor < 18000) {

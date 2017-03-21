@@ -275,7 +275,9 @@ void AP_RangeFinder_MMWRadar::update(void)
     uint32_t now = AP_HAL::millis();
     if (get_reading()) {
         if (_packet_form & Packet_Form::Target_Info) {
-            state.distance_cm = _target_info.range_cm;
+            if (_target_info.range_cm > 0) {
+                state.distance_cm = _target_info.range_cm;
+            }
             state.snr = _target_info.snr;
             state.rcs_cm = _target_info.rcs_cm;
             state.vel_cm = _target_info.vel_cm;

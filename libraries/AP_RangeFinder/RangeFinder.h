@@ -101,6 +101,7 @@ public:
     AP_Int8  _address[RANGEFINDER_MAX_INSTANCES];
     AP_Int16 _powersave_range;
     AP_Int8  _tilt[RANGEFINDER_MAX_INSTANCES];
+    AP_Float _fuse;
 
     static const struct AP_Param::GroupInfo var_info[];
     
@@ -206,6 +207,10 @@ public:
     }
     uint8_t mmwradar_valid_count() const {
         return range_valid_count(avoid_obstacle);
+    }
+
+    float fuse_correct() const {
+        return _fuse.get();
     }
 
     /*

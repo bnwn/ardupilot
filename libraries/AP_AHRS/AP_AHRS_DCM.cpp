@@ -434,7 +434,7 @@ AP_AHRS_DCM::drift_correction_yaw(void)
     float yaw_deltat;
 
     if (have_gps() && _gps.have_heading_accuracy()) {
-        /* 
+        /*
          * use gps heading if have heading accuracy
          */
         if (_gps.last_fix_time_ms() != _gps_last_update) {
@@ -444,18 +444,18 @@ AP_AHRS_DCM::drift_correction_yaw(void)
             float gps_heading_rad = ToRad(_gps.get_heading() * 0.01f);
             float yaw_error_rad = wrap_PI(gps_heading_rad - yaw);
             yaw_error = sinf(yaw_error_rad);
-            
+
 
             GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "use DGPS,head:%f", _gps.get_heading() * 0.01f);
 
             if (!_flags.have_initial_yaw ||
-                yaw_deltat > 20 || 
+                yaw_deltat > 20 ||
                     fabsf(yaw_error_rad) >= 1.047f) {
                 // reset DCM matrix based on current yaw
                 _dcm_matrix.from_euler(roll, pitch, gps_heading_rad);
                 _omega_yaw_P.zero();
                 _flags.have_initial_yaw = true;
-                yaw_error = 0;                                                                         
+                yaw_error = 0;
             }
         }
     } else if (AP_AHRS_DCM::use_compass()) {
@@ -719,7 +719,7 @@ AP_AHRS_DCM::drift_correction(float deltat)
         // waiting for more data
         return;
     }
-    
+
     bool using_gps_corrections = false;
     float ra_scale = 1.0f/(_ra_deltat*GRAVITY_MSS);
 

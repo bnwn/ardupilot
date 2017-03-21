@@ -140,6 +140,13 @@ const AP_Param::GroupInfo RangeFinder::var_info[] = {
     // @User: Standard
     AP_GROUPINFO("_TILT", 25, RangeFinder, _tilt[0], 15),
 
+    // @Param: _FUSE
+    // @DisplayName: degree tilt of sensor
+    // @Range: 0 45
+    // @Increment: 1
+    // @User: Standard
+    AP_GROUPINFO("_FUSE", 27, RangeFinder, _fuse, 2.3),
+
 #if RANGEFINDER_MAX_INSTANCES > 1
     // @Param: 2_TYPE
     // @DisplayName: Second Rangefinder type
