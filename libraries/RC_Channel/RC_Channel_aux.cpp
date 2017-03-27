@@ -433,6 +433,23 @@ RC_Channel_aux::move_servo(RC_Channel_aux::Aux_servo_function_t function,
 }
 
 /*
+ * get servo out value
+ */
+int16_t
+RC_Channel_aux::get_servo(Aux_servo_function_t function)
+{
+    if (function_assigned(function)) {
+        for (uint8_t i = 0; i < RC_AUX_MAX_CHANNELS; i++) {
+            if (_aux_channels[i] && _aux_channels[i]->function.get() == function) {
+                return (int16_t)(_aux_channels[i]->get_servo_out());
+            }
+        }
+    }
+
+    return 0;
+}
+
+/*
   set the default channel an auxiliary output function should be on
  */
 bool RC_Channel_aux::set_aux_channel_default(RC_Channel_aux::Aux_servo_function_t function, uint8_t channel)

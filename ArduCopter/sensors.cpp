@@ -61,7 +61,7 @@ void Copter::read_rangefinder(void)
         // correct alt for angle of the rangefinder
         temp_alt = (float)rangefinder.distance_cm() * MAX(0.707f, ahrs.get_rotation_body_to_ned().c.z);
         rangefinder_state.tilt_angle = ahrs.pitch;
-    } else if (gps.ground_speed() < 1.0f) {
+    } else if (gps.ground_speed() < 1.0f && fabs(vehicle_tilt) < 0.0523f) {
         int16_t advance_alt = rangefinder.distance_cm(0);
         int16_t back_alt = rangefinder.distance_cm(1);
         float advance_tilt = rangefinder.service_tilt(0) * M_PI / 180 + vehicle_tilt;

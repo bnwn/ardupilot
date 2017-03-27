@@ -148,6 +148,9 @@ public:
 	static void move_servo(Aux_servo_function_t function,
 						   int16_t value, int16_t angle_min, int16_t angle_max);
 
+    // get a servo_out value
+    static int16_t get_servo(Aux_servo_function_t function);
+
     static const struct AP_Param::GroupInfo        var_info[];
 
     // assigned and enable auxiliary channels

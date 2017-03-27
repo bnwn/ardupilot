@@ -51,6 +51,8 @@ public:
     void test_pump(uint8_t _ch_flag);
 
     /// To-Do: add function to decode pilot input from channel 6 tuning knob
+    /// get_pump_rate
+    float get_pump_rate() const { return _pump_pct_1ms.get(); }
 
     /// set_pump_rate - sets desired quantity of spray when travelling at 1m/s as a percentage of the pumps maximum rate
     void set_pump_rate(float pct_at_1ms) { _pump_pct_1ms.set(pct_at_1ms); }
