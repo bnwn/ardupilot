@@ -510,6 +510,7 @@ private:
     uint32_t _last_5hz_time;
 
     bool _cfg_needs_save;
+    uint8_t _is_dgps;
 
     bool noReceivedHdop;
 

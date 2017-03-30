@@ -145,7 +145,13 @@ const AP_Param::GroupInfo AP_GPS::var_info[] = {
     // @DisplayName: use GPS calc heading for yaw
     // @Values: 0:Disables,1:Enable
     // @User: Enigma
-    AP_GROUPINFO("USE_YAW", 14, AP_GPS, _use_for_yaw, 0),
+    AP_GROUPINFO("USE_YAW", 14, AP_GPS, _use_for_yaw, 1),
+
+    // @Param: YAW_COM
+    // @DisplayName: use GPS calc heading for yaw
+    // @Values: 0:Disables,1:Enable
+    // @User: Enigma
+    AP_GROUPINFO("YAW_COM", 15, AP_GPS, _yaw_compensation, 90),
 
     AP_GROUPEND
 };

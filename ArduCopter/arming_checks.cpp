@@ -142,7 +142,7 @@ bool Copter::compass_checks(bool display_failure)
             return false;
         }
 
-        if (gps.have_heading_accuracy()) {
+        if (gps.have_heading_accuracy() && (gps.status() > 3)) {
             if (display_failure) {
                 GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_NOTICE, "Use heading from D-GPS");
             }

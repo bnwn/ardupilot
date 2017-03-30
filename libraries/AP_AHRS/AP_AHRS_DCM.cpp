@@ -433,7 +433,7 @@ AP_AHRS_DCM::drift_correction_yaw(void)
     float yaw_error;
     float yaw_deltat;
 
-    if (have_gps() && _gps.have_heading_accuracy()) {
+    if (have_gps() && (_gps.status() > 3) && _gps.have_heading_accuracy()) {
         /*
          * use gps heading if have heading accuracy
          */

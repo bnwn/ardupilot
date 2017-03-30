@@ -118,7 +118,7 @@ public:
         uint32_t time_week_ms;              ///< GPS time (milliseconds from start of GPS week)
         uint16_t time_week;                 ///< GPS week number
         Location location;                  ///< last fix location
-        int16_t heading;                    ///< centre degrees
+        int32_t heading;                    ///< centre degrees
         uint16_t baseline_cm;                  ///< baseline length in cm
         float ground_speed;                 ///< ground speed in m/sec
         float ground_course;                ///< ground course in degrees
@@ -327,9 +327,16 @@ public:
     }
 
     // return heading value
-    int16_t get_heading(uint8_t instance) const {
-        return state[instance].heading;
+    int32_t get_heading(uint8_t instance) const {
+        int32_t heading_tmp = state[instance].heading - _yaw_compensation * 100;
+
+        if (heading_tmp < 0) {
+            heading_tmp += 36000;
+        }
+
+        return heading_tmp;
     }
+
     int16_t get_heading(void) const {
         return get_heading(primary_instance);
     }
@@ -365,6 +372,7 @@ public:
     AP_Int8 _save_config;
     AP_Int8 _auto_config;
     AP_Int8 _use_for_yaw;
+    AP_Float _yaw_compensation;
     
     // handle sending of initialisation strings to the GPS
     void send_blob_start(uint8_t instance, const char *_blob, uint16_t size);
