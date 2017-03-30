@@ -88,6 +88,8 @@
 #include <AC_InputManager/AC_InputManager.h>        // Pilot input handling library
 #include <AC_InputManager/AC_InputManager_Heli.h>   // Heli specific pilot input handling library
 #include <AP_Button/AP_Button.h>
+#include <AP_Flowmeter/AP_Flowmeter.h>         // Flowmeter library
+#include <AP_OilEngine/AP_OilEngine.h>          // Oil Engine library
 
 // Configuration
 #include "defines.h"
@@ -178,7 +180,7 @@ private:
     // Dataflash
     DataFlash_Class DataFlash;
 
-    AP_GPS gps;
+    AP_GPS gps {serial_manager};
 
     // flight modes convenience array
     AP_Int8 *flight_modes;
@@ -187,14 +189,57 @@ private:
     Compass compass;
     AP_InertialSensor ins;
 
+#if FLOWMETER_ENABLED == ENABLED
+    Flowmeter flowmeter {serial_manager};
+    struct {
+        bool enabled:1;
+        bool healthy:1;
+        int16_t flowrate;
+        uint32_t last_healthy_ms;
+        bool pesticide_check_valid;
+        uint32_t pesticide_empty_time;
+        LowPassFilterFloat flowrate_filt;
+    } flowmeter_state = { false, false, 0, 0, false, 0 };
+#endif
+
+#if RANGEFINDER_ENABLED == ENABLED
     RangeFinder rangefinder {serial_manager};
     struct {
         bool enabled:1;
         bool alt_healthy:1; // true if we can trust the altitude from the rangefinder
         int16_t alt_cm;     // tilt compensated altitude (in cm) from rangefinder
+        int16_t alt_cm_filter;
+        int16_t alt_cm_filter_slide;
+        int16_t alt_cm_filter_median;
         uint32_t last_healthy_ms;
+        float tilt_angle;
         LowPassFilterFloat alt_cm_filt; // altitude filter
-    } rangefinder_state = { false, false, 0, 0 };
+        SlidingFilterFloat alt_cm_filt_slide;
+        ModeFilterFloat_Size5 alt_cm_filt_median;
+    } rangefinder_state = { false, false, 0, 0, 0, 0, 0, 0 };
+#endif
+
+#if MMWRADAR_ENABLED == ENABLE
+    struct {
+        bool enabled:1;
+        bool range_healthy:1; // true if we can trust the altitude from the rangefinder
+        int16_t range_cm;     // tilt compensated altitude (in cm) from rangefinder
+        int16_t range_cm_filter;
+        int16_t range_cm_filter_2p;
+        int16_t range_cm_filter_kalman;
+        int16_t range_cm_filter_slide;
+        int16_t range_cm_filter_median;
+        int16_t rcs_cm;
+        int16_t snr;
+        int16_t vel_cm;
+        uint32_t last_healthy_ms;
+        LowPassFilterFloat range_cm_filt; // altitude filter
+        LowPassFilter2pFloat range_cm_filt_2p;
+        KalmanFilterFloat range_cm_filt_kalman;
+        SlidingFilterFloat range_cm_filt_slide;
+        ModeFilterFloat_Size5 range_cm_filt_median;
+    } mmwradar_state = { false, false, 0, 0 };
+#endif
 
     AP_RPM rpm_sensor;
 
@@ -277,7 +322,9 @@ private:
     struct {
         int8_t debounced_switch_position;   // currently used switch position
         int8_t last_switch_position;        // switch position in previous iteration
+        int8_t last_switch_aux10_position;  // aux10 switch position in previous iteration
         uint32_t last_edge_time_ms;         // system time that switch position was last changed
+        uint32_t last_aux10_edge_time_ms;   // system time that aux10 switch position was last changed
     } control_switch_state;
 
     struct {
@@ -328,7 +375,7 @@ private:
  #define FRAME_MAV_TYPE MAV_TYPE_QUADROTOR
 #elif (FRAME_CONFIG == TRI_FRAME)
  #define FRAME_MAV_TYPE MAV_TYPE_TRICOPTER
-#elif (FRAME_CONFIG == HEXA_FRAME || FRAME_CONFIG == Y6_FRAME)
+#elif (FRAME_CONFIG == HEXA_FRAME || FRAME_CONFIG == Y6_FRAME || FRAME_CONFIG == OIL_FRAME)
  #define FRAME_MAV_TYPE MAV_TYPE_HEXAROTOR
 #elif (FRAME_CONFIG == OCTA_FRAME || FRAME_CONFIG == OCTA_QUAD_FRAME)
  #define FRAME_MAV_TYPE MAV_TYPE_OCTOROTOR
@@ -345,7 +392,7 @@ private:
  #define MOTOR_CLASS AP_MotorsQuad
 #elif FRAME_CONFIG == TRI_FRAME
  #define MOTOR_CLASS AP_MotorsTri
-#elif FRAME_CONFIG == HEXA_FRAME
+#elif (FRAME_CONFIG == HEXA_FRAME || FRAME_CONFIG == OIL_FRAME)
  #define MOTOR_CLASS AP_MotorsHexa
 #elif FRAME_CONFIG == Y6_FRAME
  #define MOTOR_CLASS AP_MotorsY6
@@ -542,6 +589,10 @@ private:
     AP_Mount camera_mount;
 #endif
 
+#if OILENGINE == ENABLED
+    AP_OilEngine oil_engine;
+#endif
+
     // AC_Fence library to reduce fly-aways
 #if AC_FENCE == ENABLED
     AC_Fence    fence;
@@ -689,6 +740,7 @@ private:
     float get_pilot_desired_climb_rate(float throttle_control);
     float get_non_takeoff_throttle();
     float get_surface_tracking_climb_rate(int16_t target_rate, float current_alt_target, float dt);
+    float get_surface_tracking_climb_rate_in_auto(int16_t target_rate, float current_alt_target, float dt);
     void auto_takeoff_set_start_alt(void);
     void auto_takeoff_attitude_run(float target_yaw_rate);
     void set_accel_throttle_I_from_pilot_throttle(float pilot_throttle);
@@ -925,6 +977,10 @@ private:
     void avoid_adsb_run();
     bool avoid_adsb_set_velocity(const Vector3f& velocity_neu);
 
+    // support for point A to B flight mode, POINT_ATOB
+    bool point_init(bool ignore_checks);
+    void point_run();
+
     void ekf_check();
     bool ekf_over_threshold();
     void failsafe_ekf_event();
@@ -1018,11 +1074,20 @@ private:
     void set_throttle_and_failsafe(uint16_t throttle_pwm);
     void set_throttle_zero_flag(int16_t throttle_control);
     void radio_passthrough_to_motors();
+    void init_farming();
+    void radio_to_pump_output();
+    void pesticide_remaining_check();
+    void farming_mode_handle(void);
     void init_barometer(bool full_calibration);
     void read_barometer(void);
     void init_rangefinder(void);
     void read_rangefinder(void);
     bool rangefinder_alt_ok();
+    bool rangefinder_alt_ok_auto();
+    void init_flowmeter(void);
+    void read_flowmeter(void);
+    bool get_pesticide_remaining(void);
+    bool flowmeter_ok(void);
     void init_compass();
     void init_optflow();
     void update_optical_flow(void);
@@ -1077,7 +1142,7 @@ private:
     void print_hit_enter();
     void tuning();
     void gcs_send_text_fmt(MAV_SEVERITY severity, const char *fmt, ...);
-    bool start_command(const AP_Mission::Mission_Command& cmd);
+    bool start_command(const AP_Mission::Mission_Command& _cmd);
     bool verify_command(const AP_Mission::Mission_Command& cmd);
     bool verify_command_callback(const AP_Mission::Mission_Command& cmd);
 
@@ -1126,6 +1191,11 @@ private:
     void init_capabilities(void);
     void dataflash_periodic(void);
     void accel_cal_update(void);
+
+#if AVOID_OBSTACLE == ENABLED
+    bool check_obstacle(void);
+    void avoidance_obstacle(void);
+#endif
 
 public:
     void mavlink_delay_cb();

@@ -32,6 +32,8 @@
 #define GPS_MAX_INSTANCES 2
 #define GPS_RTK_INJECT_TO_ALL 127
 
+#define BDNST_DRTK_DETECT 1
+
 class DataFlash_Class;
 class AP_GPS_Backend;
 
@@ -41,12 +43,14 @@ class AP_GPS
 {
 public:
     // constructor
-	AP_GPS() {
+    AP_GPS(AP_SerialManager &serial_manager) :
+        _serial_manager(serial_manager)
+    {
 		AP_Param::setup_object_defaults(this, var_info);
     }
 
     /// Startup initialisation.
-    void init(DataFlash_Class *dataflash, const AP_SerialManager& serial_manager);
+    void init(DataFlash_Class *dataflash);
 
     /// Update GPS state based on possible bytes received from the module.
     /// This routine must be called periodically (typically at 10Hz or
@@ -71,6 +75,7 @@ public:
         GPS_TYPE_ERB = 13,
         GPS_TYPE_MAV = 14,
 		GPS_TYPE_NOVA = 15,
+        GPS_TYPE_DRTK = 16,
     };
 
     /// GPS status codes
@@ -113,6 +118,8 @@ public:
         uint32_t time_week_ms;              ///< GPS time (milliseconds from start of GPS week)
         uint16_t time_week;                 ///< GPS week number
         Location location;                  ///< last fix location
+        int16_t heading;                    ///< centre degrees
+        uint16_t baseline_cm;                  ///< baseline length in cm
         float ground_speed;                 ///< ground speed in m/sec
         float ground_course;                ///< ground course in degrees
         uint16_t hdop;                      ///< horizontal dilution of precision in cm
@@ -126,6 +133,7 @@ public:
         bool have_speed_accuracy:1;
         bool have_horizontal_accuracy:1;
         bool have_vertical_accuracy:1;
+        bool have_heading_accuracy:1;
         uint32_t last_gps_time_ms;          ///< the system time we got the last GPS timestamp, milliseconds
     };
 
@@ -310,6 +318,22 @@ public:
         return have_vertical_velocity(primary_instance);
     }
 
+    // return true if the GPS supports heading
+    bool have_heading_accuracy(uint8_t instance) const {
+        return (state[instance].have_heading_accuracy && (_use_for_yaw.get() == 1));
+    }
+    bool have_heading_accuracy(void) const {
+        return have_heading_accuracy(primary_instance);
+    }
+
+    // return heading value
+    int16_t get_heading(uint8_t instance) const {
+        return state[instance].heading;
+    }
+    int16_t get_heading(void) const {
+        return get_heading(primary_instance);
+    }
+
     // the expected lag (in seconds) in the position and velocity readings from the gps
     float get_lag() const { return 0.2f; }
 
@@ -340,6 +364,7 @@ public:
     AP_Int8 _gnss_mode[2];
     AP_Int8 _save_config;
     AP_Int8 _auto_config;
+    AP_Int8 _use_for_yaw;
     
     // handle sending of initialisation strings to the GPS
     void send_blob_start(uint8_t instance, const char *_blob, uint16_t size);
@@ -375,6 +400,7 @@ private:
     GPS_State state[GPS_MAX_INSTANCES];
     AP_GPS_Backend *drivers[GPS_MAX_INSTANCES];
     AP_HAL::UARTDriver *_port[GPS_MAX_INSTANCES];
+    AP_SerialManager &_serial_manager;
 
     /// primary GPS instance
     uint8_t primary_instance:2;
@@ -397,6 +423,7 @@ private:
         struct NMEA_detect_state nmea_detect_state;
         struct SBP_detect_state sbp_detect_state;
         struct ERB_detect_state erb_detect_state;
+        struct DRTK_detect_state drtk_detect_state;
     } detect_state[GPS_MAX_INSTANCES];
 
     struct {

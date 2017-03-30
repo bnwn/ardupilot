@@ -111,6 +111,14 @@ bool Copter::set_mode(control_mode_t mode, mode_reason_t reason)
             success = guided_nogps_init(ignore_checks);
             break;
 
+        case POINT_ATOB:
+            success = point_init(ignore_checks);
+            break;
+
+        case MOTOR_ESTOP:
+            set_motor_emergency_stop(!ignore_checks);
+            break;
+
         default:
             success = false;
             break;
@@ -128,7 +136,7 @@ bool Copter::set_mode(control_mode_t mode, mode_reason_t reason)
         control_mode_reason = reason;
         DataFlash.Log_Write_Mode(control_mode, control_mode_reason);
 
-        adsb.set_is_auto_mode((mode == AUTO) || (mode == RTL) || (mode == GUIDED));
+        adsb.set_is_auto_mode((mode == AUTO) || (mode == RTL) || (mode == GUIDED) || (mode == POINT_ATOB));
 
 #if AC_FENCE == ENABLED
         // pilot requested flight mode change during a fence breach indicates pilot is attempting to manually recover
@@ -247,6 +255,10 @@ void Copter::update_flight_mode()
             guided_nogps_run();
             break;
 
+        case POINT_ATOB:
+            point_run();
+            break;
+
         default:
             break;
     }
@@ -261,6 +273,9 @@ void Copter::exit_mode(control_mode_t old_control_mode, control_mode_t new_contr
     }
 #endif
 
+    // ensure disable imitation flags
+    pos_control.set_imitation_flags(false);
+
     // stop mission when we leave auto mode
     if (old_control_mode == AUTO) {
         if (mission.state() == AP_Mission::MISSION_RUNNING) {
@@ -269,6 +284,14 @@ void Copter::exit_mode(control_mode_t old_control_mode, control_mode_t new_contr
 #if MOUNT == ENABLED
         camera_mount.set_mode_to_default();
 #endif  // MOUNT == ENABLED
+    }
+
+    if (old_control_mode == POINT_ATOB) {
+        if (mission.point_state() == AP_Mission::MISSION_RUNNING) {
+            mission.stop();
+            mission.save_break_point();
+            sprayer.enable(false);
+        }
     }
 
     // smooth throttle transition when switching from manual to automatic flight modes
@@ -312,6 +335,7 @@ bool Copter::mode_requires_GPS(control_mode_t mode) {
         case POSHOLD:
         case BRAKE:
         case AVOID_ADSB:
+        case POINT_ATOB:
         case THROW:
             return true;
         default:
@@ -353,6 +377,7 @@ void Copter::notify_flight_mode(control_mode_t mode) {
         case AVOID_ADSB:
         case GUIDED_NOGPS:
         case LAND:
+        case POINT_ATOB:
             // autopilot modes
             AP_Notify::flags.autopilot_mode = true;
             break;
@@ -423,6 +448,8 @@ void Copter::print_flight_mode(AP_HAL::BetterStream *port, uint8_t mode)
     case GUIDED_NOGPS:
         port->print("GUIDED_NOGPS");
         break;
+    case POINT_ATOB:
+        port->print("POINT_ATOB");
     default:
         port->printf("Mode(%u)", (unsigned)mode);
         break;

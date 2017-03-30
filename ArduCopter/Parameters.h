@@ -124,6 +124,7 @@ public:
         k_param_serial2_baud,           // deprecated - remove
         k_param_land_repositioning,
         k_param_rangefinder, // rangefinder object
+        k_param_flowmeter,
         k_param_fs_ekf_thresh,
         k_param_terrain,
         k_param_acro_expo,
@@ -216,6 +217,11 @@ public:
         k_param_takeoff_trigger_dz,
         k_param_gcs3,
         k_param_gcs_pid_mask,    // 126
+
+        // 127 : rangefinder kalman param
+        k_param_rangefinder_kalman_p,
+        k_param_rangefinder_kalman_r,
+        k_param_rangefinder_filter,
 
         //
         // 135 : reserved for Solo until features merged with master
@@ -362,9 +368,14 @@ public:
         k_param_rtl_climb_min,
         k_param_rpm_sensor,
         k_param_autotune_min_d, // 251
-        k_param_DataFlash = 253, // 253 - Logging Group
+        k_param_DataFlash = 252, // 252 - Logging Group
 
-        // 254,255: reserved
+        //
+        // 253: oil engine control
+        //
+        k_param_pid_oilengine1,
+        k_param_pid_oilengine2,
+        k_param_oil_engine = 255,
 
         // the k_param_* space is 9-bits in size
         // 511: reserved
@@ -391,6 +402,10 @@ public:
     AP_Int16        rtl_speed_cms;
     AP_Float        rtl_cone_slope;
     AP_Float        rangefinder_gain;
+
+    AP_Float        rangefinder_kalman_p;
+    AP_Float        rangefinder_kalman_r;
+    AP_Int16        rangefinder_filter;
 
     AP_Int8         failsafe_battery_enabled;   // battery failsafe enabled
     AP_Float        fs_batt_voltage;            // battery voltage below which failsafe will be triggered
@@ -492,6 +507,10 @@ public:
     AC_P                    p_vel_z;
     AC_PID                  pid_accel_z;
 
+#if OILENGINE == ENABLED
+    AC_PID                  pid_oilengine1;
+    AC_PID                  pid_oilengine2;
+#endif
     AC_P                    p_pos_xy;
     AC_P                    p_alt_hold;
 
@@ -499,6 +518,7 @@ public:
     AP_Int8                 autotune_axis_bitmask;
     AP_Float                autotune_aggressiveness;
     AP_Float                autotune_min_d;
+
 
     // Note: keep initializers here in the same order as they are declared
     // above.
@@ -525,6 +545,11 @@ public:
 
         p_vel_z                 (VEL_Z_P),
         pid_accel_z             (ACCEL_Z_P,       ACCEL_Z_I,        ACCEL_Z_D,      ACCEL_Z_IMAX,       ACCEL_Z_FILT_HZ,    MAIN_LOOP_SECONDS),
+
+    #if OILENGINE == ENABLED
+        pid_oilengine1          (OILENGINE_P,     OILENGINE_I,      OILENGINE_D,    OILENGINE_IMAX,     OILENGINE_FILT_HZ,  OILENGINE_UPDATE_TIME),
+        pid_oilengine2          (OILENGINE_P,     OILENGINE_I,      OILENGINE_D,    OILENGINE_IMAX,     OILENGINE_FILT_HZ,  OILENGINE_UPDATE_TIME),
+    #endif
 
         // P controller	        initial P
         //----------------------------------------------------------------------

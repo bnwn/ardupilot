@@ -3,6 +3,7 @@ CONFIG += console
 CONFIG -= app_bundle
 CONFIG -= qt
 
+<<<<<<< HEAD
 SOURCES += \
     ../AntennaTracker/AntennaTracker.cpp \
     ../AntennaTracker/capabilities.cpp \
@@ -38,6 +39,9 @@ SOURCES += \
     ../APMrover2/Steering.cpp \
     ../APMrover2/system.cpp \
     ../APMrover2/test.cpp \
+=======
+SOURCES += main.cpp \
+>>>>>>> 27298f90022adbc7f884f8b66f09a9d77edbf141
     ../ArduCopter/afs_copter.cpp \
     ../ArduCopter/AP_Rally.cpp \
     ../ArduCopter/AP_State.cpp \
@@ -64,6 +68,10 @@ SOURCES += \
     ../ArduCopter/control_guided_nogps.cpp \
     ../ArduCopter/control_land.cpp \
     ../ArduCopter/control_loiter.cpp \
+<<<<<<< HEAD
+=======
+    ../ArduCopter/control_point.cpp \
+>>>>>>> 27298f90022adbc7f884f8b66f09a9d77edbf141
     ../ArduCopter/control_poshold.cpp \
     ../ArduCopter/control_rtl.cpp \
     ../ArduCopter/control_sport.cpp \
@@ -75,6 +83,10 @@ SOURCES += \
     ../ArduCopter/esc_calibration.cpp \
     ../ArduCopter/events.cpp \
     ../ArduCopter/failsafe.cpp \
+<<<<<<< HEAD
+=======
+    ../ArduCopter/farming.cpp \
+>>>>>>> 27298f90022adbc7f884f8b66f09a9d77edbf141
     ../ArduCopter/fence.cpp \
     ../ArduCopter/flight_mode.cpp \
     ../ArduCopter/GCS_Mavlink.cpp \
@@ -103,6 +115,7 @@ SOURCES += \
     ../ArduCopter/test.cpp \
     ../ArduCopter/tuning.cpp \
     ../ArduCopter/UserCode.cpp \
+<<<<<<< HEAD
     ../ArduPlane/afs_plane.cpp \
     ../ArduPlane/altitude.cpp \
     ../ArduPlane/ArduPlane.cpp \
@@ -135,6 +148,8 @@ SOURCES += \
     ../ArduPlane/test.cpp \
     ../ArduPlane/tiltrotor.cpp \
     ../ArduPlane/tuning.cpp \
+=======
+>>>>>>> 27298f90022adbc7f884f8b66f09a9d77edbf141
     ../libraries/AC_AttitudeControl/AC_AttitudeControl.cpp \
     ../libraries/AC_AttitudeControl/AC_AttitudeControl_Heli.cpp \
     ../libraries/AC_AttitudeControl/AC_AttitudeControl_Multi.cpp \
@@ -145,6 +160,10 @@ SOURCES += \
     ../libraries/AC_Fence/AC_PolyFence_loader.cpp \
     ../libraries/AC_InputManager/AC_InputManager.cpp \
     ../libraries/AC_InputManager/AC_InputManager_Heli.cpp \
+<<<<<<< HEAD
+=======
+    ../libraries/AC_OilEngine/AC_OilEngine.cpp \
+>>>>>>> 27298f90022adbc7f884f8b66f09a9d77edbf141
     ../libraries/AC_PID/examples/AC_PID_test/AC_PID_test.cpp \
     ../libraries/AC_PID/AC_HELI_PID.cpp \
     ../libraries/AC_PID/AC_P.cpp \
@@ -216,6 +235,10 @@ SOURCES += \
     ../libraries/AP_Declination/examples/AP_Declination_test/AP_Declination_test.cpp \
     ../libraries/AP_Declination/AP_Declination.cpp \
     ../libraries/AP_EPM/AP_EPM.cpp \
+<<<<<<< HEAD
+=======
+    ../libraries/AP_Flowmeter/AP_Flowmeter.cpp \
+>>>>>>> 27298f90022adbc7f884f8b66f09a9d77edbf141
     ../libraries/AP_Frsky_Telem/AP_Frsky_Telem.cpp \
     ../libraries/AP_GPS/examples/GPS_AUTO_test/GPS_AUTO_test.cpp \
     ../libraries/AP_GPS/examples/GPS_UBLOX_passthrough/GPS_UBLOX_passthrough.cpp \
@@ -618,6 +641,7 @@ SOURCES += \
     ../libraries/SITL/SITL.cpp \
     ../libraries/StorageManager/examples/StorageTest/StorageTest.cpp \
     ../libraries/StorageManager/StorageManager.cpp \
+<<<<<<< HEAD
     ../modules/gbenchmark/cmake/gnu_posix_regex.cpp \
     ../modules/gbenchmark/cmake/posix_regex.cpp \
     ../modules/gbenchmark/cmake/std_regex.cpp \
@@ -713,6 +737,8 @@ SOURCES += \
     ../modules/gtest/xcode/Samples/FrameworkSample/widget_test.cc \
     ../modules/mavlink/pymavlink/generator/C/test/windows/stdafx.cpp \
     ../modules/mavlink/pymavlink/generator/C/test/windows/testmav.cpp \
+=======
+>>>>>>> 27298f90022adbc7f884f8b66f09a9d77edbf141
     ../modules/PX4Firmware/src/drivers/airspeed/airspeed.cpp \
     ../modules/PX4Firmware/src/drivers/batt_smbus/batt_smbus.cpp \
     ../modules/PX4Firmware/src/drivers/blinkm/blinkm.cpp \
@@ -747,6 +773,10 @@ SOURCES += \
     ../modules/PX4Firmware/src/drivers/hott/hott_telemetry/hott_telemetry.cpp \
     ../modules/PX4Firmware/src/drivers/hott/comms.cpp \
     ../modules/PX4Firmware/src/drivers/hott/messages.cpp \
+<<<<<<< HEAD
+=======
+    ../modules/PX4Firmware/src/drivers/hz16wa/hz16wa.cpp \
+>>>>>>> 27298f90022adbc7f884f8b66f09a9d77edbf141
     ../modules/PX4Firmware/src/drivers/irlock/irlock.cpp \
     ../modules/PX4Firmware/src/drivers/l3gd20/l3gd20.cpp \
     ../modules/PX4Firmware/src/drivers/led/led.cpp \
@@ -755,6 +785,10 @@ SOURCES += \
     ../modules/PX4Firmware/src/drivers/ll40ls/LidarLitePWM.cpp \
     ../modules/PX4Firmware/src/drivers/ll40ls/ll40ls.cpp \
     ../modules/PX4Firmware/src/drivers/lsm303d/lsm303d.cpp \
+<<<<<<< HEAD
+=======
+    ../modules/PX4Firmware/src/drivers/m006/m006.cpp \
+>>>>>>> 27298f90022adbc7f884f8b66f09a9d77edbf141
     ../modules/PX4Firmware/src/drivers/mb12xx/mb12xx.cpp \
     ../modules/PX4Firmware/src/drivers/md25/BlockSysIdent.cpp \
     ../modules/PX4Firmware/src/drivers/md25/md25.cpp \
@@ -1219,6 +1253,7 @@ SOURCES += \
     ../modules/PX4Firmware/unittests/st24_test.cpp \
     ../modules/PX4Firmware/unittests/sumd_test.cpp \
     ../modules/PX4Firmware/unittests/uorb_stub.cpp \
+<<<<<<< HEAD
     ../modules/PX4NuttX/apps/examples/cxxtest/cxxtest_main.cxx \
     ../modules/PX4NuttX/apps/examples/elf/tests/helloxx/hello++1.cpp \
     ../modules/PX4NuttX/apps/examples/elf/tests/helloxx/hello++2.cpp \
@@ -1603,6 +1638,8 @@ SOURCES += \
     ../Tools/Replay/LR_MsgHandler.cpp \
     ../Tools/Replay/MsgHandler.cpp \
     ../Tools/Replay/Replay.cpp \
+=======
+>>>>>>> 27298f90022adbc7f884f8b66f09a9d77edbf141
     ../libraries/AP_Module/examples/ModuleTest/module/moduletest.c \
     ../libraries/AP_NavEKF/Models/GimbalEstimatorExample/calcF.c \
     ../libraries/AP_NavEKF/Models/GimbalEstimatorExample/calcH_MAG.c \
@@ -1614,12 +1651,15 @@ SOURCES += \
     ../libraries/AP_NavEKF/Models/GimbalEstimatorExample/calcTms.c \
     ../libraries/AP_Param/tools/eedump.c \
     ../libraries/AP_Param/tools/eedump_apparam.c \
+<<<<<<< HEAD
     ../modules/mavlink/examples/linux/mavlink_udp.c \
     ../modules/mavlink/missionlib/testing/main.c \
     ../modules/mavlink/missionlib/mavlink_parameters.c \
     ../modules/mavlink/missionlib/waypoints.c \
     ../modules/mavlink/pymavlink/generator/C/test/posix/testmav.c \
     ../modules/mavlink/pymavlink/mavnative/mavnative.c \
+=======
+>>>>>>> 27298f90022adbc7f884f8b66f09a9d77edbf141
     ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/builtin_commands.c \
     ../modules/PX4Firmware/Build/px4io-v2_default.build/empty.c \
     ../modules/PX4Firmware/Build/git_version.c \
@@ -1631,6 +1671,15 @@ SOURCES += \
     ../modules/PX4Firmware/nuttx-configs/px4fmu-v4/src/empty.c \
     ../modules/PX4Firmware/nuttx-configs/px4io-v1/src/empty.c \
     ../modules/PX4Firmware/nuttx-configs/px4io-v2/src/empty.c \
+<<<<<<< HEAD
+=======
+    ../modules/PX4Firmware/nuttx-configs/vrbrain-v51/src/empty.c \
+    ../modules/PX4Firmware/nuttx-configs/vrbrain-v52/src/empty.c \
+    ../modules/PX4Firmware/nuttx-configs/vrbrain-v54/src/empty.c \
+    ../modules/PX4Firmware/nuttx-configs/vrcore-v10/src/empty.c \
+    ../modules/PX4Firmware/nuttx-configs/vrubrain-v51/src/empty.c \
+    ../modules/PX4Firmware/nuttx-configs/vrubrain-v52/src/empty.c \
+>>>>>>> 27298f90022adbc7f884f8b66f09a9d77edbf141
     ../modules/PX4Firmware/src/drivers/ardrone_interface/ardrone_interface.c \
     ../modules/PX4Firmware/src/drivers/ardrone_interface/ardrone_motor_control.c \
     ../modules/PX4Firmware/src/drivers/boards/aerocore/aerocore_init.c \
@@ -1669,6 +1718,47 @@ SOURCES += \
     ../modules/PX4Firmware/src/drivers/boards/px4io-v2/px4io_init.c \
     ../modules/PX4Firmware/src/drivers/boards/px4io-v2/px4io_timer_config.c \
     ../modules/PX4Firmware/src/drivers/boards/sitl/sitl_led.c \
+<<<<<<< HEAD
+=======
+    ../modules/PX4Firmware/src/drivers/boards/vrbrain-v51/board_can.c \
+    ../modules/PX4Firmware/src/drivers/boards/vrbrain-v51/board_init.c \
+    ../modules/PX4Firmware/src/drivers/boards/vrbrain-v51/board_led.c \
+    ../modules/PX4Firmware/src/drivers/boards/vrbrain-v51/board_spi.c \
+    ../modules/PX4Firmware/src/drivers/boards/vrbrain-v51/board_timer_config.c \
+    ../modules/PX4Firmware/src/drivers/boards/vrbrain-v51/board_usb.c \
+    ../modules/PX4Firmware/src/drivers/boards/vrbrain-v52/board_can.c \
+    ../modules/PX4Firmware/src/drivers/boards/vrbrain-v52/board_init.c \
+    ../modules/PX4Firmware/src/drivers/boards/vrbrain-v52/board_led.c \
+    ../modules/PX4Firmware/src/drivers/boards/vrbrain-v52/board_spi.c \
+    ../modules/PX4Firmware/src/drivers/boards/vrbrain-v52/board_timer_config.c \
+    ../modules/PX4Firmware/src/drivers/boards/vrbrain-v52/board_usb.c \
+    ../modules/PX4Firmware/src/drivers/boards/vrbrain-v54/board_can.c \
+    ../modules/PX4Firmware/src/drivers/boards/vrbrain-v54/board_init.c \
+    ../modules/PX4Firmware/src/drivers/boards/vrbrain-v54/board_led.c \
+    ../modules/PX4Firmware/src/drivers/boards/vrbrain-v54/board_spi.c \
+    ../modules/PX4Firmware/src/drivers/boards/vrbrain-v54/board_timer_config.c \
+    ../modules/PX4Firmware/src/drivers/boards/vrbrain-v54/board_usb.c \
+    ../modules/PX4Firmware/src/drivers/boards/vrcore-v10/board_can.c \
+    ../modules/PX4Firmware/src/drivers/boards/vrcore-v10/board_init.c \
+    ../modules/PX4Firmware/src/drivers/boards/vrcore-v10/board_led.c \
+    ../modules/PX4Firmware/src/drivers/boards/vrcore-v10/board_spi.c \
+    ../modules/PX4Firmware/src/drivers/boards/vrcore-v10/board_timer_config.c \
+    ../modules/PX4Firmware/src/drivers/boards/vrcore-v10/board_usb.c \
+    ../modules/PX4Firmware/src/drivers/boards/vrubrain-v51/board_can.c \
+    ../modules/PX4Firmware/src/drivers/boards/vrubrain-v51/board_init.c \
+    ../modules/PX4Firmware/src/drivers/boards/vrubrain-v51/board_led.c \
+    ../modules/PX4Firmware/src/drivers/boards/vrubrain-v51/board_spi.c \
+    ../modules/PX4Firmware/src/drivers/boards/vrubrain-v51/board_timer_config.c \
+    ../modules/PX4Firmware/src/drivers/boards/vrubrain-v51/board_usb.c \
+    ../modules/PX4Firmware/src/drivers/boards/vrubrain-v52/board_buzzer.c \
+    ../modules/PX4Firmware/src/drivers/boards/vrubrain-v52/board_can.c \
+    ../modules/PX4Firmware/src/drivers/boards/vrubrain-v52/board_init.c \
+    ../modules/PX4Firmware/src/drivers/boards/vrubrain-v52/board_led.c \
+    ../modules/PX4Firmware/src/drivers/boards/vrubrain-v52/board_pwm_input.c \
+    ../modules/PX4Firmware/src/drivers/boards/vrubrain-v52/board_pwm_servo.c \
+    ../modules/PX4Firmware/src/drivers/boards/vrubrain-v52/board_spi.c \
+    ../modules/PX4Firmware/src/drivers/boards/vrubrain-v52/board_usb.c \
+>>>>>>> 27298f90022adbc7f884f8b66f09a9d77edbf141
     ../modules/PX4Firmware/src/drivers/camera_trigger/camera_trigger_params.c \
     ../modules/PX4Firmware/src/drivers/frsky_telemetry/frsky_data.c \
     ../modules/PX4Firmware/src/drivers/frsky_telemetry/frsky_telemetry.c \
@@ -1817,6 +1907,10 @@ SOURCES += \
     ../modules/PX4Firmware/src/systemcmds/mtd/24xxxx_mtd.c \
     ../modules/PX4Firmware/src/systemcmds/mtd/mtd.c \
     ../modules/PX4Firmware/src/systemcmds/nshterm/nshterm.c \
+<<<<<<< HEAD
+=======
+    ../modules/PX4Firmware/src/systemcmds/otp/otp.c \
+>>>>>>> 27298f90022adbc7f884f8b66f09a9d77edbf141
     ../modules/PX4Firmware/src/systemcmds/param/param.c \
     ../modules/PX4Firmware/src/systemcmds/perf/perf.c \
     ../modules/PX4Firmware/src/systemcmds/pwm/pwm.c \
@@ -1850,6 +1944,7 @@ SOURCES += \
     ../modules/PX4Firmware/src/systemcmds/top/top.c \
     ../modules/PX4Firmware/src/systemcmds/usb_connected/usb_connected.c \
     ../modules/PX4Firmware/src/systemcmds/ver/ver.c \
+<<<<<<< HEAD
     ../modules/PX4NuttX/apps/builtin/builtin.c \
     ../modules/PX4NuttX/apps/builtin/builtin_list.c \
     ../modules/PX4NuttX/apps/builtin/exec_builtin.c \
@@ -4666,11 +4761,18 @@ SOURCES += \
     ../Tools/Linux_HAL_Essentials/pru/pwmpru/pwmpru1.c \
     ../Tools/Linux_HAL_Essentials/pru/rangefinderpru/rangefinder.c \
     ../Tools/Linux_HAL_Essentials/pru/rcinpru/rcinpru0.c
+=======
+    ../libraries/AP_OilEngine/AP_OilEngine.cpp \
+    ../libraries/AP_RangeFinder/AP_RangeFinder_MMWRadar.cpp \
+    ../libraries/AP_GPS/AP_GPS_DRTK.cpp \
+    ../libraries/Filter/SlidingFilter.cpp
+>>>>>>> 27298f90022adbc7f884f8b66f09a9d77edbf141
 
 include(deployment.pri)
 qtcAddDeployment()
 
 HEADERS += \
+<<<<<<< HEAD
     ../AntennaTracker/APM_Config.h \
     ../AntennaTracker/config.h \
     ../AntennaTracker/defines.h \
@@ -4686,6 +4788,8 @@ HEADERS += \
     ../APMrover2/Parameters.h \
     ../APMrover2/Rover.h \
     ../APMrover2/version.h \
+=======
+>>>>>>> 27298f90022adbc7f884f8b66f09a9d77edbf141
     ../ArduCopter/afs_copter.h \
     ../ArduCopter/AP_Rally.h \
     ../ArduCopter/APM_Config.h \
@@ -4698,6 +4802,7 @@ HEADERS += \
     ../ArduCopter/Parameters.h \
     ../ArduCopter/UserVariables.h \
     ../ArduCopter/version.h \
+<<<<<<< HEAD
     ../ArduPlane/APM_Config.h \
     ../ArduPlane/avoidance_adsb.h \
     ../ArduPlane/config.h \
@@ -5279,6 +5384,9 @@ HEADERS += \
     ../Build.UART_test/libraries/GCS_MAVLink/include/mavlink/v1.0/mavlink_helpers.h \
     ../Build.UART_test/libraries/GCS_MAVLink/include/mavlink/v1.0/mavlink_types.h \
     ../Build.UART_test/libraries/GCS_MAVLink/include/mavlink/v1.0/protocol.h \
+=======
+    ../benchmarks/AP_gbenchmark.h \
+>>>>>>> 27298f90022adbc7f884f8b66f09a9d77edbf141
     ../libraries/AC_AttitudeControl/AC_AttitudeControl.h \
     ../libraries/AC_AttitudeControl/AC_AttitudeControl_Heli.h \
     ../libraries/AC_AttitudeControl/AC_AttitudeControl_Multi.h \
@@ -5288,6 +5396,10 @@ HEADERS += \
     ../libraries/AC_Fence/AC_PolyFence_loader.h \
     ../libraries/AC_InputManager/AC_InputManager.h \
     ../libraries/AC_InputManager/AC_InputManager_Heli.h \
+<<<<<<< HEAD
+=======
+    ../libraries/AC_OilEngine/AC_OilEngine.h \
+>>>>>>> 27298f90022adbc7f884f8b66f09a9d77edbf141
     ../libraries/AC_PID/AC_HELI_PID.h \
     ../libraries/AC_PID/AC_P.h \
     ../libraries/AC_PID/AC_PI_2D.h \
@@ -5356,6 +5468,10 @@ HEADERS += \
     ../libraries/AP_Compass/CompassCalibrator.h \
     ../libraries/AP_Declination/AP_Declination.h \
     ../libraries/AP_EPM/AP_EPM.h \
+<<<<<<< HEAD
+=======
+    ../libraries/AP_Flowmeter/AP_Flowmeter.h \
+>>>>>>> 27298f90022adbc7f884f8b66f09a9d77edbf141
     ../libraries/AP_Frsky_Telem/AP_Frsky_Telem.h \
     ../libraries/AP_GPS/AP_GPS.h \
     ../libraries/AP_GPS/AP_GPS_ERB.h \
@@ -5743,6 +5859,7 @@ HEADERS += \
     ../libraries/SITL/SIM_XPlane.h \
     ../libraries/SITL/SITL.h \
     ../libraries/StorageManager/StorageManager.h \
+<<<<<<< HEAD
     ../modules/gbenchmark/include/benchmark/benchmark.h \
     ../modules/gbenchmark/include/benchmark/benchmark_api.h \
     ../modules/gbenchmark/include/benchmark/macros.h \
@@ -5887,6 +6004,78 @@ HEADERS += \
     ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/APM/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/protocol/SoftwareVersion.hpp \
     ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/APM/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/CoarseOrientation.hpp \
     ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/APM/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/Timestamp.hpp \
+=======
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/equipment/actuator/ArrayCommand.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/equipment/actuator/Command.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/equipment/actuator/Status.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/equipment/ahrs/MagneticFieldStrength.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/equipment/ahrs/Solution.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/equipment/air_data/AngleOfAttack.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/equipment/air_data/IndicatedAirspeed.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/equipment/air_data/Sideslip.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/equipment/air_data/StaticPressure.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/equipment/air_data/StaticTemperature.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/equipment/air_data/TrueAirspeed.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/equipment/camera_gimbal/AngularCommand.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/equipment/camera_gimbal/GEOPOICommand.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/equipment/camera_gimbal/Mode.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/equipment/camera_gimbal/Status.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/equipment/esc/RawCommand.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/equipment/esc/RPMCommand.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/equipment/esc/Status.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/equipment/gnss/Auxiliary.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/equipment/gnss/Fix.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/equipment/gnss/RTCMStream.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/equipment/hardpoint/Command.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/equipment/hardpoint/Status.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/equipment/indication/BeepCommand.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/equipment/indication/LightsCommand.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/equipment/indication/RGB565.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/equipment/indication/SingleLightCommand.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/equipment/power/BatteryInfo.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/equipment/power/CircuitStatus.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/equipment/power/PrimaryPowerSupplyStatus.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/equipment/range_sensor/Measurement.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/equipment/safety/ArmingStatus.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/protocol/debug/KeyValue.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/protocol/debug/LogLevel.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/protocol/debug/LogMessage.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/protocol/dynamic_node_id/server/AppendEntries.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/protocol/dynamic_node_id/server/Discovery.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/protocol/dynamic_node_id/server/Entry.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/protocol/dynamic_node_id/server/RequestVote.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/protocol/dynamic_node_id/Allocation.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/protocol/enumeration/Begin.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/protocol/enumeration/Indication.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/protocol/file/BeginFirmwareUpdate.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/protocol/file/Delete.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/protocol/file/EntryType.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/protocol/file/Error.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/protocol/file/GetDirectoryEntryInfo.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/protocol/file/GetInfo.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/protocol/file/Path.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/protocol/file/Read.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/protocol/file/Write.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/protocol/param/Empty.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/protocol/param/ExecuteOpcode.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/protocol/param/GetSet.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/protocol/param/NumericValue.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/protocol/param/Value.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/protocol/AccessCommandShell.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/protocol/CANIfaceStats.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/protocol/DataTypeKind.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/protocol/GetDataTypeInfo.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/protocol/GetNodeInfo.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/protocol/GetTransportStats.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/protocol/GlobalTimeSync.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/protocol/HardwareVersion.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/protocol/NodeStatus.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/protocol/Panic.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/protocol/RestartNode.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/protocol/SoftwareVersion.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/CoarseOrientation.hpp \
+    ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/home/farsight/Working_PX4/ardupilot/modules/PX4Firmware/src/modules/uavcan/dsdlc_generated/uavcan/Timestamp.hpp \
+>>>>>>> 27298f90022adbc7f884f8b66f09a9d77edbf141
     ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/nuttx-export/arch/arm/arm.h \
     ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/nuttx-export/arch/arm/pg_macros.h \
     ../modules/PX4Firmware/Build/px4fmu-v2_APM.build/nuttx-export/arch/armv7-m/exc_return.h \
@@ -7006,6 +7195,21 @@ HEADERS += \
     ../modules/PX4Firmware/nuttx-configs/px4io-v1/include/board.h \
     ../modules/PX4Firmware/nuttx-configs/px4io-v2/include/board.h \
     ../modules/PX4Firmware/nuttx-configs/sim/include/board.h \
+<<<<<<< HEAD
+=======
+    ../modules/PX4Firmware/nuttx-configs/vrbrain-v51/include/board.h \
+    ../modules/PX4Firmware/nuttx-configs/vrbrain-v51/include/nsh_romfsimg.h \
+    ../modules/PX4Firmware/nuttx-configs/vrbrain-v52/include/board.h \
+    ../modules/PX4Firmware/nuttx-configs/vrbrain-v52/include/nsh_romfsimg.h \
+    ../modules/PX4Firmware/nuttx-configs/vrbrain-v54/include/board.h \
+    ../modules/PX4Firmware/nuttx-configs/vrbrain-v54/include/nsh_romfsimg.h \
+    ../modules/PX4Firmware/nuttx-configs/vrcore-v10/include/board.h \
+    ../modules/PX4Firmware/nuttx-configs/vrcore-v10/include/nsh_romfsimg.h \
+    ../modules/PX4Firmware/nuttx-configs/vrubrain-v51/include/board.h \
+    ../modules/PX4Firmware/nuttx-configs/vrubrain-v51/include/nsh_romfsimg.h \
+    ../modules/PX4Firmware/nuttx-configs/vrubrain-v52/include/board.h \
+    ../modules/PX4Firmware/nuttx-configs/vrubrain-v52/include/nsh_romfsimg.h \
+>>>>>>> 27298f90022adbc7f884f8b66f09a9d77edbf141
     ../modules/PX4Firmware/src/drivers/airspeed/airspeed.h \
     ../modules/PX4Firmware/src/drivers/ardrone_interface/ardrone_motor_control.h \
     ../modules/PX4Firmware/src/drivers/boards/aerocore/board_config.h \
@@ -7017,6 +7221,15 @@ HEADERS += \
     ../modules/PX4Firmware/src/drivers/boards/px4io-v1/board_config.h \
     ../modules/PX4Firmware/src/drivers/boards/px4io-v2/board_config.h \
     ../modules/PX4Firmware/src/drivers/boards/sim/board_config.h \
+<<<<<<< HEAD
+=======
+    ../modules/PX4Firmware/src/drivers/boards/vrbrain-v51/board_config.h \
+    ../modules/PX4Firmware/src/drivers/boards/vrbrain-v52/board_config.h \
+    ../modules/PX4Firmware/src/drivers/boards/vrbrain-v54/board_config.h \
+    ../modules/PX4Firmware/src/drivers/boards/vrcore-v10/board_config.h \
+    ../modules/PX4Firmware/src/drivers/boards/vrubrain-v51/board_config.h \
+    ../modules/PX4Firmware/src/drivers/boards/vrubrain-v52/board_config.h \
+>>>>>>> 27298f90022adbc7f884f8b66f09a9d77edbf141
     ../modules/PX4Firmware/src/drivers/device/device.h \
     ../modules/PX4Firmware/src/drivers/device/device_nuttx.h \
     ../modules/PX4Firmware/src/drivers/device/i2c.h \
@@ -7037,9 +7250,17 @@ HEADERS += \
     ../modules/PX4Firmware/src/drivers/hmc5883/hmc5883.h \
     ../modules/PX4Firmware/src/drivers/hott/comms.h \
     ../modules/PX4Firmware/src/drivers/hott/messages.h \
+<<<<<<< HEAD
     ../modules/PX4Firmware/src/drivers/ll40ls/LidarLite.h \
     ../modules/PX4Firmware/src/drivers/ll40ls/LidarLiteI2C.h \
     ../modules/PX4Firmware/src/drivers/ll40ls/LidarLitePWM.h \
+=======
+    ../modules/PX4Firmware/src/drivers/hz16wa/hz16wa.h \
+    ../modules/PX4Firmware/src/drivers/ll40ls/LidarLite.h \
+    ../modules/PX4Firmware/src/drivers/ll40ls/LidarLiteI2C.h \
+    ../modules/PX4Firmware/src/drivers/ll40ls/LidarLitePWM.h \
+    ../modules/PX4Firmware/src/drivers/m006/m006.h \
+>>>>>>> 27298f90022adbc7f884f8b66f09a9d77edbf141
     ../modules/PX4Firmware/src/drivers/md25/BlockSysIdent.hpp \
     ../modules/PX4Firmware/src/drivers/md25/md25.hpp \
     ../modules/PX4Firmware/src/drivers/mpu9250/gyro.h \
@@ -7063,6 +7284,10 @@ HEADERS += \
     ../modules/PX4Firmware/src/drivers/drv_batt_smbus.h \
     ../modules/PX4Firmware/src/drivers/drv_blinkm.h \
     ../modules/PX4Firmware/src/drivers/drv_device.h \
+<<<<<<< HEAD
+=======
+    ../modules/PX4Firmware/src/drivers/drv_flowmeter.h \
+>>>>>>> 27298f90022adbc7f884f8b66f09a9d77edbf141
     ../modules/PX4Firmware/src/drivers/drv_gpio.h \
     ../modules/PX4Firmware/src/drivers/drv_gps.h \
     ../modules/PX4Firmware/src/drivers/drv_gyro.h \
@@ -7703,6 +7928,7 @@ HEADERS += \
     ../modules/PX4Firmware/unittests/board_config.h \
     ../modules/PX4Firmware/unittests/debug.h \
     ../modules/PX4Firmware/unittests/queue.h \
+<<<<<<< HEAD
     ../modules/PX4NuttX/apps/builtin/builtin_list.h \
     ../modules/PX4NuttX/apps/builtin/builtin_proto.h \
     ../modules/PX4NuttX/apps/examples/adc/adc.h \
@@ -9813,4 +10039,9 @@ HEADERS += \
     ../Tools/Replay/Parameters.h \
     ../Tools/Replay/Replay.h \
     ../Tools/Replay/VehicleType.h
+=======
+    ../tests/AP_gtest.h \
+    ../libraries/AP_RangeFinder/AP_RangeFinder_MMWRadar.h \
+    ../libraries/AP_GPS/AP_GPS_DRTK.h
+>>>>>>> 27298f90022adbc7f884f8b66f09a9d77edbf141
 

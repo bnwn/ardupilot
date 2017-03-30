@@ -3,6 +3,7 @@
 #include "Copter.h"
 
 #define CONTROL_SWITCH_DEBOUNCE_TIME_MS  200
+#define CONTROL_SWITCH_HOLD_LONG_TIME_MS 3000
 
 //Documentation of Aux Switch Flags:
 static union {
@@ -21,6 +22,7 @@ static union {
 void Copter::read_control_switch()
 {
     uint32_t tnow_ms = millis();
+    static bool is_hold_long = false;
 
     // calculate position of flight mode switch
     int8_t switch_position;
@@ -38,8 +40,56 @@ void Copter::read_control_switch()
 
     // debounce switch
     bool control_switch_changed = control_switch_state.debounced_switch_position != switch_position;
+    bool control_aux10_switch_on = aux_con.CH10_flag == AUX_SWITCH_HIGH;
     bool sufficient_time_elapsed = tnow_ms - control_switch_state.last_edge_time_ms > CONTROL_SWITCH_DEBOUNCE_TIME_MS;
     bool failsafe_disengaged = !failsafe.radio && failsafe.radio_counter == 0;
+
+    if (control_aux10_switch_on && failsafe_disengaged) {
+        if (ap.land_complete && (tnow_ms - control_switch_state.last_aux10_edge_time_ms > CONTROL_SWITCH_HOLD_LONG_TIME_MS)) {
+            if (mission.clear_point_item() == AP_MISSION_POINT_CLEAR_UP) {
+            //if (mission.reset_point_item() == AP_MISSION_POINT_SET_CURRENT) {
+                AP_Notify::events.tune_save = 1;
+                AP_Notify::flags.point_setup_init = 3;
+            } else {
+                AP_Notify::events.tune_error = 1;
+            }
+            control_switch_state.last_aux10_edge_time_ms = tnow_ms;
+            is_hold_long = true;
+        }
+    } else {
+        if (!is_hold_long && position_ok() && (tnow_ms - control_switch_state.last_aux10_edge_time_ms > CONTROL_SWITCH_DEBOUNCE_TIME_MS) && (control_switch_state.last_switch_aux10_position != -1)) {
+        //if (!is_hold_long && (tnow_ms - control_switch_state.last_aux10_edge_time_ms > CONTROL_SWITCH_DEBOUNCE_TIME_MS) && (control_switch_state.last_switch_aux10_position != -1)) {
+            if (ap.land_complete) {
+                if (mission.reset_current_point() == AP_MISSION_POINT_SET_CURRENT) {
+                    if (ap.initialised) {
+                        AP_Notify::events.tune_save = 1;
+                        AP_Notify::flags.point_setup_success = 3;
+                    }
+                } else {
+                    if (ap.initialised) {
+                        AP_Notify::events.tune_error = 1;
+                    }
+                }
+            } else {
+                int ret = mission.set_current_point();
+
+                if (ap.initialised) {
+                    if (ret == AP_MISSION_POINT_SET_A) {
+                        AP_Notify::events.tune_started = 1;
+                        AP_Notify::flags.point_setup_init = 3;
+                    } else if (ret == AP_MISSION_POINT_SET_B) {
+                        AP_Notify::events.tune_save = 1;
+                        AP_Notify::flags.point_setup_success = 3;
+                    } else {
+                        AP_Notify::events.tune_error = 1;
+                    }
+                }
+            }
+        }
+
+        is_hold_long = false;
+        control_switch_state.last_aux10_edge_time_ms = tnow_ms;
+    }
 
     if (control_switch_changed && sufficient_time_elapsed && failsafe_disengaged) {
         // set flight mode and simple mode setting
@@ -69,9 +119,11 @@ void Copter::read_control_switch()
 
         // set the debounced switch position
         control_switch_state.debounced_switch_position = switch_position;
+
     }
 
     control_switch_state.last_switch_position = switch_position;
+    control_switch_state.last_switch_aux10_position = aux_con.CH10_flag;
 }
 
 // check_if_auxsw_mode_used - Check to see if any of the Aux Switches are set to a given mode.
@@ -108,6 +160,7 @@ bool Copter::check_duplicate_auxsw(void)
 void Copter::reset_control_switch()
 {
     control_switch_state.last_switch_position = control_switch_state.debounced_switch_position = -1;
+    control_switch_state.last_switch_aux10_position = -1;
     read_control_switch();
 }
 
@@ -123,6 +176,9 @@ uint8_t Copter::read_3pos_switch(int16_t radio_in)
 void Copter::read_aux_switches()
 {
     uint8_t switch_position;
+#if OILENGINE == ENABLED
+    static int16_t oil_engine_radio_in = 0;
+#endif
 
     // exit immediately during radio failsafe
     if (failsafe.radio || failsafe.radio_counter != 0) {
@@ -149,6 +205,13 @@ void Copter::read_aux_switches()
         do_aux_switch_function(g.ch8_option, aux_con.CH8_flag);
     }
 
+#if OILENGINE == ENABLED
+    if (oil_engine_radio_in != g.rc_9.get_radio_in()) {
+        oil_engine_radio_in = g.rc_9.get_radio_in();
+
+        oil_engine.set_radio_in((int16_t)(oil_engine_radio_in - g.rc_9.get_radio_min()), (int16_t)(g.rc_9.get_radio_max() - g.rc_9.get_radio_min()));
+    }
+#else
     // check if Ch9 switch has changed position
     switch_position = read_3pos_switch(g.rc_9.get_radio_in());
     if (aux_con.CH9_flag != switch_position) {
@@ -158,6 +221,7 @@ void Copter::read_aux_switches()
         // invoke the appropriate function
         do_aux_switch_function(g.ch9_option, aux_con.CH9_flag);
     }
+#endif
 
     // check if Ch10 switch has changed position
     switch_position = read_3pos_switch(g.rc_10.get_radio_in());
@@ -400,9 +464,11 @@ void Copter::do_aux_switch_function(int8_t ch_function, uint8_t ch_flag)
 #endif
 #if SPRAYER == ENABLED
         case AUXSW_SPRAYER:
-            sprayer.enable(ch_flag == AUX_SWITCH_HIGH);
-            // if we are disarmed the pilot must want to test the pump
-            sprayer.test_pump((ch_flag == AUX_SWITCH_HIGH) && !motors.armed());
+            if (control_mode != POINT_ATOB) {
+                sprayer.enable(ch_flag > AUX_SWITCH_LOW);
+                // if we are disarmed the pilot must want to test the pump
+                sprayer.test_pump(ch_flag);
+            }
             break;
 #endif
 
@@ -591,6 +657,28 @@ void Copter::do_aux_switch_function(int8_t ch_function, uint8_t ch_flag)
             }else{
                 avoidance_adsb.disable();
                 Log_Write_Event(DATA_AVOIDANCE_ADSB_DISABLE);
+            }
+            break;
+
+        case AUXSW_POINT_ATOB:
+            if (ch_flag == AUX_SWITCH_HIGH) {
+                // set flight mode and simple mode setting
+                if (set_mode(POINT_ATOB, MODE_REASON_TX_COMMAND)) {
+                    if (ap.initialised) {
+                        AP_Notify::events.user_mode_change = 1;
+                    }
+                } else {
+                    // alert user to mode change failure
+                    AP_Notify::events.user_mode_change_failed = 1;
+                }
+            } else {
+                // return to flight mode switch's flight mode if we are currently in throw mode
+                if (control_mode == POINT_ATOB) {
+                    reset_control_switch();
+                    if (ap.initialised) {
+                        AP_Notify::events.user_mode_change = 1;
+                    }
+                }
             }
             break;
     }

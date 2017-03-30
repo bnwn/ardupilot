@@ -34,6 +34,7 @@
 #include "AP_GPS_SIRF.h"
 #include "AP_GPS_UBLOX.h"
 #include "AP_GPS_MAV.h"
+#include "AP_GPS_DRTK.h"
 #include "GPS_Backend.h"
 
 extern const AP_HAL::HAL &hal;
@@ -43,7 +44,7 @@ const AP_Param::GroupInfo AP_GPS::var_info[] = {
     // @Param: TYPE
     // @DisplayName: GPS type
     // @Description: GPS type
-    // @Values: 0:None,1:AUTO,2:uBlox,3:MTK,4:MTK19,5:NMEA,6:SiRF,7:HIL,8:SwiftNav,9:PX4-UAVCAN,10:SBF,11:GSOF,12:QURT,13:ERB,14:MAV,15:NOVA
+    // @Values: 0:None,1:AUTO,2:uBlox,3:MTK,4:MTK19,5:NMEA,6:SiRF,7:HIL,8:SwiftNav,9:PX4-UAVCAN,10:SBF,11:GSOF,12:QURT,13:ERB,14:MAV,15:NOVA,16:DRTK
     // @RebootRequired: True
     AP_GROUPINFO("TYPE",    0, AP_GPS, _type[0], 1),
 
@@ -52,7 +53,7 @@ const AP_Param::GroupInfo AP_GPS::var_info[] = {
     // @Description: GPS type of 2nd GPS
     // @Values: 0:None,1:AUTO,2:uBlox,3:MTK,4:MTK19,5:NMEA,6:SiRF,7:HIL,8:SwiftNav,9:PX4-UAVCAN,10:SBF,11:GSOF
     // @RebootRequired: True
-    AP_GROUPINFO("TYPE2",   1, AP_GPS, _type[1], 0),
+    AP_GROUPINFO("TYPE2",   1, AP_GPS, _type[1], 1),
 
     // @Param: NAVFILTER
     // @DisplayName: Navigation filter setting
@@ -140,18 +141,23 @@ const AP_Param::GroupInfo AP_GPS::var_info[] = {
     // @User: Advanced
     AP_GROUPINFO("AUTO_CONFIG", 13, AP_GPS, _auto_config, 1),
 
+    // @Param: USE__YAW
+    // @DisplayName: use GPS calc heading for yaw
+    // @Values: 0:Disables,1:Enable
+    // @User: Enigma
+    AP_GROUPINFO("USE_YAW", 14, AP_GPS, _use_for_yaw, 0),
+
     AP_GROUPEND
 };
 
 /// Startup initialisation.
-void AP_GPS::init(DataFlash_Class *dataflash, const AP_SerialManager& serial_manager)
+void AP_GPS::init(DataFlash_Class *dataflash)
 {
     _DataFlash = dataflash;
     primary_instance = 0;
-
     // search for serial ports with gps protocol
-    _port[0] = serial_manager.find_serial(AP_SerialManager::SerialProtocol_GPS, 0);
-    _port[1] = serial_manager.find_serial(AP_SerialManager::SerialProtocol_GPS, 1);
+    _port[0] = _serial_manager.find_serial(AP_SerialManager::SerialProtocol_GPS, 0);
+    _port[1] = _serial_manager.find_serial(AP_SerialManager::SerialProtocol_GPS, 1);
     _last_instance_swap_ms = 0;
 }
 
@@ -211,6 +217,25 @@ AP_GPS::detect_instance(uint8_t instance)
     struct detect_state *dstate = &detect_state[instance];
     uint32_t now = AP_HAL::millis();
 
+#if BDNST_DRTK_DETECT == 1
+    // use to startup BDNST DRTK
+    uint32_t baudrate_tmp = 0;
+    int8_t index = 0;
+    if (_type[instance] == GPS_TYPE_DRTK &&
+            _port[instance] != nullptr) {
+        baudrate_tmp = _serial_manager.find_baudrate(AP_SerialManager::SerialProtocol_GPS, instance);
+        for (; index<7; index++) {
+           if (baudrate_tmp == _baudrates[index]) {
+               break;
+           }
+        }
+        _broadcast_gps_type("DRTK", instance, index); // baud rate had set by mannual
+        _port[instance]->begin(baudrate_tmp);
+        new_gps = new AP_GPS_DRTK(*this, state[instance], _port[instance]);
+        goto found_gps;
+    }
+#endif
+
 #if CONFIG_HAL_BOARD == HAL_BOARD_PX4
     if (_type[instance] == GPS_TYPE_PX4) {
         // check for explicitely chosen PX4 GPS beforehand
@@ -228,7 +253,7 @@ AP_GPS::detect_instance(uint8_t instance)
         goto found_gps;
     }
 #endif
-    
+
     if (_port[instance] == NULL) {
         // UART not available
         return;
@@ -248,7 +273,7 @@ AP_GPS::detect_instance(uint8_t instance)
 	} else if ((_type[instance] == GPS_TYPE_NOVA)) {
 		_broadcast_gps_type("NOVA", instance, -1); // baud rate isn't valid
 		new_gps = new AP_GPS_NOVA(*this, state[instance], _port[instance]);
-	}
+    }
 
     // record the time when we started detection. This is used to try
     // to avoid initialising a uBlox as a NMEA GPS
@@ -341,7 +366,7 @@ AP_GPS::detect_instance(uint8_t instance)
 		}
 	}
 
-#if CONFIG_HAL_BOARD == HAL_BOARD_PX4 || CONFIG_HAL_BOARD == HAL_BOARD_QURT
+#if CONFIG_HAL_BOARD == HAL_BOARD_PX4 || CONFIG_HAL_BOARD == HAL_BOARD_QURT || BDNST_DRTK_DETECT == 1
 found_gps:
 #endif
 	if (new_gps != NULL) {

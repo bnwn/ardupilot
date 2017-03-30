@@ -142,6 +142,13 @@ bool Copter::compass_checks(bool display_failure)
             return false;
         }
 
+        if (gps.have_heading_accuracy()) {
+            if (display_failure) {
+                GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_NOTICE, "Use heading from D-GPS");
+            }
+            return true;
+        }
+
         // check the primary compass is healthy
         if (!compass.healthy()) {
             if (display_failure) {

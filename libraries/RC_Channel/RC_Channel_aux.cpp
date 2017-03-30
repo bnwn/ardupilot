@@ -136,6 +136,10 @@ void RC_Channel_aux::aux_servo_function_setup(void)
         // fixed wing throttle
         set_range_out(0,100);
         break;
+    case RC_Channel_aux::k_oil_engine1:
+    case RC_Channel_aux::k_oil_engine2:
+        // oil engine throttle
+        set_range_out(0, 1000);
     default:
         break;
     }
@@ -426,6 +430,23 @@ RC_Channel_aux::move_servo(RC_Channel_aux::Aux_servo_function_t function,
 			_aux_channels[i]->output();
 		}
 	}
+}
+
+/*
+ * get servo out value
+ */
+int16_t
+RC_Channel_aux::get_servo(Aux_servo_function_t function)
+{
+    if (function_assigned(function)) {
+        for (uint8_t i = 0; i < RC_AUX_MAX_CHANNELS; i++) {
+            if (_aux_channels[i] && _aux_channels[i]->function.get() == function) {
+                return (int16_t)(_aux_channels[i]->get_servo_out());
+            }
+        }
+    }
+
+    return 0;
 }
 
 /*

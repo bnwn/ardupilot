@@ -7,5 +7,8 @@
 #include "DerivativeFilter.h"
 #include "FilterWithBuffer.h"
 #include "LowPassFilter.h"
+#include "LowPassFilter2p.h"
+#include "SlidingFilter.h"
+#include "KalmanFilter.h"
 #include "ModeFilter.h"
 #include "Butter.h"

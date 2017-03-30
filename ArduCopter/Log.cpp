@@ -334,11 +334,18 @@ void Copter::Log_Write_Control_Tuning()
         desired_alt         : pos_control.get_alt_target() / 100.0f,
         inav_alt            : inertial_nav.get_altitude() / 100.0f,
         baro_alt            : baro_alt,
+        //desired_rangefinder_alt : (int16_t)target_rangefinder_alt,
+        //rangefinder_alt     : rangefinder_state.alt_cm,
+        //terr_alt            : terr_alt,
+        //target_climb_rate   : (int16_t)pos_control.get_vel_target_z(),
+        //climb_rate          : climb_rate
+
+        //desired_rangefinder_alt : (int16_t)(rangefinder_state.alt_cm_filter_median),
         desired_rangefinder_alt : (int16_t)target_rangefinder_alt,
-        rangefinder_alt     : rangefinder_state.alt_cm,
+        rangefinder_alt     : (int16_t)(rangefinder_state.alt_cm),
         terr_alt            : terr_alt,
-        target_climb_rate   : (int16_t)pos_control.get_vel_target_z(),
-        climb_rate          : climb_rate
+        target_climb_rate   : rangefinder_state.alt_cm_filter,
+        climb_rate          : rangefinder_state.alt_cm_filter_slide
     };
     DataFlash.WriteBlock(&pkt, sizeof(pkt));
 }
@@ -377,7 +384,8 @@ void Copter::Log_Write_Attitude()
 {
     Vector3f targets = attitude_control.get_att_target_euler_cd();
     targets.z = wrap_360_cd(targets.z);
-    DataFlash.Log_Write_Attitude(ahrs, targets);
+    uint16_t heading = (uint16_t)gps.get_heading();
+    DataFlash.Log_Write_Attitude(ahrs, targets, heading);
 
  #if OPTFLOW == ENABLED
     DataFlash.Log_Write_EKF(ahrs,optflow.enabled());

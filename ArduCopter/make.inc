@@ -61,3 +61,5 @@ LIBRARIES += AP_IRLock
 LIBRARIES += AC_InputManager
 LIBRARIES += AP_ADSB
 LIBRARIES += AP_Avoidance
+LIBRARIES += AP_Flowmeter
+LIBRARIES += AP_OilEngine

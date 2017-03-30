@@ -65,7 +65,10 @@
  # define FRAME_CONFIG   QUAD_FRAME
 #endif
 
-#if FRAME_CONFIG == QUAD_FRAME
+#if FRAME_CONFIG == OIL_FRAME
+ # define FRAME_CONFIG_STRING "HEXA"
+ # define OIL_ENGINE_HEXA ENABLED
+#elif FRAME_CONFIG == QUAD_FRAME
  # define FRAME_CONFIG_STRING "QUAD"
 #elif FRAME_CONFIG == TRI_FRAME
  # define FRAME_CONFIG_STRING "TRI"
@@ -128,12 +131,30 @@
  # define RANGEFINDER_ENABLED ENABLED
 #endif
 
+#ifndef MMWRADAR_ENABLED
+ # define MMWRADAR_ENABLED DISABLED
+#endif
+
+#ifndef FLOWMETER_ENABLED
+ # define FLOWMETER_ENABLED ENABLED
+#endif
+
 #ifndef RANGEFINDER_HEALTH_MAX
- # define RANGEFINDER_HEALTH_MAX 3          // number of good reads that indicates a healthy rangefinder
+ # define RANGEFINDER_HEALTH_MAX 1          // number of good reads that indicates a healthy rangefinder
+#endif
+
+#ifndef FLOWMETER_HEALTH_MAX
+ # define FLOWMETER_HEALTH_MAX 5
+#endif
+
+#ifndef PESTICIDE_EMPTY_TIMEOUT_MS
+ # define PESTICIDE_EMPTY_TIMEOUT_MS 1000
 #endif
 
 #ifndef RANGEFINDER_GAIN_DEFAULT
  # define RANGEFINDER_GAIN_DEFAULT 0.8f     // gain for controlling how quickly rangefinder range adjusts target altitude (lower means slower reaction)
+ # define RANGEFINDER_KALMAN_P 10
+ # define RANGEFINDER_KALMNA_R 0.0001
 #endif
 
 #ifndef THR_SURFACE_TRACKING_VELZ_MAX
@@ -146,6 +167,10 @@
 
 #ifndef RANGEFINDER_WPNAV_FILT_HZ
  # define RANGEFINDER_WPNAV_FILT_HZ   0.25f // filter frequency for rangefinder altitude provided to waypoint navigation class
+#endif
+
+#ifndef FLOWMETER_FILT_HZ
+ # define FLOWMETER_FILT_HZ          0.0f
 #endif
 
 #ifndef RANGEFINDER_TILT_CORRECTION         // by disable tilt correction for use of range finder data by EKF
@@ -308,6 +333,12 @@
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
+// Avoid Obstacle - a simple function to avoid obstacle
+#ifndef AVOID_OBSTACLE
+ # define AVOID_OBSTACLE DISABLED
+#endif
+
+//////////////////////////////////////////////////////////////////////////////
 // RADIO CONFIGURATION
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
@@ -335,6 +366,12 @@
 #ifndef FLIGHT_MODE_6
  # define FLIGHT_MODE_6                  STABILIZE
 #endif
+#ifndef FLIGHT_MODE_7
+ # define FLIGHT_MODE_7                  STABILIZE
+#endif
+#ifndef FLIGHT_MODE_8
+ # define FLIGHT_MODE_8                  STABILIZE
+#endif
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -356,7 +393,7 @@
 // Landing
 //
 #ifndef LAND_SPEED
- # define LAND_SPEED    50          // the descent speed for the final stage of landing in cm/s
+ # define LAND_SPEED    70          // the descent speed for the final stage of landing in cm/s
 #endif
 #ifndef LAND_START_ALT
  # define LAND_START_ALT 1000         // altitude in cm where land controller switches to slow rate of descent
@@ -394,14 +431,23 @@
 // CAMERA TRIGGER AND CONTROL
 //
 #ifndef CAMERA
- # define CAMERA        ENABLED
+ # define CAMERA        DISABLE
+#endif
+
+//////////////////////////////////////////////////////////////////////////////
+//  OIL ENGINE CONTROL
+//
+#ifdef OIL_ENGINE_HEXA
+ # define OILENGINE     ENABLED
+#else
+ # define OILENGINE     DISABLED
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
 // MOUNT (ANTENNA OR CAMERA)
 //
 #ifndef MOUNT
- # define MOUNT         ENABLED
+ # define MOUNT         DISABLE
 #endif
 
 
@@ -576,6 +622,32 @@
 #endif
 #ifndef ACCEL_Z_FILT_HZ
  # define ACCEL_Z_FILT_HZ   20.0f
+#endif
+
+// Oil Engine control gains
+#ifndef OILENGINE_P
+ # define OILENGINE_P 1.0f
+#endif
+#ifndef OILENGINE_I
+ # define OILENGINE_I 0.0f
+#endif
+#ifndef OILENGINE_D
+ # define OILENGINE_D 0.0f
+#endif
+#ifndef OILENGINE_IMAX
+ # define OILENGINE_IMAX 200
+#endif
+#ifndef OILENGINE_FILT_HZ
+ # define OILENGINE_FILT_HZ 20.0f
+#endif
+#ifndef OILENGINE_UPDATE_TIME
+ # define OILENGINE_UPDATE_TIME 0.02f
+#endif
+#ifndef OIL_PWM_MAX
+ # define OIL_PWM_MAX 2000
+#endif
+#ifndef OIL_PWM_MIN
+ # define OIL_PWM_MIN 1000
 #endif
 
 // default maximum vertical velocity and acceleration the pilot may request

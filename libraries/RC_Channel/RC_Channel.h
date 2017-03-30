@@ -141,11 +141,13 @@ public:
     void       set_radio_out(int16_t val){ _radio_out = val;}
 
     int16_t    get_radio_min() const {return _radio_min.get();}
-    void       set_radio_min(int16_t val){_radio_min = val;}
-
+    void       set_radio_min(int16_t val){_radio_min = val; \
+                                         save_radio_min();}
+    void       save_radio_min() { _radio_min.save();}
     int16_t    get_radio_max() const {return _radio_max.get();}
-    void       set_radio_max(int16_t val){_radio_max = val;}
-
+    void       set_radio_max(int16_t val){_radio_max = val; \
+                                         save_radio_max();}
+    void       save_radio_max() { _radio_max.save();}
     int16_t    get_radio_trim() const { return _radio_trim.get();}
     void       set_radio_trim(int16_t val) { _radio_trim.set(val);}
     void       save_radio_trim() { _radio_trim.save();}

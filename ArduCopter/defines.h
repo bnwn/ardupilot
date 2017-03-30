@@ -69,6 +69,8 @@ enum aux_sw_func {
     AUXSW_RELAY4 =              36, // Relay4 pin on/off (in Mission planner set CH10_OPT = 36)
     AUXSW_THROW =               37,  // change to THROW flight mode
     AUXSW_AVOID_ADSB =          38,  // enable AP_Avoidance library
+    AUXSW_POINT_ATOB =          39,
+    AUXSW_OIL_ENGINE_THROTTLE = 40,
     AUXSW_SWITCH_MAX,
 };
 
@@ -83,6 +85,7 @@ enum aux_sw_func {
 #define OCTA_QUAD_FRAME 7
 #define SINGLE_FRAME 8
 #define COAX_FRAME 9
+#define OIL_FRAME 10
 
 // HIL enumerations
 #define HIL_MODE_DISABLED               0
@@ -108,6 +111,8 @@ enum control_mode_t {
     THROW =        18,  // throw to launch mode using inertial/GPS system, no pilot input
     AVOID_ADSB =   19,  // automatic avoidance of obstacles in the macro scale - e.g. full-sized aircraft
     GUIDED_NOGPS = 20,  // guided mode but only accepts attitude and altitude
+    POINT_ATOB =   21,  // drove between point A and B
+    MOTOR_ESTOP =  22,  // set motor emergency stop
 };
 
 enum mode_reason_t {
@@ -128,6 +133,7 @@ enum mode_reason_t {
     MODE_REASON_AVOIDANCE,
     MODE_REASON_AVOIDANCE_RECOVERY,
     MODE_REASON_THROW_COMPLETE,
+    MODE_REASON_PESTICIDE_EMPTY,
 };
 
 // Tuning enumeration

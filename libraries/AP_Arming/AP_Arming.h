@@ -44,7 +44,7 @@ public:
         ARMING_RUDDER_ARMDISARM = 2
     };
 
-    AP_Arming(const AP_AHRS &ahrs_ref, const AP_Baro &baro, Compass &compass,
+    AP_Arming(const AP_AHRS &ahrs_ref, const AP_Baro &baro, Compass &compass, AP_GPS &gps,
               const AP_BattMonitor &battery, const enum HomeState &home_set);
 
     ArmingRequired arming_required();
@@ -76,6 +76,7 @@ protected:
     const AP_AHRS           &ahrs;
     const AP_Baro           &barometer;
     Compass                 &_compass;
+    AP_GPS                  &_gps;
     const AP_BattMonitor    &_battery;
     const enum HomeState    &home_is_set;
 

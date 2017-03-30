@@ -214,6 +214,62 @@ void RGBLed::update_colours(void)
         return;
     }
 
+    if (AP_Notify::flags.point_setup_init > 0) {
+        switch(step) {
+            case 0:
+            case 1:
+            case 4:
+            case 5:
+                // yellow on
+                _red_des = _led_off;
+                _blue_des = brightness;
+                _green_des = brightness;
+                break;
+            case 2:
+            case 3:
+            case 6:
+            case 7:
+            case 8:
+                // all off
+                _red_des = _led_off;
+                _blue_des = _led_off;
+                _green_des = _led_off;
+                break;
+            case 9:
+                AP_Notify::flags.point_setup_init--;
+            break;
+        }
+        return;
+    }
+
+    if (AP_Notify::flags.point_setup_success > 0) {
+        switch(step) {
+            case 0:
+            case 1:
+            case 4:
+            case 5:
+                // purse on
+                _red_des = brightness;
+                _blue_des = brightness;
+                _green_des = _led_off;
+                break;
+            case 2:
+            case 3:
+            case 6:
+            case 7:
+            case 8:
+                // all off
+                _red_des = _led_off;
+                _blue_des = _led_off;
+                _green_des = _led_off;
+                break;
+            case 9:
+                AP_Notify::flags.point_setup_success--;
+                break;
+        }
+        return;
+    }
+
     // solid green or blue if armed
     if (AP_Notify::flags.armed) {
         // solid green if armed with GPS 3d lock

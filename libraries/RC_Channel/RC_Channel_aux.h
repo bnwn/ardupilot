@@ -95,6 +95,8 @@ public:
         k_choke                 = 68,
         k_starter               = 69,
         k_throttle              = 70,
+        k_oil_engine1           = 71,
+        k_oil_engine2           = 72,
         k_nr_aux_servo_functions         ///< This must be the last enum value (only add new values _before_ this one)
     } Aux_servo_function_t;
 
@@ -145,6 +147,9 @@ public:
 	// set a servo_out value, and angle range, then calc_pwm
 	static void move_servo(Aux_servo_function_t function,
 						   int16_t value, int16_t angle_min, int16_t angle_max);
+
+    // get a servo_out value
+    static int16_t get_servo(Aux_servo_function_t function);
 
     static const struct AP_Param::GroupInfo        var_info[];
 

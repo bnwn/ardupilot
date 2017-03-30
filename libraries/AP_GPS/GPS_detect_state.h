@@ -74,3 +74,11 @@ struct SBP_detect_state {
     uint16_t crc_so_far;
     uint16_t crc;
 };
+
+struct DRTK_detect_state {
+    enum {
+        NONE = 0,
+        START_SEQ = 1,
+        END_SEQ = 2
+    } state:8;
+};

@@ -69,6 +69,9 @@ void Copter::run_autopilot()
     if (control_mode == AUTO) {
         // update state of mission
         // may call commands_process.pde's start_command and verify_command functions
-        mission.update();
+        mission.update(AP_MISSION_AUTO_RUNNING);
+
+    } else if (control_mode == POINT_ATOB) {
+        mission.update(AP_MISSION_POINT_ATOB_RUNNING);
     }
 }

@@ -188,7 +188,7 @@ void Copter::init_ardupilot()
     hal.scheduler->register_timer_failsafe(failsafe_check_static, 1000);
 
     // Do GPS init
-    gps.init(&DataFlash, serial_manager);
+    gps.init(&DataFlash);
 
     if(g.compass_enabled)
         init_compass();
@@ -215,6 +215,15 @@ void Copter::init_ardupilot()
 #if MOUNT == ENABLED
     // initialise camera mount
     camera_mount.init(&DataFlash, serial_manager);
+#endif
+
+#if OILENGINE == ENABLED
+    // initialise oil engine
+    g.rc_7.set_radio_max(OIL_PWM_MAX);
+    g.rc_8.set_radio_max(OIL_PWM_MAX);
+    g.rc_7.set_radio_min(OIL_PWM_MIN);
+    g.rc_8.set_radio_min(OIL_PWM_MIN);
+    oil_engine.init();
 #endif
 
 #if PRECISION_LANDING == ENABLED
@@ -254,6 +263,9 @@ void Copter::init_ardupilot()
     // read Baro pressure at ground
     //-----------------------------
     init_barometer(true);
+
+    // initialise flowmeter
+    init_farming();
 
     // initialise rangefinder
     init_rangefinder();
