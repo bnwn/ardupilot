@@ -29,7 +29,17 @@ void Copter::init_rangefinder(void)
 #if RANGEFINDER_ENABLED == ENABLED
    rangefinder.init();
    rangefinder_state.alt_cm_filt.set_cutoff_frequency(RANGEFINDER_WPNAV_FILT_HZ);
-   rangefinder_state.enabled = rangefinder.has_orientation(ROTATION_PITCH_270);
+ //  rangefinder_state.enabled = rangefinder.has_orientation(ROTATION_PITCH_270);
+   rangefinder_state.alt_cm_filt_slide.set_sliding_param(10);
+   rangefinder_state.enabled = (rangefinder.num_sensors() >= 1);
+
+#if MMWRADAR_ENABLED == ENABLED
+   mmwradar_state.enabled = rangefinder_state.enabled;
+//   mmwradar_state.range_cm_filt.set_cutoff_frequency(RANGEFINDER_WPNAV_FILT_HZ);
+//   mmwradar_state.range_cm_filt_2p.set_cutoff_frequency(50, RANGEFINDER_WPNAV_FILT_HZ);
+//   mmwradar_state.range_cm_filt_kalman.set_kalman_param(RANGEFINDER_KALMAN_P, RANGEFINDER_KALMNA_R);
+//   mmwradar_state.range_cm_filt_slide.set_sliding_param(10);
+#endif
 #endif
 }
 
@@ -39,19 +49,42 @@ void Copter::read_rangefinder(void)
 #if RANGEFINDER_ENABLED == ENABLED
     rangefinder.update();
 
-    if (rangefinder.num_sensors() > 0 &&
-        should_log(MASK_LOG_CTUN)) {
-        DataFlash.Log_Write_RFND(rangefinder);
+    rangefinder_state.alt_healthy = ((rangefinder.status(0) == RangeFinder::RangeFinder_Good)
+                                     && (rangefinder.range_valid_count(0) >= RANGEFINDER_HEALTH_MAX)
+                                     && (rangefinder.status(1) == RangeFinder::RangeFinder_Good)
+                                     && (rangefinder.range_valid_count(1) >= RANGEFINDER_HEALTH_MAX));
+
+    int16_t temp_alt;
+    float vehicle_tilt = ahrs.pitch;
+    if (rangefinder.service_tilt(0) == 0 && rangefinder.service_tilt(1) == 0) { // isn't mmwradar
+        // correct alt for angle of the rangefinder
+        temp_alt = (float)rangefinder.distance_cm() * MAX(0.707f, ahrs.get_rotation_body_to_ned().c.z);
+        rangefinder_state.tilt_angle = ahrs.pitch;
+    } else if (gps.ground_speed() < 1.0f && fabs(vehicle_tilt) < 0.0523f) {
+        int16_t advance_alt = rangefinder.distance_cm(0);
+        int16_t back_alt = rangefinder.distance_cm(1);
+        float advance_tilt = rangefinder.service_tilt(0) * M_PI / 180 + vehicle_tilt;
+        float back_tilt = rangefinder.service_tilt(1) * M_PI / 180 - vehicle_tilt;
+
+        rangefinder_state.tilt_angle = MAX(fabs(advance_tilt), fabs(advance_tilt));
+        temp_alt = (advance_alt * MAX(0.707f, cos(advance_tilt) * cos(ahrs.roll)) + back_alt * MAX(0.707f, cos(back_tilt) * cos(ahrs.roll))) / rangefinder.fuse_correct();
+    } else {
+        uint8_t rngfnd_num = 0;
+        if (ahrs.pitch_sensor > 0 && ahrs.pitch_sensor < 18000) {
+            rngfnd_num = 1;
+            vehicle_tilt *= -1;
+        }
+
+        temp_alt = rangefinder.distance_cm(rngfnd_num);
+
+        rangefinder_state.tilt_angle = rangefinder.service_tilt(rngfnd_num) * M_PI / 180 + vehicle_tilt;
+        if (rangefinder_state.tilt_angle < 0) {
+            rangefinder_state.tilt_angle += M_2PI;
+        } else if (rangefinder_state.tilt_angle > M_2PI) {
+            rangefinder_state.tilt_angle -= M_2PI;
+        }
+        temp_alt = (float)temp_alt * MAX(0.707f, cos(rangefinder_state.tilt_angle) * cos(ahrs.roll));
     }
-
-    rangefinder_state.alt_healthy = ((rangefinder.status_orient(ROTATION_PITCH_270) == RangeFinder::RangeFinder_Good) && (rangefinder.range_valid_count_orient(ROTATION_PITCH_270) >= RANGEFINDER_HEALTH_MAX));
-
-    int16_t temp_alt = rangefinder.distance_cm_orient(ROTATION_PITCH_270);
-
- #if RANGEFINDER_TILT_CORRECTION == ENABLED
-    // correct alt for angle of the rangefinder
-    temp_alt = (float)temp_alt * MAX(0.707f, ahrs.get_rotation_body_to_ned().c.z);
- #endif
 
     rangefinder_state.alt_cm = temp_alt;
 
@@ -62,14 +95,46 @@ void Copter::read_rangefinder(void)
         if (now - rangefinder_state.last_healthy_ms > RANGEFINDER_TIMEOUT_MS) {
             // reset filter if we haven't used it within the last second
             rangefinder_state.alt_cm_filt.reset(rangefinder_state.alt_cm);
+            rangefinder_state.alt_cm_filt_slide.reset(rangefinder_state.alt_cm);
         } else {
-            rangefinder_state.alt_cm_filt.apply(rangefinder_state.alt_cm, 0.05f);
+            rangefinder_state.alt_cm_filt.apply(rangefinder_state.alt_cm, 0.02f);
+            rangefinder_state.alt_cm_filt_slide.apply(rangefinder_state.alt_cm);
+            rangefinder_state.alt_cm_filt_median.apply(rangefinder_state.alt_cm);
         }
         rangefinder_state.last_healthy_ms = now;
     }
 
+    rangefinder_state.alt_cm_filter = rangefinder_state.alt_cm_filt.get();
+    rangefinder_state.alt_cm_filter_median = rangefinder_state.alt_cm_filt_median.get();
+    rangefinder_state.alt_cm_filter_slide = rangefinder_state.alt_cm_filt_slide.get();
+
     // send rangefinder altitude and health to waypoint navigation library
     wp_nav->set_rangefinder_alt(rangefinder_state.enabled, rangefinder_state.alt_healthy, rangefinder_state.alt_cm_filt.get());
+
+
+#if MMWRADAR_ENABLED == ENABLED
+    mmwradar_state.range_healthy = ((rangefinder.mmwradar_status() == RangeFinder::RangeFinder_Good) && (rangefinder.mmwradar_valid_count()) >= RANGEFINDER_HEALTH_MAX);
+
+    // get mmwradar value
+    rangefinder.mmwradar_distance(mmwradar_state.range_cm, mmwradar_state.rcs_cm, mmwradar_state.snr, mmwradar_state.vel_cm);
+#endif
+
+    switch (g.rangefinder_filter.get()) {
+        case 1:
+            //mmwradar_state.range_cm = mmwradar_state.range_cm_filter;
+            rangefinder_state.alt_cm = rangefinder_state.alt_cm_filter;
+            break;
+        case 2:
+            rangefinder_state.alt_cm = rangefinder_state.alt_cm_filter_slide;
+            break;
+        case 3:
+            rangefinder_state.alt_cm = rangefinder_state.alt_cm_filter_median;
+            break;
+        case 0:
+        default:
+            break;
+    }
+
 
 #else
     rangefinder_state.enabled = false;
@@ -81,7 +146,93 @@ void Copter::read_rangefinder(void)
 // return true if rangefinder_alt can be used
 bool Copter::rangefinder_alt_ok()
 {
-    return (rangefinder_state.enabled && rangefinder_state.alt_healthy);
+    //return (rangefinder_state.enabled && rangefinder_state.alt_healthy);
+    return rangefinder_alt_ok_auto();
+}
+
+bool Copter::rangefinder_alt_ok_auto()
+{
+    return rangefinder_state.alt_healthy;
+}
+
+void Copter::init_flowmeter(void)
+{
+#if FLOWMETER_ENABLED == ENABLED
+    flowmeter_state.enabled = flowmeter.init();
+    flowmeter_state.flowrate_filt.set_cutoff_frequency(FLOWMETER_FILT_HZ);
+#endif
+//    test
+//    while(1) {
+//        usleep(100000);
+//        if (get_pesticide_remaining()) {
+//            printf("flowrate_rel: %d \n  pluse rate: %.6f \n", flowmeter_state.flowrate, flowmeter.pluse_rate());
+//        } else {
+//            printf("pesticide empty! \n");
+//        }
+//    }
+}
+
+// return flowrate from flowmeter measurement
+void Copter::read_flowmeter(void)
+{
+#if FLOWMETER_ENABLED == ENABLED
+    flowmeter.update();
+
+    flowmeter_state.healthy = (flowmeter.has_data() && (flowmeter.range_valid_count() >= FLOWMETER_HEALTH_MAX));
+    flowmeter_state.pesticide_check_valid = flowmeter.get_state();
+    flowmeter_state.flowrate = flowmeter.flowrate();
+
+    // filter flowmeter
+    uint32_t now = AP_HAL::millis();
+
+    if (flowmeter_state.healthy) {
+        if (now - flowmeter_state.last_healthy_ms > PESTICIDE_EMPTY_TIMEOUT_MS) {
+            // reset filter if we haven't used it within the last second
+            flowmeter_state.flowrate_filt.reset(flowmeter_state.flowrate);
+        } else {
+            flowmeter_state.flowrate_filt.apply(flowmeter_state.flowrate, 0.0f);
+        }
+        flowmeter_state.last_healthy_ms = now;
+    }
+#else
+    flowmeter_state.enable = false;
+    flowmeter_state.healthy = false;
+    flowmeter_state.flowrate = 0.0f;
+#endif
+}
+
+bool Copter::flowmeter_ok(void)
+{
+    return (flowmeter_state.enabled && flowmeter_state.healthy);
+}
+
+bool Copter::get_pesticide_remaining(void)
+{
+    read_flowmeter();
+
+//    GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "rate:%.2f", flowmeter_state.flowrate * 0.01f);
+    if (flowmeter_ok()) {
+        uint32_t now = AP_HAL::millis();
+
+        if (flowmeter_state.pesticide_check_valid && (flowmeter_state.flowrate <= flowmeter.rtl_flowrate())) {
+            if (flowmeter_state.pesticide_empty_time == 0) {
+                flowmeter_state.pesticide_empty_time = now;
+
+            } else if ((now - flowmeter_state.pesticide_empty_time) > PESTICIDE_EMPTY_TIMEOUT_MS) {
+                flowmeter_state.pesticide_empty_time = 0;
+                flowmeter_state.pesticide_check_valid = false;
+                flowmeter_state.flowrate = 0.0f;
+                flowmeter_state.flowrate_filt.reset(flowmeter_state.flowrate);
+                flowmeter.disable();
+                return false;
+            }
+        } else {
+            // reset pesticide empty time
+            flowmeter_state.pesticide_empty_time = 0;
+        }
+    }
+
+    return true;
 }
 
 /*

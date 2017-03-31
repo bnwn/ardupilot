@@ -39,6 +39,8 @@
 
 #define UNIX_OFFSET_MSEC (17000ULL * 86400ULL + 52 * 10 * MSEC_PER_WEEK - GPS_LEAPSECONDS_MILLIS)
 
+#define BDNST_DRTK_DETECT 1
+
 class DataFlash_Class;
 class AP_GPS_Backend;
 
@@ -47,7 +49,6 @@ class AP_GPS_Backend;
 class AP_GPS
 {
 public:
-
     friend class AP_GPS_ERB;
     friend class AP_GPS_GSOF;
     friend class AP_GPS_MAV;
@@ -62,6 +63,15 @@ public:
     friend class AP_GPS_SIRF;
     friend class AP_GPS_UBLOX;
     friend class AP_GPS_Backend;
+    // constructor
+    AP_GPS(AP_SerialManager &serial_manager) :
+        _serial_manager(serial_manager)
+    {
+		AP_Param::setup_object_defaults(this, var_info);
+    }
+
+    /// Startup initialisation.
+    void init(DataFlash_Class *dataflash);
 
     // constructor
 	AP_GPS();
@@ -83,7 +93,8 @@ public:
         GPS_TYPE_QURT  = 12,
         GPS_TYPE_ERB = 13,
         GPS_TYPE_MAV = 14,
-        GPS_TYPE_NOVA = 15,
+		GPS_TYPE_NOVA = 15,
+        GPS_TYPE_DRTK = 16,
     };
 
     /// GPS status codes
@@ -127,6 +138,8 @@ public:
         uint32_t time_week_ms;              ///< GPS time (milliseconds from start of GPS week)
         uint16_t time_week;                 ///< GPS week number
         Location location;                  ///< last fix location
+        int32_t heading;                    ///< centre degrees
+        uint16_t baseline_cm;                  ///< baseline length in cm
         float ground_speed;                 ///< ground speed in m/sec
         float ground_course;                ///< ground course in degrees
         uint16_t hdop;                      ///< horizontal dilution of precision in cm
@@ -140,6 +153,7 @@ public:
         bool have_speed_accuracy:1;
         bool have_horizontal_accuracy:1;
         bool have_vertical_accuracy:1;
+        bool have_heading_accuracy:1;
         uint32_t last_gps_time_ms;          ///< the system time we got the last GPS timestamp, milliseconds
     };
 
@@ -304,6 +318,29 @@ public:
         return have_vertical_velocity(primary_instance);
     }
 
+    // return true if the GPS supports heading
+    bool have_heading_accuracy(uint8_t instance) const {
+        return (state[instance].have_heading_accuracy && (_use_for_yaw.get() == 1));
+    }
+    bool have_heading_accuracy(void) const {
+        return have_heading_accuracy(primary_instance);
+    }
+
+    // return heading value
+    int32_t get_heading(uint8_t instance) const {
+        int32_t heading_tmp = state[instance].heading - _yaw_compensation * 100;
+
+        if (heading_tmp < 0) {
+            heading_tmp += 36000;
+        }
+
+        return heading_tmp;
+    }
+
+    int16_t get_heading(void) const {
+        return get_heading(primary_instance);
+    }
+
     // the expected lag (in seconds) in the position and velocity readings from the gps
     float get_lag(uint8_t instance) const;
     float get_lag(void) const { return get_lag(primary_instance); }
@@ -318,6 +355,32 @@ public:
 
     // set accuracy for HIL
     void setHIL_Accuracy(uint8_t instance, float vdop, float hacc, float vacc, float sacc, bool _have_vertical_velocity, uint32_t sample_ms);
+
+    static const struct AP_Param::GroupInfo var_info[];
+
+    // dataflash for logging, if available
+    DataFlash_Class *_DataFlash;
+
+    // configuration parameters
+    AP_Int8 _type[GPS_MAX_INSTANCES];
+    AP_Int8 _navfilter;
+    AP_Int8 _auto_switch;
+    AP_Int8 _min_dgps;
+    AP_Int16 _sbp_logmask;
+    AP_Int8 _inject_to;
+    uint32_t _last_instance_swap_ms;
+    AP_Int8 _sbas_mode;
+    AP_Int8 _min_elevation;
+    AP_Int8 _raw_data;
+    AP_Int8 _gnss_mode[2];
+    AP_Int8 _save_config;
+    AP_Int8 _auto_config;
+    AP_Int8 _use_for_yaw;
+    AP_Float _yaw_compensation;
+    
+    // handle sending of initialisation strings to the GPS
+    void send_blob_start(uint8_t instance, const char *_blob, uint16_t size);
+    void send_blob_update(uint8_t instance);
 
     // lock out a GPS port, allowing another application to use the port
     void lock_port(uint8_t instance, bool locked);
@@ -399,11 +462,13 @@ private:
         // the time we got our last fix in system milliseconds
         uint32_t last_message_time_ms;
     };
+
     // Note allowance for an additional instance to contain blended data
-    GPS_timing timing[GPS_MAX_RECEIVERS+1];
-    GPS_State state[GPS_MAX_RECEIVERS+1];
-    AP_GPS_Backend *drivers[GPS_MAX_RECEIVERS];
-    AP_HAL::UARTDriver *_port[GPS_MAX_RECEIVERS];
+    GPS_timing timing[GPS_MAX_INSTANCES];
+    GPS_State state[GPS_MAX_INSTANCES];
+    AP_GPS_Backend *drivers[GPS_MAX_INSTANCES];
+    AP_HAL::UARTDriver *_port[GPS_MAX_INSTANCES];
+    AP_SerialManager &_serial_manager;
 
     /// primary GPS instance
     uint8_t primary_instance:2;
@@ -426,7 +491,8 @@ private:
         struct NMEA_detect_state nmea_detect_state;
         struct SBP_detect_state sbp_detect_state;
         struct ERB_detect_state erb_detect_state;
-    } detect_state[GPS_MAX_RECEIVERS];
+        struct DRTK_detect_state drtk_detect_state;
+    } detect_state[GPS_MAX_INSTANCES];
 
     struct {
         const char *blob;

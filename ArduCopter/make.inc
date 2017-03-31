@@ -66,3 +66,5 @@ LIBRARIES += AP_Stats
 LIBRARIES += AP_Gripper
 LIBRARIES += AP_Beacon
 LIBRARIES += AP_Arming
+LIBRARIES += AP_Flowmeter
+LIBRARIES += AP_OilEngine

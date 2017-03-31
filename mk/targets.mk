@@ -109,8 +109,13 @@ qurt: all
 %-asan: LDFLAGS += -fsanitize=address
 
 # cope with copter and hil targets
+<<<<<<< HEAD
 FRAMES = heli
 BOARDS = apm1 apm2 apm2beta apm1-1280 px4 px4-v1 px4-v2 px4-v3 px4-v4 sitl flymaple linux erle pxf navio navio2 raspilot bbbmini minlure erlebrain2 bhat qflight pxfmini
+=======
+FRAMES = quad tri hexa y6 octa octa-quad heli single coax obc nologging oil
+BOARDS = apm1 apm2 apm2beta apm1-1280 px4 px4-v1 px4-v2 px4-v4 sitl flymaple linux erle pxf navio navio2 raspilot bbbmini minlure erlebrain2 bhat qflight pxfmini
+>>>>>>> 2430caca065e293b45b204e891ae1bd3cc86dab2
 BOARDS += vrbrain
 BOARDS += vrbrain-v51 vrbrain-v52 vrbrain-v54
 BOARDS += vrcore-v10

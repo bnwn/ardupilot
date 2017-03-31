@@ -25,9 +25,14 @@
 #include "AP_RangeFinder_Bebop.h"
 #include "AP_RangeFinder_MAVLink.h"
 #include "AP_RangeFinder_LeddarOne.h"
+<<<<<<< HEAD
 #include "AP_RangeFinder_uLanding.h"
 #include "AP_RangeFinder_trone.h"
 #include <AP_BoardConfig/AP_BoardConfig.h>
+=======
+#include "AP_RangeFinder_MMWRadar.h"
+#include <stdio.h>
+>>>>>>> 2430caca065e293b45b204e891ae1bd3cc86dab2
 
 extern const AP_HAL::HAL &hal;
 
@@ -38,7 +43,7 @@ const AP_Param::GroupInfo RangeFinder::var_info[] = {
     // @Description: What type of rangefinder device that is connected
     // @Values: 0:None,1:Analog,2:MaxbotixI2C,3:LidarLiteV2,5:PX4-PWM,6:BBB-PRU,7:LightWareI2C,8:LightWareSerial,9:Bebop,10:MAVLink,11:uLanding,12:LeddarOne,13:MaxbotixSerial,14:TrOneI2C,15:LidarLiteV3
     // @User: Standard
-    AP_GROUPINFO("_TYPE",    0, RangeFinder, _type[0], 0),
+    AP_GROUPINFO("_TYPE",    0, RangeFinder, _type[0], 13),
 
     // @Param: _PIN
     // @DisplayName: Rangefinder pin
@@ -76,7 +81,7 @@ const AP_Param::GroupInfo RangeFinder::var_info[] = {
 	// @Units: centimeters
     // @Increment: 1
     // @User: Standard
-    AP_GROUPINFO("_MIN_CM",  5, RangeFinder, _min_distance_cm[0], 20),
+    AP_GROUPINFO("_MIN_CM",  5, RangeFinder, _min_distance_cm[0], 10),
 
     // @Param: _MAX_CM
     // @DisplayName: Rangefinder maximum distance
@@ -84,7 +89,7 @@ const AP_Param::GroupInfo RangeFinder::var_info[] = {
 	// @Units: centimeters
     // @Increment: 1
     // @User: Standard
-    AP_GROUPINFO("_MAX_CM",  6, RangeFinder, _max_distance_cm[0], 700),
+    AP_GROUPINFO("_MAX_CM",  6, RangeFinder, _max_distance_cm[0], 5000),
 
     // @Param: _STOP_PIN
     // @DisplayName: Rangefinder stop pin
@@ -133,6 +138,7 @@ const AP_Param::GroupInfo RangeFinder::var_info[] = {
     // @User: Standard
     AP_GROUPINFO("_ADDR", 23, RangeFinder, _address[0], 0),
 
+<<<<<<< HEAD
     // @Param: _POS_X
     // @DisplayName:  X position offset
     // @Description: X position of the first rangefinder in body frame. Positive X is forward of the origin. Use the zero range datum point if supplied.
@@ -158,6 +164,21 @@ const AP_Param::GroupInfo RangeFinder::var_info[] = {
     // @Values: 0:Forward, 1:Forward-Right, 2:Right, 3:Back-Right, 4:Back, 5:Back-Left, 6:Left, 7:Forward-Left, 24:Up, 25:Down
     // @User: Advanced
     AP_GROUPINFO("_ORIENT", 53, RangeFinder, _orientation[0], ROTATION_PITCH_270),
+=======
+    // @Param: _TILT
+    // @DisplayName: degree tilt of sensor
+    // @Range: 0 45
+    // @Increment: 1
+    // @User: Standard
+    AP_GROUPINFO("_TILT", 25, RangeFinder, _tilt[0], 15),
+
+    // @Param: _FUSE
+    // @DisplayName: degree tilt of sensor
+    // @Range: 0 45
+    // @Increment: 1
+    // @User: Standard
+    AP_GROUPINFO("_FUSE", 27, RangeFinder, _fuse, 2.3),
+>>>>>>> 2430caca065e293b45b204e891ae1bd3cc86dab2
 
 #if RANGEFINDER_MAX_INSTANCES > 1
     // @Param: 2_TYPE
@@ -165,7 +186,7 @@ const AP_Param::GroupInfo RangeFinder::var_info[] = {
     // @Description: What type of rangefinder device that is connected
     // @Values: 0:None,1:Analog,2:MaxbotixI2C,3:LidarLiteV2,5:PX4-PWM,6:BBB-PRU,7:LightWareI2C,8:LightWareSerial,9:Bebop,10:MAVLink,11:uLanding,12:LeddarOne,13:MaxbotixSerial,14:TrOneI2C,15:LidarLiteV3
     // @User: Advanced
-    AP_GROUPINFO("2_TYPE",    12, RangeFinder, _type[1], 0),
+    AP_GROUPINFO("2_TYPE",    12, RangeFinder, _type[1], 13),
 
     // @Param: 2_PIN
     // @DisplayName: Rangefinder pin
@@ -203,7 +224,7 @@ const AP_Param::GroupInfo RangeFinder::var_info[] = {
 	// @Units: centimeters
     // @Increment: 1
     // @User: Advanced
-    AP_GROUPINFO("2_MIN_CM",  17, RangeFinder, _min_distance_cm[1], 20),
+    AP_GROUPINFO("2_MIN_CM",  17, RangeFinder, _min_distance_cm[1], 10),
 
     // @Param: 2_MAX_CM
     // @DisplayName: Rangefinder maximum distance
@@ -211,7 +232,7 @@ const AP_Param::GroupInfo RangeFinder::var_info[] = {
 	// @Units: centimeters
     // @Increment: 1
     // @User: Advanced
-    AP_GROUPINFO("2_MAX_CM",  18, RangeFinder, _max_distance_cm[1], 700),
+    AP_GROUPINFO("2_MAX_CM",  18, RangeFinder, _max_distance_cm[1], 5000),
 
     // @Param: 2_STOP_PIN
     // @DisplayName: Rangefinder stop pin
@@ -252,6 +273,7 @@ const AP_Param::GroupInfo RangeFinder::var_info[] = {
     // @User: Advanced
     AP_GROUPINFO("2_ADDR", 24, RangeFinder, _address[1], 0),
 
+<<<<<<< HEAD
     // @Param: 2_POS_X
     // @DisplayName:  X position offset
     // @Description: X position of the second rangefinder in body frame. Positive X is forward of the origin. Use the zero range datum point if supplied.
@@ -277,6 +299,15 @@ const AP_Param::GroupInfo RangeFinder::var_info[] = {
     // @Values: 0:Forward, 1:Forward-Right, 2:Right, 3:Back-Right, 4:Back, 5:Back-Left, 6:Left, 7:Forward-Left, 24:Up, 25:Down
     // @User: Advanced
     AP_GROUPINFO("2_ORIENT", 54, RangeFinder, _orientation[1], ROTATION_PITCH_270),
+=======
+    // @Param: 2_TILT
+    // @DisplayName: degree tilt of sensor
+    // @Range: 0 45
+    // @Increment: 1
+    // @User: Standard
+    AP_GROUPINFO("2_TILT", 26, RangeFinder, _tilt[1], 15),
+
+>>>>>>> 2430caca065e293b45b204e891ae1bd3cc86dab2
 #endif
 
 #if RANGEFINDER_MAX_INSTANCES > 2
@@ -284,9 +315,14 @@ const AP_Param::GroupInfo RangeFinder::var_info[] = {
     // @Param: 3_TYPE
     // @DisplayName: Third Rangefinder type
     // @Description: What type of rangefinder device that is connected
+<<<<<<< HEAD
     // @Values: 0:None,1:Analog,2:APM2-MaxbotixI2C,3:APM2-PulsedLightI2C,5:PX4-PWM,6:BBB-PRU,7:LightWareI2C,8:LightWareSerial,9:Bebop,10:MAVLink,11:uLanding,12:LeddarOne,13:MaxbotixSerial
     // @User: Advanced
     AP_GROUPINFO("3_TYPE",    25, RangeFinder, _type[2], 0),
+=======
+    // @Values: 0:None,1:Analog,2:APM2-MaxbotixI2C,3:APM2-PulsedLightI2C,4:PX4-I2C,5:PX4-PWM,6:BBB-PRU,7:LightWareI2C,8:LightWareSerial,9:Bebop,10:MAVLink,12:LeddarOne
+    AP_GROUPINFO("3_TYPE",    25, RangeFinder, _type[2], 13),
+>>>>>>> 2430caca065e293b45b204e891ae1bd3cc86dab2
 
     // @Param: 3_PIN
     // @DisplayName: Rangefinder pin
@@ -314,8 +350,12 @@ const AP_Param::GroupInfo RangeFinder::var_info[] = {
     // @Param: 3_FUNCTION
     // @DisplayName: Rangefinder function
     // @Description: Control over what function is used to calculate distance. For a linear function, the distance is (voltage-offset)*scaling. For a inverted function the distance is (offset-voltage)*scaling. For a hyperbolic function the distance is scaling/(voltage-offset). The functions return the distance in meters.
+<<<<<<< HEAD
     // @Values: 0:Linear,1:Inverted,2:Hyperbolic
     // @User: Advanced
+=======
+    // @Values: 0:Linear,1:Inverted,2:Hyperbolic,3:used to auto avoid obstacle
+>>>>>>> 2430caca065e293b45b204e891ae1bd3cc86dab2
     AP_GROUPINFO("3_FUNCTION",  29, RangeFinder, _function[2], 0),
 
     // @Param: 3_MIN_CM
@@ -323,16 +363,24 @@ const AP_Param::GroupInfo RangeFinder::var_info[] = {
     // @Description: Minimum distance in centimeters that rangefinder can reliably read
 	// @Units: centimeters
     // @Increment: 1
+<<<<<<< HEAD
     // @User: Advanced
     AP_GROUPINFO("3_MIN_CM",  30, RangeFinder, _min_distance_cm[2], 20),
+=======
+    AP_GROUPINFO("3_MIN_CM",  30, RangeFinder, _min_distance_cm[2], 10),
+>>>>>>> 2430caca065e293b45b204e891ae1bd3cc86dab2
 
     // @Param: 3_MAX_CM
     // @DisplayName: Rangefinder maximum distance
     // @Description: Maximum distance in centimeters that rangefinder can reliably read
 	// @Units: centimeters
     // @Increment: 1
+<<<<<<< HEAD
     // @User: Advanced
     AP_GROUPINFO("3_MAX_CM",  31, RangeFinder, _max_distance_cm[2], 700),
+=======
+    AP_GROUPINFO("3_MAX_CM",  31, RangeFinder, _max_distance_cm[2], 5000),
+>>>>>>> 2430caca065e293b45b204e891ae1bd3cc86dab2
 
     // @Param: 3_STOP_PIN
     // @DisplayName: Rangefinder stop pin
@@ -588,19 +636,43 @@ void RangeFinder::update(void)
             update_pre_arm_check(i);
         }
     }
+<<<<<<< HEAD
 }
 
 bool RangeFinder::_add_backend(AP_RangeFinder_Backend *backend)
+=======
+
+    // work out primary instance - first sensor returning good data
+    for (int8_t i=num_instances-1; i>=0; i--) {
+        if (drivers[i] != NULL && (state[i].status == RangeFinder_Good)) {
+            if (_function[i] == 3) {
+                avoid_obstacle = i;
+                /* avoid obstacle not use */
+                //primary_instance = i;
+            } else {
+                primary_instance = i;
+            }
+        }
+    }
+}
+
+void RangeFinder::_add_backend(AP_RangeFinder_Backend *backend, uint8_t instance)
+>>>>>>> 2430caca065e293b45b204e891ae1bd3cc86dab2
 {
     if (!backend) {
         return false;
     }
-    if (num_instances == RANGEFINDER_MAX_INSTANCES) {
+    if (instance == RANGEFINDER_MAX_INSTANCES) {
         AP_HAL::panic("Too many RANGERS backends");
     }
 
+<<<<<<< HEAD
     drivers[num_instances++] = backend;
     return true;
+=======
+    drivers[instance] = backend;
+    state[instance].instance = instance;
+>>>>>>> 2430caca065e293b45b204e891ae1bd3cc86dab2
 }
 
 /*
@@ -608,6 +680,7 @@ bool RangeFinder::_add_backend(AP_RangeFinder_Backend *backend)
  */
 void RangeFinder::detect_instance(uint8_t instance)
 {
+<<<<<<< HEAD
     enum RangeFinder_Type type = (enum RangeFinder_Type)_type[instance].get();
     switch (type) {
     case RangeFinder_TYPE_PLI2C:
@@ -620,9 +693,26 @@ void RangeFinder::detect_instance(uint8_t instance)
         _add_backend(AP_RangeFinder_MaxsonarI2CXL::detect(*this, instance, state[instance]));
         break;
     case RangeFinder_TYPE_LWI2C:
+=======
+    uint8_t type = _type[instance];
+#if CONFIG_HAL_BOARD == HAL_BOARD_PX4 || CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN
+    if (type == RangeFinder_TYPE_PLI2C || 
+        type == RangeFinder_TYPE_MBI2C) {
+        // I2C sensor types are handled by the PX4Firmware code
+        type = RangeFinder_TYPE_PX4;
+    }
+#endif
+    if (type == RangeFinder_TYPE_PLI2C) {
+        _add_backend(AP_RangeFinder_PulsedLightLRF::detect(*this, instance, state[instance]), instance);
+    }
+    if (type == RangeFinder_TYPE_MBI2C) {
+        _add_backend(AP_RangeFinder_MaxsonarI2CXL::detect(*this, instance, state[instance]), instance);
+    }
+    if (type == RangeFinder_TYPE_LWI2C) {
+>>>>>>> 2430caca065e293b45b204e891ae1bd3cc86dab2
         if (_address[instance]) {
             _add_backend(AP_RangeFinder_LightWareI2C::detect(*this, instance, state[instance],
-                hal.i2c_mgr->get_device(HAL_RANGEFINDER_LIGHTWARE_I2C_BUS, _address[instance])));
+                hal.i2c_mgr->get_device(HAL_RANGEFINDER_LIGHTWARE_I2C_BUS, _address[instance])), instance);
         }
         break;
     case RangeFinder_TYPE_TRONE:
@@ -636,7 +726,14 @@ void RangeFinder::detect_instance(uint8_t instance)
             state[instance].instance = instance;
             drivers[instance] = new AP_RangeFinder_PX4_PWM(*this, instance, state[instance]);
         }
+<<<<<<< HEAD
         break;
+=======
+    }
+    if (type == RangeFinder_TYPE_MMWRadar) {
+        _add_backend(AP_RangeFinder_MMWRadar::detect(*this, instance, state[instance], serial_manager), instance);
+    }
+>>>>>>> 2430caca065e293b45b204e891ae1bd3cc86dab2
 #endif
 #if CONFIG_HAL_BOARD_SUBTYPE == HAL_BOARD_SUBTYPE_LINUX_BBBMINI
     case RangeFinder_TYPE_BBB_PRU:

@@ -16,6 +16,22 @@ const AP_Param::GroupInfo AC_PosControl::var_info[] = {
     // @User: Advanced
     AP_GROUPINFO("_ACC_XY_FILT", 1, AC_PosControl, _accel_xy_filt_hz, POSCONTROL_ACCEL_FILTER_HZ),
 
+    // @Param: _DT_XY
+    // @DisplayName: XY Controller dt
+    // @Description: position control frequency
+    // @Units: Hz
+    // @Range: 0.0025 0.02
+    // @Increment: 0.0005
+    // @User: Enigma
+    AP_GROUPINFO("_DT_XY", 2, AC_PosControl, _dt_xy, POSCONTROL_DEFAULT_HZ),
+
+    // @Param: _VEL_CPS
+    // @DisplayName: XYZ Controller vel compensate
+    // @Description: position control vel compensate
+    // @User: Enigma
+    AP_GROUPINFO("_VEL_CPS", 3, AC_PosControl, _vel_compensate, POSCONTROL_VEL_COMPENSATE),
+
+
     AP_GROUPEND
 };
 
@@ -37,7 +53,7 @@ AC_PosControl::AC_PosControl(const AP_AHRS_View& ahrs, const AP_InertialNav& ina
     _p_pos_xy(p_pos_xy),
     _pi_vel_xy(pi_vel_xy),
     _dt(POSCONTROL_DT_400HZ),
-    _dt_xy(POSCONTROL_DT_50HZ),
+//    _dt_xy(POSCONTROL_DT_50HZ),
     _last_update_xy_ms(0),
     _last_update_z_ms(0),
     _speed_down_cms(POSCONTROL_SPEED_DOWN),
@@ -69,6 +85,7 @@ AC_PosControl::AC_PosControl(const AP_AHRS_View& ahrs, const AP_InertialNav& ina
     _flags.freeze_ff_xy = true;
     _flags.freeze_ff_z = true;
     _flags.use_desvel_ff_z = true;
+    _flags.use_auto_imitation = false;
     _limit.pos_up = true;
     _limit.pos_down = true;
     _limit.vel_up = true;
@@ -205,6 +222,69 @@ void AC_PosControl::set_alt_target_from_climb_rate_ff(float climb_rate_cms, floa
     if ((_vel_desired.z<0 && (!_motors.limit.throttle_lower || force_descend)) || (_vel_desired.z>0 && !_motors.limit.throttle_upper && !_limit.pos_up)) {
         _pos_target.z += _vel_desired.z * dt;
     }
+}
+
+/// set_alt_target_from_climb_rate_ff_in_auto - adjusts target up or down using a climb rate in cm/s using feed-forward
+///     should be called continuously (with dt set to be the expected time between calls)
+///     actual position target will be moved no faster than the speed_down and speed_up
+///     target will also be stopped if the motors hit their limits or leash length is exceeded
+///     set force_descend to true during landing to allow target to move low enough to slow the motors
+void AC_PosControl::set_alt_target_from_climb_rate_ff_in_auto(float climb_rate_cms, float dt, bool force_descend)
+{
+#if USE_FEED_FORWARD == 1
+    // calculated increased maximum acceleration if over speed
+    float accel_z_cms = _accel_z_cms;
+    if (_vel_desired.z < _speed_down_cms && !is_zero(_speed_down_cms)) {
+        accel_z_cms *= POSCONTROL_OVERSPEED_GAIN_Z * _vel_desired.z / _speed_down_cms;
+    }
+    if (_vel_desired.z > _speed_up_cms && !is_zero(_speed_up_cms)) {
+        accel_z_cms *= POSCONTROL_OVERSPEED_GAIN_Z * _vel_desired.z / _speed_up_cms;
+    }
+    accel_z_cms = constrain_float(accel_z_cms, 0.0f, 750.0f);
+
+    // jerk_z is calculated to reach full acceleration in 1000ms.
+    float jerk_z = accel_z_cms * POSCONTROL_JERK_RATIO;
+
+    float accel_z_max = MIN(accel_z_cms, safe_sqrt(2.0f*fabsf(_vel_desired.z - climb_rate_cms)*jerk_z));
+
+    _accel_last_z_cms += jerk_z * dt;
+    _accel_last_z_cms = MIN(accel_z_max, _accel_last_z_cms);
+
+    float vel_change_limit = _accel_last_z_cms * dt;
+    _vel_desired.z = constrain_float(climb_rate_cms, _vel_desired.z-vel_change_limit, _vel_desired.z+vel_change_limit);
+    _flags.use_desvel_ff_z = true;
+
+    // adjust desired alt if motors have not hit their limits
+    // To-Do: add check of _limit.pos_down?
+    _pos_target.z += _vel_desired.z * dt;
+
+    // do not let target alt get above limit
+    if (_alt_max > 0 && _pos_target.z > _alt_max) {
+        _pos_target.z = _alt_max;
+        _limit.pos_up = true;
+        // decelerate feed forward to zero
+        _vel_desired.z = constrain_float(0.0f, _vel_desired.z-vel_change_limit, _vel_desired.z+vel_change_limit);
+    }
+
+#else
+    // adjust desired alt if motors have not hit their limits
+    // To-Do: add check of _limit.pos_down?
+//    if ((climb_rate_cms<0 && (!_motors.limit.throttle_lower || force_descend)) || (climb_rate_cms>0 && !_limit.pos_up)) {
+//        _pos_target.z += climb_rate_cms * dt;
+//    }
+    _pos_target.z += climb_rate_cms * dt;
+
+    // do not let target alt get above limit
+    if (_alt_max > 0 && _pos_target.z > _alt_max) {
+        _pos_target.z = _alt_max;
+        _limit.pos_up = true;
+    }
+
+    // do not use z-axis desired velocity feed forward
+    // vel_desired set to desired climb rate for reporting and land-detector
+    _flags.use_desvel_ff_z = false;
+    _vel_desired.z = climb_rate_cms;
+#endif
 }
 
 /// add_takeoff_climb_rate - adjusts alt target up or down using a climb rate in cm/s
@@ -531,8 +611,10 @@ void AC_PosControl::set_pos_target(const Vector3f& position)
 {
     _pos_target = position;
 
-    _flags.use_desvel_ff_z = false;
-    _vel_desired.z = 0.0f;
+    if (!_flags.use_auto_imitation) {
+        _flags.use_desvel_ff_z = false;
+        _vel_desired.z = 0.0f;
+    }
     // initialise roll and pitch to current roll and pitch.  This avoids a twitch between when the target is set and the pos controller is first run
     // To-Do: this initialisation of roll and pitch targets needs to go somewhere between when pos-control is initialised and when it completes it's first cycle
     //_roll_target = constrain_int32(_ahrs.roll_sensor,-_attitude_control.lean_angle_max(),_attitude_control.lean_angle_max());

@@ -85,6 +85,7 @@ AP_Arming::AP_Arming(const AP_AHRS &ahrs_ref, const AP_Baro &baro, Compass &comp
     ahrs(ahrs_ref),
     barometer(baro),
     _compass(compass),
+    _gps(gps),
     _battery(battery),
     armed(false),
     arming_method(NONE)
@@ -282,6 +283,14 @@ bool AP_Arming::compass_checks(bool report)
             return true;
         }
 
+        if (gps.status() > 3 && _gps.have_heading_accuracy()) {
+            if (report) {
+                GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_NOTICE, "Use heading from D-GPS");
+            }
+            return true;
+        }
+
+
         if (!_compass.healthy()) {
             if (report) {
                 GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_CRITICAL, "PreArm: Compass not healthy");
@@ -334,7 +343,7 @@ bool AP_Arming::compass_checks(bool report)
         if (!_compass.consistent()) {
             if (report) {
                 GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_CRITICAL,"PreArm: Compasses inconsistent");
-    }
+             }
             return false;
         }
     }

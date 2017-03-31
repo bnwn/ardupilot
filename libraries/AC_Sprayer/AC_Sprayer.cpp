@@ -11,7 +11,7 @@ const AP_Param::GroupInfo AC_Sprayer::var_info[] = {
     // @Description: Allows you to enable (1) or disable (0) the sprayer
     // @Values: 0:Disabled,1:Enabled
     // @User: Standard
-    AP_GROUPINFO_FLAGS("ENABLE", 0, AC_Sprayer, _enabled, 0, AP_PARAM_FLAG_ENABLE),
+    AP_GROUPINFO_FLAGS("ENABLE", 0, AC_Sprayer, _enabled, 1, AP_PARAM_FLAG_ENABLE),
 
     // @Param: PUMP_RATE
     // @DisplayName: Pump speed
@@ -48,6 +48,8 @@ const AP_Param::GroupInfo AC_Sprayer::var_info[] = {
     AP_GROUPEND
 };
 
+bool  AC_Sprayer::_sprayer_enable;
+
 AC_Sprayer::AC_Sprayer(const AP_InertialNav* inav) :
     _inav(inav),
     _speed_over_min_time(0),
@@ -63,7 +65,13 @@ AC_Sprayer::AC_Sprayer(const AP_InertialNav* inav) :
         _spinner_pwm.set_and_save(AC_SPRAYER_DEFAULT_SPINNER_PWM);
     }
 
+    // initialise flags
+    _flags.spraying = false;
+    _flags.testing = false;
+
+    _sprayer_enable = _enabled;
     // To-Do: ensure that the pump and spinner servo channels are enabled
+    enable(false);
 }
 
 void AC_Sprayer::run(const bool true_false)
@@ -166,4 +174,10 @@ AC_Sprayer::update()
     }else{
         stop_spraying();
     }
+}
+
+void AC_Sprayer::test_pump(uint8_t _ch_flag)
+{
+    RC_Channel_aux::move_servo(RC_Channel_aux::k_sprayer_pump, _ch_flag * 5000, 0, 10000);
+    RC_Channel_aux::set_radio(RC_Channel_aux::k_sprayer_spinner, _spinner_pwm);
 }

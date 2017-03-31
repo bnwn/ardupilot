@@ -21,10 +21,10 @@
 #include <SRV_Channel/SRV_Channel.h>
 #include <AP_InertialNav/AP_InertialNav.h>     // Inertial Navigation library
 
-#define AC_SPRAYER_DEFAULT_PUMP_RATE        10.0f   ///< default quantity of spray per meter travelled
+#define AC_SPRAYER_DEFAULT_PUMP_RATE        50.0f   ///< default quantity of spray per meter travelled
 #define AC_SPRAYER_DEFAULT_PUMP_MIN         0       ///< default minimum pump speed expressed as a percentage from 0 to 100
 #define AC_SPRAYER_DEFAULT_SPINNER_PWM      1300    ///< default speed of spinner (higher means spray is throw further horizontally
-#define AC_SPRAYER_DEFAULT_SPEED_MIN        100     ///< we must be travelling at least 1m/s to begin spraying
+#define AC_SPRAYER_DEFAULT_SPEED_MIN        50     ///< we must be travelling at least 1m/s to begin spraying
 #define AC_SPRAYER_DEFAULT_TURN_ON_DELAY    100     ///< delay between when we reach the minimum speed and we begin spraying.  This reduces the likelihood of constantly turning on/off the pump
 #define AC_SPRAYER_DEFAULT_SHUT_OFF_DELAY   1000    ///< shut-off delay in milli seconds.  This reduces the likelihood of constantly turning on/off the pump
 
@@ -47,9 +47,11 @@ public:
     bool spraying() const { return _flags.spraying; }
 
     /// test_pump - set to true to turn on pump as if travelling at 1m/s as a test
-    void test_pump(bool true_false) { _flags.testing = true_false; }
+    void test_pump(uint8_t _ch_flag);
 
     /// To-Do: add function to decode pilot input from channel 6 tuning knob
+    /// get_pump_rate
+    float get_pump_rate() const { return _pump_pct_1ms.get(); }
 
     /// set_pump_rate - sets desired quantity of spray when travelling at 1m/s as a percentage of the pumps maximum rate
     void set_pump_rate(float pct_at_1ms) { _pump_pct_1ms.set(pct_at_1ms); }

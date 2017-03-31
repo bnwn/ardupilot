@@ -73,6 +73,7 @@ protected:
     const AP_AHRS           &ahrs;
     const AP_Baro           &barometer;
     Compass                 &_compass;
+    AP_GPS                  &_gps;
     const AP_BattMonitor    &_battery;
 
     // internal members

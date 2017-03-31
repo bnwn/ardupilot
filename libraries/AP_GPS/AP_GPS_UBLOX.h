@@ -540,6 +540,7 @@ private:
     AP_GPS::GPS_Status next_fix;
 
     bool _cfg_needs_save;
+    uint8_t _is_dgps;
 
     bool noReceivedHdop;
     

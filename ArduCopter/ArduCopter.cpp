@@ -90,10 +90,11 @@ const AP_Scheduler::Task Copter::scheduler_tasks[] = {
 #endif
     SCHED_TASK(update_batt_compass,   10,    120),
     SCHED_TASK(read_aux_switches,     10,     50),
+    SCHED_TASK(farming_mode_handle,   10,     75),
     SCHED_TASK(arm_motors_check,      10,     50),
     SCHED_TASK(auto_disarm_check,     10,     50),
     SCHED_TASK(auto_trim,             10,     75),
-    SCHED_TASK(read_rangefinder,      20,    100),
+    SCHED_TASK(read_rangefinder,      50,    100),
     SCHED_TASK(update_proximity,     100,     50),
     SCHED_TASK(update_beacon,        400,     50),
     SCHED_TASK(update_altitude,       10,    100),
@@ -154,6 +155,9 @@ const AP_Scheduler::Task Copter::scheduler_tasks[] = {
 #endif
     SCHED_TASK(button_update,          5,    100),
     SCHED_TASK(stats_update,           1,    100),
+#if AVOID_OBSTACLE == ENABLED
+    SCHED_TASK(avoidance_obstacle,     50,   75),
+#endif
 };
 
 
@@ -184,6 +188,9 @@ void Copter::compass_accumulate(void)
 {
     if (g.compass_enabled) {
         compass.accumulate();
+        if (compass.learn_offsets_enabled()) {
+            compass.learn_offsets();
+        }
     }
 }
 
@@ -465,7 +472,9 @@ void Copter::three_hz_loop()
 #endif // AC_FENCE_ENABLED
 
 #if SPRAYER == ENABLED
-    sprayer.update();
+    if (control_mode == POINT_ATOB) { // in point a to b mode control pump
+        sprayer.update();
+    }
 #endif
 
     update_events();

@@ -30,8 +30,12 @@
 
 #define POSCONTROL_LEASH_LENGTH_MIN             100.0f  // minimum leash lengths in cm
 
+#define POSCONTROL_DEFAULT_HZ                   0.004f
 #define POSCONTROL_DT_50HZ                      0.02f   // time difference in seconds for 50hz update rate
+#define POSCONTROL_DT_200HZ                     0.005f  // time difference in seconds for 200hz update rate
 #define POSCONTROL_DT_400HZ                     0.0025f // time difference in seconds for 400hz update rate
+
+#define POSCONTROL_VEL_COMPENSATE               1.0f
 
 #define POSCONTROL_ACTIVE_TIMEOUT_MS            200     // position controller is considered active if it has been called within the past 0.2 seconds
 
@@ -41,6 +45,8 @@
 #define POSCONTROL_JERK_RATIO                   1.0f    // Defines the time it takes to reach the requested acceleration
 
 #define POSCONTROL_OVERSPEED_GAIN_Z             2.0f    // gain controlling rate at which z-axis speed is brought back within SPEED_UP and SPEED_DOWN range
+
+#define USE_FEED_FORWARD                        1       // use feed forward control in auto mission if set 1
 
 class AC_PosControl
 {
@@ -90,6 +96,9 @@ public:
     /// get_vel_target_z - returns current vertical speed in cm/s
     float get_vel_target_z() const { return _vel_target.z; }
 
+    /// get_vel_target_z - returns current vertical speed in cm/s
+    float get_vel_desired_z() const { return _vel_desired.z; }
+
     /// set_accel_z - set vertical acceleration in cm/s/s
     ///     leash length will be recalculated the next time update_z_controller() is called
     void set_accel_z(float accel_cmss);
@@ -123,6 +132,13 @@ public:
     ///     target will also be stopped if the motors hit their limits or leash length is exceeded
     ///     set force_descend to true during landing to allow target to move low enough to slow the motors
     virtual void set_alt_target_from_climb_rate_ff(float climb_rate_cms, float dt, bool force_descend);
+
+    /// set_alt_target_from_climb_rate_ff - adjusts target up or down using a climb rate in cm/s using feed-forward
+    ///     should be called continuously (with dt set to be the expected time between calls)
+    ///     actual position target will be moved no faster than the speed_down and speed_up
+    ///     target will also be stopped if the motors hit their limits or leash length is exceeded
+    ///     set force_descend to true during landing to allow target to move low enough to slow the motors
+    void set_alt_target_from_climb_rate_ff_in_auto(float climb_rate_cms, float dt, bool force_descend);
 
     /// add_takeoff_climb_rate - adjusts alt target up or down using a climb rate in cm/s
     ///     should be called continuously (with dt set to be the expected time between calls)
@@ -289,6 +305,8 @@ public:
     // time_since_last_xy_update - returns time in seconds since the horizontal position controller was last run
     float time_since_last_xy_update() const;
 
+    void set_imitation_flags(bool state) { _flags.use_auto_imitation = state; }
+
     static const struct AP_Param::GroupInfo var_info[];
 
 protected:
@@ -306,6 +324,7 @@ protected:
             uint16_t freeze_ff_z        : 1;    // 1 used to freeze velocity to accel feed forward for one iteration
             uint16_t use_desvel_ff_z    : 1;    // 1 to use z-axis desired velocity as feed forward into velocity step
             uint16_t vehicle_horiz_vel_override : 1; // 1 if we should use _vehicle_horiz_vel as our velocity process variable for one timestep
+            uint16_t use_auto_imitation : 1;
     } _flags;
 
     // limit flags structure
@@ -380,10 +399,11 @@ protected:
 
     // parameters
     AP_Float    _accel_xy_filt_hz;      // XY acceleration filter cutoff frequency
+    AP_Float    _vel_compensate;
 
     // internal variables
     float       _dt;                    // time difference (in seconds) between calls from the main program
-    float       _dt_xy;                 // time difference (in seconds) between update_xy_controller and update_vel_controller_xyz calls
+    AP_Float       _dt_xy;                 // time difference (in seconds) between update_xy_controller and update_vel_controller_xyz calls
     uint32_t    _last_update_xy_ms;     // system time of last update_xy_controller call
     uint32_t    _last_update_z_ms;      // system time of last update_z_controller call
     float       _speed_down_cms;        // max descent rate in cm/s
