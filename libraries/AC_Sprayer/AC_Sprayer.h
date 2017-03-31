@@ -38,7 +38,7 @@ public:
     AC_Sprayer(const AP_InertialNav* inav);
 
     /// run - allow or disallow spraying to occur
-    void run(bool true_false);
+    static void run(bool true_false);
 
     /// running - returns true if spraying is currently permitted
     bool running() const { return _flags.running; }
@@ -65,14 +65,14 @@ private:
     const AP_InertialNav* const _inav;      ///< pointers to other objects we depend upon
 
     // parameters
-    AP_Int8         _enabled;               ///< top level enable/disable control
+    static AP_Int8         _enabled;               ///< top level enable/disable control
     AP_Float        _pump_pct_1ms;          ///< desired pump rate (expressed as a percentage of top rate) when travelling at 1m/s
     AP_Int8         _pump_min_pct;          ///< minimum pump rate (expressed as a percentage from 0 to 100)
     AP_Int16        _spinner_pwm;           ///< pwm rate of spinner
     AP_Float        _speed_min;             ///< minimum speed in cm/s above which the sprayer will be started
 
     /// flag bitmask
-    struct sprayer_flags_type {
+    static struct sprayer_flags_type {
         uint8_t spraying    : 1;            ///< 1 if we are currently spraying
         uint8_t testing     : 1;            ///< 1 if we are testing the sprayer and should output a minimum value
         uint8_t running     : 1;            ///< 1 if we are permitted to run sprayer
@@ -82,5 +82,5 @@ private:
     uint32_t        _speed_over_min_time;   ///< time at which we reached speed minimum
     uint32_t        _speed_under_min_time;  ///< time at which we fell below speed minimum
 
-    void stop_spraying();
+    static void stop_spraying();
 };

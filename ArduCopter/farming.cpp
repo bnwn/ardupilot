@@ -12,7 +12,7 @@ void Copter::init_farming()
 // set output throngh radio channel
 void Copter::radio_to_pump_output()
 {
-    RC_Channel_aux::set_aux_channel_default(RC_Channel_aux::k_sprayer_pump, CH_8);
+    SRV_Channels::set_aux_channel_default(SRV_Channel::k_sprayer_pump, CH_8);
 }
 
 void Copter::pesticide_remaining_check()
@@ -21,7 +21,7 @@ void Copter::pesticide_remaining_check()
             && (control_mode == POINT_ATOB)
             && flowmeter.farming_state()
             && !ap.land_complete
-            && (RC_Channel_aux::get_servo(RC_Channel_aux::k_sprayer_pump) > (sprayer.get_pump_rate() * 100))) {
+            && (SRV_Channels::get_servo(SRV_Channel::k_sprayer_pump) > (sprayer.get_pump_rate() * 100))) {
         // only return home when pesticide is empty
         set_mode(RTL, MODE_REASON_PESTICIDE_EMPTY);
     }

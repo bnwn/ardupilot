@@ -40,7 +40,7 @@ public:
     void reset(T value);
 
 protected:
-    uint8_t _sum;
+    int _sum;
     T _array[SAMPLE_MAX];
     T _array_sort[SAMPLE_MAX];
     T _output;

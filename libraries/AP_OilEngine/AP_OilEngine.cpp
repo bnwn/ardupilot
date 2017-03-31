@@ -78,19 +78,19 @@ void AP_OilEngine::init()
     }
 
     /* setup pwm output servo */
-    RC_Channel_aux::set_aux_channel_default(RC_Channel_aux::k_oil_engine1, CH_7);
-    RC_Channel_aux::set_aux_channel_default(RC_Channel_aux::k_oil_engine2, CH_8);
+    SRV_Channels::set_aux_channel_default(SRV_Channel::k_oil_engine1, CH_7);
+    SRV_Channels::set_aux_channel_default(SRV_Channel::k_oil_engine2, CH_8);
 
     // ensure servo are off
-    RC_Channel_aux::set_radio_to_min(RC_Channel_aux::k_oil_engine1);
-    RC_Channel_aux::set_radio_to_min(RC_Channel_aux::k_oil_engine2);
+    SRV_Channels::set_output_limit(SRV_Channel::k_oil_engine1, SRV_Channel::SRV_CHANNEL_LIMIT_MIN);
+    SRV_Channels::set_output_limit(SRV_Channel::k_oil_engine2, SRV_Channel::SRV_CHANNEL_LIMIT_MIN);
 }
 
 void AP_OilEngine::control()
 {
     // exit immediately if the function has not been set-up for any servo or pwm input pin setup faliure
-    if (!RC_Channel_aux::function_assigned(RC_Channel_aux::k_oil_engine1) || \
-            !RC_Channel_aux::function_assigned(RC_Channel_aux::k_oil_engine2) || \
+    if (!SRV_Channels::function_assigned(SRV_Channel::k_oil_engine1) || \
+            !SRV_Channels::function_assigned(SRV_Channel::k_oil_engine2) || \
             !_valid_rpm) {
         return;
     }
@@ -118,8 +118,8 @@ void AP_OilEngine::control()
 #endif
 
     // update servo position
-    RC_Channel_aux::move_servo(RC_Channel_aux::k_oil_engine1, _servo1_angle_desired, 0, OIL_ENGINE_MAX_ANGLE);
-    RC_Channel_aux::move_servo(RC_Channel_aux::k_oil_engine2, _servo2_angle_desired, 0, OIL_ENGINE_MAX_ANGLE);
+    SRV_Channels::move_servo(SRV_Channel::k_oil_engine1, _servo1_angle_desired, 0, OIL_ENGINE_MAX_ANGLE);
+    SRV_Channels::move_servo(SRV_Channel::k_oil_engine2, _servo2_angle_desired, 0, OIL_ENGINE_MAX_ANGLE);
 }
 
 void AP_OilEngine::calc_rpm()

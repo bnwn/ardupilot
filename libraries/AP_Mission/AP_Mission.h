@@ -496,15 +496,12 @@ public:
     // be found.
     uint16_t get_landing_sequence_start();
 
-<<<<<<< HEAD
     // find the nearest landing sequence starting point (DO_LAND_START) and
     // switch to that mission item.  Returns false if no DO_LAND_START
     // available.
     bool jump_to_landing_sequence(void);
-=======
     // return the point valid flag
     bool is_valid_point(void);
->>>>>>> 2430caca065e293b45b204e891ae1bd3cc86dab2
 
     // user settable parameters
     static const struct AP_Param::GroupInfo var_info[];

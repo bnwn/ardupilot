@@ -12,7 +12,7 @@ bool Copter::point_init(bool ignore_checks)
         auto_mode = Auto_Loiter;
 
         // reject switching to auto mode if landed with motors armed but first command is not a takeoff (reduce change of flips)
-        if (motors.armed() && ap.land_complete) {
+        if (motors->armed() && ap.land_complete) {
             gcs_send_text(MAV_SEVERITY_CRITICAL, "Point: Missing Takeoff Cmd");
             return false;
         }
@@ -24,12 +24,12 @@ bool Copter::point_init(bool ignore_checks)
         }
 
         // initialise waypoint and spline controller
-        wp_nav.wp_and_spline_init();
+        wp_nav->wp_and_spline_init();
 
         // clear guided limits
         guided_limit_clear();
 
-        pos_control.set_desired_velocity_z(inertial_nav.get_velocity_z());
+        pos_control->set_desired_velocity_z(inertial_nav.get_velocity_z());
 
         // start/resume the point mission
         mission.point_atob_start();
@@ -78,6 +78,10 @@ void Copter::point_run()
 
     case Auto_Loiter:
         auto_loiter_run();
+        break;
+
+    case Auto_NavPayloadPlace:
+        auto_payload_place_run();
         break;
     }
 }

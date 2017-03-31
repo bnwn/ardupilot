@@ -192,63 +192,18 @@ void Copter::read_aux_switches()
         return;
     }
 
-    // check if ch7 switch has changed position
-    switch_position = read_3pos_switch(g.rc_7.get_radio_in());
-    if (aux_con.CH7_flag != switch_position) {
-        // set the CH7 flag
-        aux_con.CH7_flag = switch_position;
-
-        // invoke the appropriate function
-        do_aux_switch_function(g.ch7_option, aux_con.CH7_flag);
-    }
-
-    // check if Ch8 switch has changed position
-    switch_position = read_3pos_switch(g.rc_8.get_radio_in());
-    if (aux_con.CH8_flag != switch_position) {
-        // set the CH8 flag
-        aux_con.CH8_flag = switch_position;
-
-        // invoke the appropriate function
-        do_aux_switch_function(g.ch8_option, aux_con.CH8_flag);
-    }
-
+    read_aux_switch(CH_7, aux_con.CH7_flag, g.ch7_option);
+    read_aux_switch(CH_8, aux_con.CH8_flag, g.ch8_option);
+    read_aux_switch(CH_9, aux_con.CH9_flag, g.ch9_option);
 #if OILENGINE == ENABLED
-    if (oil_engine_radio_in != g.rc_9.get_radio_in()) {
-        oil_engine_radio_in = g.rc_9.get_radio_in();
+    if (oil_engine_radio_in != RC_Channels::rc_channel(CH_9)->get_radio_in()) {
+        oil_engine_radio_in = RC_Channels::rc_channel(CH_9)->get_radio_in();
 
-        oil_engine.set_radio_in((int16_t)(oil_engine_radio_in - g.rc_9.get_radio_min()), (int16_t)(g.rc_9.get_radio_max() - g.rc_9.get_radio_min()));
-    }
-#else
-    // check if Ch9 switch has changed position
-    switch_position = read_3pos_switch(g.rc_9.get_radio_in());
-    if (aux_con.CH9_flag != switch_position) {
-        // set the CH9 flag
-        aux_con.CH9_flag = switch_position;
-
-        // invoke the appropriate function
-        do_aux_switch_function(g.ch9_option, aux_con.CH9_flag);
+        oil_engine.set_radio_in((int16_t)(oil_engine_radio_in - RC_Channels::rc_channel(CH_9)->get_radio_min()), (int16_t)(RC_Channels::rc_channel(CH_9)->get_radio_max() - RC_Channels::rc_channel(CH_9)->get_radio_min()));
     }
 #endif
-
-    // check if Ch10 switch has changed position
-    switch_position = read_3pos_switch(g.rc_10.get_radio_in());
-    if (aux_con.CH10_flag != switch_position) {
-        // set the CH10 flag
-        aux_con.CH10_flag = switch_position;
-
-        // invoke the appropriate function
-        do_aux_switch_function(g.ch10_option, aux_con.CH10_flag);
-    }
-
-    // check if Ch11 switch has changed position
-    switch_position = read_3pos_switch(g.rc_11.get_radio_in());
-    if (aux_con.CH11_flag != switch_position) {
-        // set the CH11 flag
-        aux_con.CH11_flag = switch_position;
-
-        // invoke the appropriate function
-        do_aux_switch_function(g.ch11_option, aux_con.CH11_flag);
-    }
+    read_aux_switch(CH_10, aux_con.CH10_flag, g.ch10_option);
+    read_aux_switch(CH_11, aux_con.CH11_flag, g.ch11_option);
 
 #if CONFIG_HAL_BOARD == HAL_BOARD_PX4 || CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN
     read_aux_switch(CH_12, aux_con.CH12_flag, g.ch12_option);
@@ -472,7 +427,7 @@ void Copter::do_aux_switch_function(int8_t ch_function, uint8_t ch_flag)
 
 #if SPRAYER == ENABLED
             if (control_mode != POINT_ATOB) {
-                sprayer.enable(ch_flag > AUX_SWITCH_LOW);
+                sprayer.run(ch_flag > AUX_SWITCH_LOW);
                 // if we are disarmed the pilot must want to test the pump
                 sprayer.test_pump(ch_flag);
             }
@@ -672,7 +627,6 @@ void Copter::do_aux_switch_function(int8_t ch_function, uint8_t ch_flag)
             }
             break;
 
-<<<<<<< HEAD
         case AUXSW_PRECISION_LOITER:
 #if PRECISION_LANDING == ENABLED
             switch (ch_flag) {
@@ -709,7 +663,8 @@ void Copter::do_aux_switch_function(int8_t ch_function, uint8_t ch_flag)
             case AUX_SWITCH_LOW:
                 init_disarm_motors();
                 break;
-=======
+            }
+
         case AUXSW_POINT_ATOB:
             if (ch_flag == AUX_SWITCH_HIGH) {
                 // set flight mode and simple mode setting
@@ -729,7 +684,6 @@ void Copter::do_aux_switch_function(int8_t ch_function, uint8_t ch_flag)
                         AP_Notify::events.user_mode_change = 1;
                     }
                 }
->>>>>>> 2430caca065e293b45b204e891ae1bd3cc86dab2
             }
             break;
     }

@@ -81,7 +81,7 @@ const AP_Param::GroupInfo AP_Arming::var_info[] = {
 //The function point is particularly hacky, hacky, tacky
 //but I don't want to reimplement messaging to GCS at the moment:
 AP_Arming::AP_Arming(const AP_AHRS &ahrs_ref, const AP_Baro &baro, Compass &compass,
-                     const AP_BattMonitor &battery) :
+                     const AP_BattMonitor &battery, const AP_GPS &gps) :
     ahrs(ahrs_ref),
     barometer(baro),
     _compass(compass),
@@ -283,7 +283,7 @@ bool AP_Arming::compass_checks(bool report)
             return true;
         }
 
-        if (gps.status() > 3 && _gps.have_heading_accuracy()) {
+        if (_gps.status() > 3 && _gps.have_heading_accuracy()) {
             if (report) {
                 GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_NOTICE, "Use heading from D-GPS");
             }

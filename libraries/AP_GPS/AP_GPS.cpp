@@ -262,12 +262,6 @@ const AP_Param::GroupInfo AP_GPS::var_info[] = {
     AP_GROUPEND
 };
 
-// constructor
-AP_GPS::AP_GPS()
-{
-    AP_Param::setup_object_defaults(this, var_info);
-}
-
 /// Startup initialisation.
 void AP_GPS::init(DataFlash_Class *dataflash)
 {
@@ -400,9 +394,6 @@ AP_GPS::detect_instance(uint8_t instance)
     struct detect_state *dstate = &detect_state[instance];
     uint32_t now = AP_HAL::millis();
 
-<<<<<<< HEAD
-    switch (_type[instance]) {
-=======
 #if BDNST_DRTK_DETECT == 1
     // use to startup BDNST DRTK
     uint32_t baudrate_tmp = 0;
@@ -422,7 +413,7 @@ AP_GPS::detect_instance(uint8_t instance)
     }
 #endif
 
->>>>>>> 2430caca065e293b45b204e891ae1bd3cc86dab2
+    switch (_type[instance]) {
 #if CONFIG_HAL_BOARD == HAL_BOARD_PX4
     case GPS_TYPE_PX4:
         // check for explicitly chosen PX4 GPS beforehand
@@ -526,7 +517,7 @@ AP_GPS::detect_instance(uint8_t instance)
              _baudrates[dstate->current_baud] == 115200) &&
             AP_GPS_UBLOX::_detect(dstate->ublox_detect_state, data)) {
             _broadcast_gps_type("u-blox", instance, dstate->current_baud);
-            new_gps = new AP_GPS_UBLOX(*this, state[instance], _port[instance]);
+            new_gps = new AP_GPS_UBLOX(*this, state[instance], _port[instance], _use_for_yaw);
         } 
 #if !HAL_MINIMIZE_FEATURES
         // we drop the MTK drivers when building a small build as they are so rarely used
@@ -577,6 +568,7 @@ found_gps:
         drivers[instance] = new_gps;
         timing[instance].last_message_time_ms = now;
     }
+#endif
 }
 
 AP_GPS::GPS_Status 

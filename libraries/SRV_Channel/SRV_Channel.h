@@ -103,6 +103,8 @@ public:
         k_tracker_pitch         = 72,            ///< antennatracker pitch
         k_throttleLeft          = 73,
         k_throttleRight         = 74,
+        k_oil_engine1           = 75,
+        k_oil_engine2           = 76,
         k_nr_aux_servo_functions         ///< This must be the last enum value (only add new values _before_ this one)
     } Aux_servo_function_t;
 
@@ -148,6 +150,13 @@ public:
     }
     uint16_t get_trim(void) const {
         return servo_trim;
+    }
+
+    void set_input(int32_t _value) {
+        _input_value = _value;
+    }
+    int32_t get_input_value(void) const {
+        return _input_value;
     }
 
 private:
@@ -196,6 +205,8 @@ private:
     
     // a bitmask type wide enough for NUM_SERVO_CHANNELS
     typedef uint16_t servo_mask_t;
+
+    int32_t _input_value;
 
     // mask of channels where we have a output_pwm value. Cleared when a
     // scaled value is written. 
@@ -307,7 +318,7 @@ public:
 
     // set a servo_out value, and angle range, then calc_pwm
     static void move_servo(SRV_Channel::Aux_servo_function_t function,
-                           int16_t value, int16_t angle_min, int16_t angle_max);
+                           int32_t value, int16_t angle_min, int16_t angle_max);
 
     // assign and enable auxiliary channels
     static void enable_aux_servos(void);
@@ -351,6 +362,8 @@ public:
     // upgrade RC* parameters into SERVO* parameters
     static bool upgrade_parameters(const uint8_t old_keys[14], uint16_t aux_channel_mask, RCMapper *rcmap);
     static void upgrade_motors_servo(uint8_t ap_motors_key, uint8_t ap_motors_idx, uint8_t new_channel);
+
+    static int32_t get_servo(SRV_Channel::Aux_servo_function_t function);
     
 private:
     struct {

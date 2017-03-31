@@ -68,3 +68,4 @@ LIBRARIES += AP_Beacon
 LIBRARIES += AP_Arming
 LIBRARIES += AP_Flowmeter
 LIBRARIES += AP_OilEngine
+LIBRARIES += SRV_Channel

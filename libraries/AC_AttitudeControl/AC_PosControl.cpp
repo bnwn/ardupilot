@@ -258,14 +258,6 @@ void AC_PosControl::set_alt_target_from_climb_rate_ff_in_auto(float climb_rate_c
     // To-Do: add check of _limit.pos_down?
     _pos_target.z += _vel_desired.z * dt;
 
-    // do not let target alt get above limit
-    if (_alt_max > 0 && _pos_target.z > _alt_max) {
-        _pos_target.z = _alt_max;
-        _limit.pos_up = true;
-        // decelerate feed forward to zero
-        _vel_desired.z = constrain_float(0.0f, _vel_desired.z-vel_change_limit, _vel_desired.z+vel_change_limit);
-    }
-
 #else
     // adjust desired alt if motors have not hit their limits
     // To-Do: add check of _limit.pos_down?

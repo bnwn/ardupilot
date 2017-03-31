@@ -1,7 +1,5 @@
 #include "SlidingFilter.h"
-#include "algorithm"
 #include <string>
-using namespace std;
 /// @file SlidingFilter.cpp
 /// @brief  A class to implement a low pass filter without losing precision even for int types
 ///         the downside being that it's a little slower as it internally uses a float
@@ -58,7 +56,18 @@ T SlidingFilter<T>::apply(T sample) {
 
         _array_sort[_sum - 1] = _array[_sum - 1];
         _array[_sum - 1] = sample;
-        sort(_array_sort, _array_sort+_sum);
+
+        int i,j,d;
+        for(d=_sum/2;d>0;d/=2)
+        {
+            for(i=d;i<_sum;++i)
+            {
+                int temp=_array_sort[i];
+                for(j=i;j>=d&&_array_sort[j-d]>temp;j-=d)
+                    _array_sort[j]=_array_sort[j-d];
+                _array_sort[j]=temp;
+            }
+        }
 
         if (sample > _array_sort[_sum-2]) {
             _output = _array_sort[_sum-2];
@@ -91,4 +100,5 @@ void SlidingFilter<T>::reset(T value) {
 template class SlidingFilter<int>;
 template class SlidingFilter<long>;
 template class SlidingFilter<float>;
+
 

@@ -273,7 +273,7 @@ void Copter::exit_mode(control_mode_t old_control_mode, control_mode_t new_contr
 #endif
 
     // ensure disable imitation flags
-    pos_control.set_imitation_flags(false);
+    pos_control->set_imitation_flags(false);
 
     // stop mission when we leave auto mode
     if (old_control_mode == AUTO) {
@@ -289,7 +289,7 @@ void Copter::exit_mode(control_mode_t old_control_mode, control_mode_t new_contr
         if (mission.point_state() == AP_Mission::MISSION_RUNNING) {
             mission.stop();
             mission.save_break_point();
-            sprayer.enable(false);
+            sprayer.run(false);
         }
     }
 

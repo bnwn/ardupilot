@@ -234,7 +234,7 @@ void AP_GPS_DRTK::process_message(enum packet_type _packet)
                     break;
                 case 4:
                 case 5:
-                    state.status = AP_GPS::GPS_OK_FIX_3D_RTK;
+                    state.status = AP_GPS::GPS_OK_FIX_3D_RTK_FIXED;
                     break;
                 case 0: // NONE
                 default:

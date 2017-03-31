@@ -41,7 +41,7 @@ bool Copter::auto_init(bool ignore_checks)
         // clear guided limits
         guided_limit_clear();
 
-        pos_control.set_desired_velocity_z(inertial_nav.get_velocity_z());
+        pos_control->set_desired_velocity_z(inertial_nav.get_velocity_z());
 
         // start/resume the mission (based on MIS_RESTART parameter)
         mission.start_or_resume();
@@ -198,10 +198,10 @@ void Copter::auto_takeoff_run()
     // adjust climb rate using rangefinder
     if (rangefinder_alt_ok()) {
         // if rangefinder is ok, use surface tracking
-        target_climb_rate = get_surface_tracking_climb_rate_in_auto(target_climb_rate, pos_control.get_alt_target(), G_Dt);
+        target_climb_rate = get_surface_tracking_climb_rate_in_auto(target_climb_rate, pos_control->get_alt_target(), G_Dt);
     }
 
-    pos_control.set_alt_target_from_climb_rate_ff_in_auto(target_climb_rate, G_Dt, true);
+    pos_control->set_alt_target_from_climb_rate_ff_in_auto(target_climb_rate, G_Dt, true);
     // call z-axis position controller (wpnav should have already updated it's alt target)
     pos_control->update_z_controller();
 
@@ -284,17 +284,17 @@ void Copter::auto_wp_run()
     // adjust climb rate using rangefinder
     if (rangefinder_alt_ok()) {
         // if rangefinder is ok, use surface tracking
-        target_climb_rate = get_surface_tracking_climb_rate_in_auto(target_climb_rate, pos_control.get_alt_target(), G_Dt);
+        target_climb_rate = get_surface_tracking_climb_rate_in_auto(target_climb_rate, pos_control->get_alt_target(), G_Dt);
     }
 
-    pos_control.set_alt_target_from_climb_rate_ff_in_auto(target_climb_rate, G_Dt, true);
+    pos_control->set_alt_target_from_climb_rate_ff_in_auto(target_climb_rate, G_Dt, true);
     // call z-axis position controller (wpnav should have already updated it's alt target)
     pos_control->update_z_controller();
 
     // call attitude controller
     if (control_mode == POINT_ATOB) {
         // roll & pitch from waypoint controller, yaw rate from bearing bettween point A and B
-        attitude_control.input_euler_angle_roll_pitch_yaw(wp_nav.get_roll(), wp_nav.get_pitch(), mission.get_point_atob_heading(), true, get_smoothing_gain());
+        attitude_control->input_euler_angle_roll_pitch_yaw(wp_nav->get_roll(), wp_nav->get_pitch(), mission.get_point_atob_heading(), true, get_smoothing_gain());
     } else if (auto_yaw_mode == AUTO_YAW_HOLD) {
         // roll & pitch from waypoint controller, yaw rate from pilot
         attitude_control->input_euler_angle_roll_pitch_euler_rate_yaw(wp_nav->get_roll(), wp_nav->get_pitch(), target_yaw_rate, get_smoothing_gain());
@@ -367,10 +367,10 @@ void Copter::auto_spline_run()
     // adjust climb rate using rangefinder
     if (rangefinder_alt_ok()) {
         // if rangefinder is ok, use surface tracking
-        target_climb_rate = get_surface_tracking_climb_rate_in_auto(target_climb_rate, pos_control.get_alt_target(), G_Dt);
+        target_climb_rate = get_surface_tracking_climb_rate_in_auto(target_climb_rate, pos_control->get_alt_target(), G_Dt);
     }
 
-    pos_control.set_alt_target_from_climb_rate_ff_in_auto(target_climb_rate, G_Dt, true);
+    pos_control->set_alt_target_from_climb_rate_ff_in_auto(target_climb_rate, G_Dt, true);
     // call z-axis position controller (wpnav should have already updated it's alt target)
     pos_control->update_z_controller();
 
@@ -532,10 +532,10 @@ void Copter::auto_circle_run()
     // adjust climb rate using rangefinder
     if (rangefinder_alt_ok()) {
         // if rangefinder is ok, use surface tracking
-        target_climb_rate = get_surface_tracking_climb_rate_in_auto(target_climb_rate, pos_control.get_alt_target(), G_Dt);
+        target_climb_rate = get_surface_tracking_climb_rate_in_auto(target_climb_rate, pos_control->get_alt_target(), G_Dt);
     }
 
-    pos_control.set_alt_target_from_climb_rate_ff_in_auto(target_climb_rate, G_Dt, true);
+    pos_control->set_alt_target_from_climb_rate_ff_in_auto(target_climb_rate, G_Dt, true);
     // call z-axis position controller
     pos_control->update_z_controller();
 
@@ -625,12 +625,12 @@ void Copter::auto_loiter_run()
     // adjust climb rate using rangefinder
     if (rangefinder_alt_ok()) {
         // if rangefinder is ok, use surface tracking
-        target_climb_rate = get_surface_tracking_climb_rate_in_auto(target_climb_rate, pos_control.get_alt_target(), G_Dt);
+        target_climb_rate = get_surface_tracking_climb_rate_in_auto(target_climb_rate, pos_control->get_alt_target(), G_Dt);
     }
 
-    pos_control.set_alt_target_from_climb_rate_ff_in_auto(target_climb_rate, G_Dt, true);
-    pos_control.update_z_controller();
-    attitude_control.input_euler_angle_roll_pitch_euler_rate_yaw(wp_nav.get_roll(), wp_nav.get_pitch(), target_yaw_rate, get_smoothing_gain());
+    pos_control->set_alt_target_from_climb_rate_ff_in_auto(target_climb_rate, G_Dt, true);
+    pos_control->update_z_controller();
+    attitude_control->input_euler_angle_roll_pitch_euler_rate_yaw(wp_nav->get_roll(), wp_nav->get_pitch(), target_yaw_rate, get_smoothing_gain());
 }
 
 // get_default_auto_yaw_mode - returns auto_yaw_mode based on WP_YAW_BEHAVIOR parameter

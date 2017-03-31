@@ -208,7 +208,7 @@ private:
 #endif
 
 #if RANGEFINDER_ENABLED == ENABLED
-    RangeFinder rangefinder {serial_manager};
+    RangeFinder rangefinder {serial_manager, ROTATION_PITCH_270};
     struct {
         bool enabled:1;
         bool alt_healthy:1; // true if we can trust the altitude from the rangefinder
@@ -262,7 +262,7 @@ private:
     AP_Mission mission;
 
     // Arming/Disarming mangement class
-    AP_Arming_Copter arming {ahrs, barometer, compass, battery, inertial_nav, ins};
+    AP_Arming_Copter arming {ahrs, barometer, compass, battery, inertial_nav, ins, gps};
 
     // Optical flow sensor
 #if OPTFLOW == ENABLED
@@ -381,7 +381,6 @@ private:
         uint8_t primary_gps;        // primary gps index
     } sensor_health;
 
-<<<<<<< HEAD
     // Motor Output
 #if FRAME_CONFIG == HELI_FRAME
  #define MOTOR_CLASS AP_MotorsHeli

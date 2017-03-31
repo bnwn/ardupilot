@@ -1189,7 +1189,6 @@ void Copter::log_picture()
 }
 #endif
 
-#endif
 
 // point the camera to a specified angle
 void Copter::do_mount_control(const AP_Mission::Mission_Command& cmd)

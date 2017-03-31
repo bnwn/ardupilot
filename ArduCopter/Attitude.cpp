@@ -309,7 +309,7 @@ float Copter::get_surface_tracking_climb_rate_in_auto(int16_t target_rate, float
 
     // do not let target altitude get too far from current altitude above ground
     // Note: the 750cm limit is perhaps too wide but is consistent with the regular althold limits and helps ensure a smooth transition
-    target_rangefinder_alt = constrain_float(target_rangefinder_alt,rangefinder_state.alt_cm-pos_control.get_leash_down_z(),rangefinder_state.alt_cm+pos_control.get_leash_up_z());
+    target_rangefinder_alt = constrain_float(target_rangefinder_alt,rangefinder_state.alt_cm-pos_control->get_leash_down_z(),rangefinder_state.alt_cm+pos_control->get_leash_up_z());
 
     if (fabs(rangefinder_state.tilt_angle) > 0.523f) {
         distance_error = current_alt_target - current_alt; // not use rangefinder if degree larger than 45
@@ -321,7 +321,7 @@ float Copter::get_surface_tracking_climb_rate_in_auto(int16_t target_rate, float
     //velocity_correction = distance_error * 2.0;
     velocity_correction = constrain_float(velocity_correction, -THR_SURFACE_TRACKING_VELZ_MAX, THR_SURFACE_TRACKING_VELZ_MAX);
 
-    pos_control.set_imitation_flags(true);
+    pos_control->set_imitation_flags(true);
 
     // return combined pilot climb rate + rate to correct rangefinder alt error
     return (target_rate + velocity_correction);

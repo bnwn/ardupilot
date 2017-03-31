@@ -121,7 +121,6 @@ private:
     // the input channel this corresponds to
     uint8_t     ch_in;
 
-<<<<<<< HEAD
     int16_t pwm_to_angle();
     int16_t pwm_to_angle_dz(uint16_t dead_zone);
 };
@@ -140,23 +139,6 @@ public:
 
     static RC_Channel *rc_channel(uint8_t chan) {
         return (chan < NUM_RC_CHANNELS)?&channels[chan]:nullptr;
-=======
-    int16_t    get_radio_min() const {return _radio_min.get();}
-    void       set_radio_min(int16_t val){_radio_min = val; \
-                                         save_radio_min();}
-    void       save_radio_min() { _radio_min.save();}
-    int16_t    get_radio_max() const {return _radio_max.get();}
-    void       set_radio_max(int16_t val){_radio_max = val; \
-                                         save_radio_max();}
-    void       save_radio_max() { _radio_max.save();}
-    int16_t    get_radio_trim() const { return _radio_trim.get();}
-    void       set_radio_trim(int16_t val) { _radio_trim.set(val);}
-    void       save_radio_trim() { _radio_trim.save();}
-    
-    bool min_max_configured()
-    {
-        return _radio_min.configured() && _radio_max.configured();
->>>>>>> 2430caca065e293b45b204e891ae1bd3cc86dab2
     }
 
     static void set_pwm_all(void);

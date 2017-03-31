@@ -1001,8 +1001,7 @@ libraries/RC_Channel/examples/RC_Channel/RC_Channel.cpp
 libraries/RC_Channel/examples/RC_UART/RC_UART.cpp
 libraries/RC_Channel/RC_Channel.cpp
 libraries/RC_Channel/RC_Channel.h
-libraries/RC_Channel/RC_Channel_aux.cpp
-libraries/RC_Channel/RC_Channel_aux.h
+libraries/RC_Channel/RC_Channels.cpp
 libraries/SITL/SIM_ADSB.cpp
 libraries/SITL/SIM_ADSB.h
 libraries/SITL/SIM_Aircraft.cpp
@@ -1047,6 +1046,10 @@ libraries/SITL/SIM_XPlane.cpp
 libraries/SITL/SIM_XPlane.h
 libraries/SITL/SITL.cpp
 libraries/SITL/SITL.h
+libraries/SRV_Channel/SRV_Channel.cpp
+libraries/SRV_Channel/SRV_Channel.h
+libraries/SRV_Channel/SRV_Channels.cpp
+libraries/SRV_Channel/SRV_Channel_aux.cpp
 libraries/StorageManager/examples/StorageTest/StorageTest.cpp
 libraries/StorageManager/StorageManager.cpp
 libraries/StorageManager/StorageManager.h

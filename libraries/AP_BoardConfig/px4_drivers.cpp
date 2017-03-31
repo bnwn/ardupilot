@@ -39,20 +39,6 @@ AP_BoardConfig::px4_board_type AP_BoardConfig::px4_configured_board;
    declare driver main entry points
  */
 extern "C" {
-    int mpu6000_main(int , char **);
-    int mpu9250_main(int , char **);
-    int ms5611_main(int , char **);
-    int l3gd20_main(int , char **);
-    int lsm303d_main(int , char **);
-    int hmc5883_main(int , char **);
-    int ets_airspeed_main(int, char **);
-    int meas_airspeed_main(int, char **);
-    int ll40ls_main(int, char **);
-    int trone_main(int, char **);
-    int mb12xx_main(int, char **);
-//    int m006_main(int, char **);
- //   int hz16wa_main(int, char **);
-    int pwm_input_main(int, char **);
 #if HAL_WITH_UAVCAN
     int uavcan_main(int, char **);
 #endif
@@ -314,77 +300,6 @@ void AP_BoardConfig::px4_setup_drivers(void)
     if (px4_start_driver(fmu_main, "fmu", "sensor_reset 20")) {
         printf("FMUv4 sensor reset complete\n");        
     }
-#elif defined(CONFIG_ARCH_BOARD_PX4FMU_V2)
-    bool have_FMUV3 = false;
-    
-    printf("Starting FMUv2 sensors\n");
-    if (px4_start_driver(hmc5883_main, "hmc5883", "-C -T -I -R 4 start")) {
-        printf("Have internal hmc5883\n");
-    } else {
-        printf("No internal hmc5883\n");
-    }
-
-    // external MPU6000 is rotated YAW_180 from standard
-    if (px4_start_driver(mpu6000_main, "mpu6000", "-X -R 4 start")) {
-        printf("Found MPU6000 external\n");
-        have_FMUV3 = true;
-    } else {
-        if (px4_start_driver(mpu9250_main, "mpu9250", "-X -R 4 start")) {
-            printf("Found MPU9250 external\n");
-            have_FMUV3 = true;
-        } else {
-            printf("No MPU6000 or MPU9250 external\n");
-        }
-    }
-    if (have_FMUV3) {
-        // external L3GD20 is rotated YAW_180 from standard
-        if (px4_start_driver(l3gd20_main, "l3gd20", "-X -R 4 start")) {
-            printf("l3gd20 external started OK\n");
-        } else {
-            px4_sensor_error("No l3gd20");
-        }
-        // external LSM303D is rotated YAW_270 from standard
-        if (px4_start_driver(lsm303d_main, "lsm303d", "-a 16 -X -R 6 start")) {
-            printf("lsm303d external started OK\n");
-        } else {
-            px4_sensor_error("No lsm303d");
-        }
-        // internal MPU6000 is rotated ROLL_180_YAW_270 from standard
-        if (px4_start_driver(mpu6000_main, "mpu6000", "-R 14 start")) {
-            printf("Found MPU6000 internal\n");
-        } else {
-            if (px4_start_driver(mpu9250_main, "mpu9250", "-R 14 start")) {
-                printf("Found MPU9250 internal\n");
-            } else {
-                px4_sensor_error("No MPU6000 or MPU9250");
-            }
-        }
-        if (px4_start_driver(hmc5883_main, "hmc5883", "-C -T -S -R 8 start")) {
-            printf("Found SPI hmc5883\n");
-        }
-    } else {
-        // not FMUV3 (ie. not a pixhawk2)
-        if (px4_start_driver(mpu6000_main, "mpu6000", "start")) {
-            printf("Found MPU6000\n");
-        } else {
-            if (px4_start_driver(mpu9250_main, "mpu9250", "start")) {
-                printf("Found MPU9250\n");
-            } else {
-                printf("No MPU6000 or MPU9250\n");
-            }
-        }
-        if (px4_start_driver(l3gd20_main, "l3gd20", "start")) {
-            printf("l3gd20 started OK\n");
-        } else {
-            px4_sensor_error("no l3gd20 found");
-        }
-        if (px4_start_driver(lsm303d_main, "lsm303d", "-a 16 start")) {
-            printf("lsm303d started OK\n");
-        } else {
-            //printf("no lsm303d found");
-            px4_sensor_error("no lsm303d found");
-        }
-    }
 #endif
 
     if (px4.board_type == PX4_BOARD_OLDDRIVERS) {
@@ -493,50 +408,6 @@ void AP_BoardConfig::px4_setup_peripherals(void)
     if (px4_start_driver(adc_main, "adc", "start")) {
         hal.analogin->init();
         printf("ADC started OK\n");
-    }
-    if (px4_start_driver(ets_airspeed_main, "ets_airspeed", "start")) {
-        printf("Found ETS airspeed sensor\n");
-    }
-
-    if (px4_start_driver(meas_airspeed_main, "meas_airspeed", "start")) {
-        printf("Found MEAS airspeed sensor\n");
-    } else if (px4_start_driver(meas_airspeed_main, "meas_airspeed", "start -b 2")) {
-        printf("Found MEAS airspeed sensor (bus2)\n");
-    }
-
-    if (px4_start_driver(ll40ls_main, "ll40ls", "-X start")) {
-        printf("Found external ll40ls sensor\n");
-    }
-    if (px4_start_driver(ll40ls_main, "ll40ls", "-I start")) {
-        printf("Found internal ll40ls sensor\n");
-    }
-    if (px4_start_driver(trone_main, "trone", "start")) {
-        printf("Found trone sensor\n");
-    }
-    if (px4_start_driver(mb12xx_main, "mb12xx", "start")) {
-        printf("Found mb12xx sensor\n");
-    }
-//    if (px4_start_driver(m006_main, "m006", "start")) {
-//        printf("Found m006 sensor\n");
-//    }
-//    if (px4_start_driver(hz16wa_main, "hz16wa", "start")) {
-//        printf("Found hz16wa sensor\n");
-//    }
-
-#if !defined(CONFIG_ARCH_BOARD_PX4FMU_V1)
-    if (px4_start_driver(pwm_input_main, "pwm_input", "start")) {
-        printf("started pwm_input driver\n");
-    }
-#endif
-}
-#endif
-
-#if CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN
-void AP_BoardConfig::vrx_start_brain51_sensors(void)
-{
-#if defined(CONFIG_ARCH_BOARD_VRBRAIN_V51)
-    if (px4_start_driver(hmc5883_main, "hmc5883", "-C -R 12 -I start")) {
-        printf("HMC5883 Internal GPS started OK\n");
     } else {
         px4_sensor_error("no ADC found");
     }

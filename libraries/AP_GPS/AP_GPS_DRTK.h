@@ -69,7 +69,7 @@ class AP_GPS_DRTK : public AP_GPS_Backend
 public:
     AP_GPS_DRTK(AP_GPS &_gps, AP_GPS::GPS_State &_state, AP_HAL::UARTDriver *_port);
 
-    AP_GPS::GPS_Status highest_supported_status(void) { return AP_GPS::GPS_OK_FIX_3D_RTK; }
+    AP_GPS::GPS_Status highest_supported_status(void) { return AP_GPS::GPS_OK_FIX_3D_RTK_FIXED; }
 
     // --reserve
 //    bool _detect(struct DRTK_detect_state &state, uint8_t data);

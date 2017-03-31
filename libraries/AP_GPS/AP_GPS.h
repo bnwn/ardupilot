@@ -356,32 +356,6 @@ public:
     // set accuracy for HIL
     void setHIL_Accuracy(uint8_t instance, float vdop, float hacc, float vacc, float sacc, bool _have_vertical_velocity, uint32_t sample_ms);
 
-    static const struct AP_Param::GroupInfo var_info[];
-
-    // dataflash for logging, if available
-    DataFlash_Class *_DataFlash;
-
-    // configuration parameters
-    AP_Int8 _type[GPS_MAX_INSTANCES];
-    AP_Int8 _navfilter;
-    AP_Int8 _auto_switch;
-    AP_Int8 _min_dgps;
-    AP_Int16 _sbp_logmask;
-    AP_Int8 _inject_to;
-    uint32_t _last_instance_swap_ms;
-    AP_Int8 _sbas_mode;
-    AP_Int8 _min_elevation;
-    AP_Int8 _raw_data;
-    AP_Int8 _gnss_mode[2];
-    AP_Int8 _save_config;
-    AP_Int8 _auto_config;
-    AP_Int8 _use_for_yaw;
-    AP_Float _yaw_compensation;
-    
-    // handle sending of initialisation strings to the GPS
-    void send_blob_start(uint8_t instance, const char *_blob, uint16_t size);
-    void send_blob_update(uint8_t instance);
-
     // lock out a GPS port, allowing another application to use the port
     void lock_port(uint8_t instance, bool locked);
 
@@ -427,7 +401,6 @@ public:
     static const struct AP_Param::GroupInfo var_info[];
 
 protected:
-
     // dataflash for logging, if available
     DataFlash_Class *_DataFlash;
 
@@ -450,6 +423,8 @@ protected:
     AP_Int16 _delay_ms[GPS_MAX_RECEIVERS];
     AP_Int8 _blend_mask;
     AP_Float _blend_tc;
+    AP_Int8 _use_for_yaw;
+    AP_Float _yaw_compensation;
 
 private:
     // return gps update rate in milliseconds

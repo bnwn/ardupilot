@@ -3,11 +3,8 @@
 
 #include "AP_Mission.h"
 #include <AP_Terrain/AP_Terrain.h>
-<<<<<<< HEAD
 #include <GCS_MAVLink/GCS.h>
-=======
 #include <AC_Sprayer/AC_Sprayer.h>
->>>>>>> 2430caca065e293b45b204e891ae1bd3cc86dab2
 
 const AP_Param::GroupInfo AP_Mission::var_info[] = {
 
@@ -593,7 +590,7 @@ void AP_Mission::update(uint8_t mission_type)
                 }
             }
             if (_point_cmd.id == MAV_CMD_NAV_WAYPOINT) {
-                AC_Sprayer::enable(true);
+                AC_Sprayer::run(true);
             }
             //market _nav_cmd as complete
             _point_flags.nav_cmd_loaded = false;
@@ -803,11 +800,7 @@ bool AP_Mission::set_current_cmd(uint16_t index)
 bool AP_Mission::read_cmd_from_storage(uint16_t index, Mission_Command& cmd, uint8_t mission_type) const
 {
     // exit immediately if index is beyond last command but we always let cmd #0 (i.e. home) be read
-<<<<<<< HEAD
-    if (index >= (unsigned)_cmd_total && index != 0) {
-=======
     if (index > (unsigned)_cmd_total && index != 0 && mission_type == AP_MISSION_AUTO_RUNNING) {
->>>>>>> 2430caca065e293b45b204e891ae1bd3cc86dab2
         return false;
     }
 
@@ -2122,7 +2115,6 @@ uint16_t AP_Mission::get_landing_sequence_start()
     return landing_start_index;
 }
 
-<<<<<<< HEAD
 /*
    find the nearest landing sequence starting point (DO_LAND_START) and
    switch to that mission item.  Returns false if no DO_LAND_START
@@ -2145,7 +2137,7 @@ bool AP_Mission::jump_to_landing_sequence(void)
     GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_WARNING, "Unable to start landing sequence");
     return false;
 }
-=======
+
 bool AP_Mission::is_valid_point()
 {
     Mission_Command tmp;
@@ -2190,4 +2182,3 @@ inline void AP_Mission::set_true_cmd(uint16_t &_index, uint16_t &_p1, uint16_t i
         _index = (interval >> 8) * 10 + ((_p1 & 0x0001) ^ 1);
     }
 }
->>>>>>> 2430caca065e293b45b204e891ae1bd3cc86dab2

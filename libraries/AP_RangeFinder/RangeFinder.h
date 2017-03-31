@@ -48,16 +48,12 @@ public:
         RangeFinder_TYPE_LWSER  = 8,
         RangeFinder_TYPE_BEBOP  = 9,
         RangeFinder_TYPE_MAVLink = 10,
-<<<<<<< HEAD
         RangeFinder_TYPE_ULANDING= 11,
         RangeFinder_TYPE_LEDDARONE = 12,
         RangeFinder_TYPE_MBSER  = 13,
         RangeFinder_TYPE_TRONE  = 14,
         RangeFinder_TYPE_PLI2CV3= 15,
-=======
-        RangeFinder_TYPE_LEDDARONE = 12,
-        RangeFinder_TYPE_MMWRadar = 13
->>>>>>> 2430caca065e293b45b204e891ae1bd3cc86dab2
+        RangeFinder_TYPE_MMWRadar = 16
     };
 
     enum RangeFinder_Function {
@@ -107,13 +103,10 @@ public:
     AP_Int8  _ground_clearance_cm[RANGEFINDER_MAX_INSTANCES];
     AP_Int8  _address[RANGEFINDER_MAX_INSTANCES];
     AP_Int16 _powersave_range;
-<<<<<<< HEAD
     AP_Vector3f _pos_offset[RANGEFINDER_MAX_INSTANCES]; // position offset in body frame
     AP_Int8  _orientation[RANGEFINDER_MAX_INSTANCES];
-=======
     AP_Int8  _tilt[RANGEFINDER_MAX_INSTANCES];
     AP_Float _fuse;
->>>>>>> 2430caca065e293b45b204e891ae1bd3cc86dab2
 
     static const struct AP_Param::GroupInfo var_info[];
     
@@ -149,6 +142,9 @@ public:
         return (instance<num_instances? _RangeFinder_STATE(instance).distance_cm : 0);
     }
     uint16_t distance_cm_orient(enum Rotation orientation) const;
+    uint16_t distance_cm() {
+        return distance_cm(primary_instance);
+    }
 
     uint8_t service_tilt() const {
         return service_tilt(primary_instance);
@@ -175,30 +171,24 @@ public:
     int16_t max_distance_cm(uint8_t instance) const {
         return _max_distance_cm[instance];
     }
-<<<<<<< HEAD
     int16_t max_distance_cm_orient(enum Rotation orientation) const;
-=======
     int16_t max_distance_cm() const {
         return max_distance_cm(primary_instance);
     }
     int16_t max_mmwradar_range_cm() const {
         return max_distance_cm(avoid_obstacle);
     }
->>>>>>> 2430caca065e293b45b204e891ae1bd3cc86dab2
 
     int16_t min_distance_cm(uint8_t instance) const {
         return _min_distance_cm[instance];
     }
-<<<<<<< HEAD
     int16_t min_distance_cm_orient(enum Rotation orientation) const;
-=======
     int16_t min_distance_cm() const {
         return min_distance_cm(primary_instance);
     }
     int16_t min_mmwradar_range_cm() const {
         return min_distance_cm(avoid_obstacle);
     }
->>>>>>> 2430caca065e293b45b204e891ae1bd3cc86dab2
 
     int16_t ground_clearance_cm(uint8_t instance) const {
         return _ground_clearance_cm[instance];
@@ -207,13 +197,10 @@ public:
 
     // query status
     RangeFinder_Status status(uint8_t instance) const;
-<<<<<<< HEAD
     RangeFinder_Status status_orient(enum Rotation orientation) const;
 
     // true if sensor is returning data
-    bool has_data(uint8_t instance) const;
     bool has_data_orient(enum Rotation orientation) const;
-=======
     RangeFinder_Status status(void) const {
         return status(primary_instance);
     }
@@ -229,15 +216,12 @@ public:
     bool has_mmwradar_data() const {
         return has_data(avoid_obstacle);
     }
->>>>>>> 2430caca065e293b45b204e891ae1bd3cc86dab2
 
     // returns count of consecutive good readings
     uint8_t range_valid_count(uint8_t instance) const {
         return _RangeFinder_STATE(instance).range_valid_count;
     }
-<<<<<<< HEAD
     uint8_t range_valid_count_orient(enum Rotation orientation) const;
-=======
     uint8_t mmwradar_valid_count() const {
         return range_valid_count(avoid_obstacle);
     }
@@ -245,7 +229,6 @@ public:
     float fuse_correct() const {
         return _fuse.get();
     }
->>>>>>> 2430caca065e293b45b204e891ae1bd3cc86dab2
 
     /*
       set an externally estimated terrain height. Used to enable power
@@ -273,6 +256,7 @@ private:
     AP_RangeFinder_Backend *drivers[RANGEFINDER_MAX_INSTANCES];
     uint8_t num_instances:3;
     uint8_t avoid_obstacle:3;
+    uint8_t primary_instance:2;
     float estimated_terrain_height;
     AP_SerialManager &serial_manager;
     Vector3f pos_offset_zero;   // allows returning position offsets of zero for invalid requests
@@ -281,9 +265,5 @@ private:
     void update_instance(uint8_t instance);  
 
     void update_pre_arm_check(uint8_t instance);
-<<<<<<< HEAD
     bool _add_backend(AP_RangeFinder_Backend *driver);
-=======
-    void _add_backend(AP_RangeFinder_Backend *driver, uint8_t instance);
->>>>>>> 2430caca065e293b45b204e891ae1bd3cc86dab2
 };

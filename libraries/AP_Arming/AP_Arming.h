@@ -38,7 +38,7 @@ public:
     };
 
     AP_Arming(const AP_AHRS &ahrs_ref, const AP_Baro &baro, Compass &compass,
-              const AP_BattMonitor &battery);
+              const AP_BattMonitor &battery, const AP_GPS &gps);
 
     // these functions should not be used by Copter which holds the armed state in the motors library
     ArmingRequired arming_required();
@@ -73,7 +73,7 @@ protected:
     const AP_AHRS           &ahrs;
     const AP_Baro           &barometer;
     Compass                 &_compass;
-    AP_GPS                  &_gps;
+    const AP_GPS                  &_gps;
     const AP_BattMonitor    &_battery;
 
     // internal members
