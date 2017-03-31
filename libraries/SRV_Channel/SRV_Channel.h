@@ -152,12 +152,12 @@ public:
         return servo_trim;
     }
 
-    void set_input(int32_t _value) {
-        _input_value = _value;
-    }
-    int32_t get_input_value(void) const {
-        return _input_value;
-    }
+//    void set_input(int32_t _value) {
+//        _input_value = _value;
+//    }
+//    int32_t get_input_value(void) const {
+//        return _input_value;
+//    }
 
 private:
     AP_Int16 servo_min;
@@ -363,7 +363,7 @@ public:
     static bool upgrade_parameters(const uint8_t old_keys[14], uint16_t aux_channel_mask, RCMapper *rcmap);
     static void upgrade_motors_servo(uint8_t ap_motors_key, uint8_t ap_motors_idx, uint8_t new_channel);
 
-    static int32_t get_servo(SRV_Channel::Aux_servo_function_t function);
+//    static int32_t get_servo(SRV_Channel::Aux_servo_function_t function);
     
 private:
     struct {
