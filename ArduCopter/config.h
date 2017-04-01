@@ -351,7 +351,7 @@
 // Landing
 //
 #ifndef LAND_SPEED
- # define LAND_SPEED    70          // the descent speed for the final stage of landing in cm/s
+ # define LAND_SPEED    60          // the descent speed for the final stage of landing in cm/s
 #endif
 #ifndef LAND_START_ALT
  # define LAND_START_ALT 1000         // altitude in cm where land controller switches to slow rate of descent

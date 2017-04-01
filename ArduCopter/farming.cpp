@@ -21,8 +21,7 @@ void Copter::pesticide_remaining_check()
             && (control_mode == POINT_ATOB)
             && flowmeter.farming_state()
             && !ap.land_complete
-//            && (SRV_Channels::get_servo(SRV_Channel::k_sprayer_pump) > (sprayer.get_pump_rate() * 100))) {
-            ) {
+            && (SRV_Channels::get_servo(SRV_Channel::k_sprayer_pump) > (sprayer.get_pump_rate() * 100))) {
         // only return home when pesticide is empty
         set_mode(RTL, MODE_REASON_PESTICIDE_EMPTY);
     }

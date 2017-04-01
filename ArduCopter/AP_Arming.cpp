@@ -607,8 +607,12 @@ bool AP_Arming_Copter::arm_checks(bool display_failure, bool arming_from_gcs)
         return false;
     }
 
-    // check compass health
-    if (!_compass.healthy()) {
+    if (copter.gps.status() > 3 && copter.gps.have_heading_accuracy()) {
+        if (display_failure) {
+            GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_NOTICE, "Use heading from D-GPS");
+        }
+    } else if (!_compass.healthy()) {
+        // check compass health
         if (display_failure) {
             gcs_send_text(MAV_SEVERITY_CRITICAL,"Arm: Compass not healthy");
         }

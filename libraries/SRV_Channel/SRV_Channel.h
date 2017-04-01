@@ -17,6 +17,7 @@
 #include <AP_Param/AP_Param.h>
 #include <AP_RCMapper/AP_RCMapper.h>
 #include <AP_Common/Bitmask.h>
+#include <RC_Channel/RC_Channel.h>
 
 #define NUM_SERVO_CHANNELS 16
 
@@ -206,7 +207,7 @@ private:
     // a bitmask type wide enough for NUM_SERVO_CHANNELS
     typedef uint16_t servo_mask_t;
 
-    static int32_t _input_value;
+    int32_t _input_value;
 
     // mask of channels where we have a output_pwm value. Cleared when a
     // scaled value is written. 

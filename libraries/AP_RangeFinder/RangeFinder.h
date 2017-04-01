@@ -50,10 +50,10 @@ public:
         RangeFinder_TYPE_MAVLink = 10,
         RangeFinder_TYPE_ULANDING= 11,
         RangeFinder_TYPE_LEDDARONE = 12,
-        RangeFinder_TYPE_MBSER  = 13,
-        RangeFinder_TYPE_TRONE  = 14,
-        RangeFinder_TYPE_PLI2CV3= 15,
-        RangeFinder_TYPE_MMWRadar = 16
+        RangeFinder_TYPE_MMWRadar = 13,
+        RangeFinder_TYPE_MBSER  = 14,
+        RangeFinder_TYPE_TRONE  = 15,
+        RangeFinder_TYPE_PLI2CV3= 16
     };
 
     enum RangeFinder_Function {

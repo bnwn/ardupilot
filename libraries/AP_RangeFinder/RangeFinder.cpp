@@ -668,6 +668,7 @@ void RangeFinder::detect_instance(uint8_t instance)
         break;
     case RangeFinder_TYPE_MMWRadar:
         _add_backend(AP_RangeFinder_MMWRadar::detect(*this, instance, state[instance], serial_manager));
+        break;
 #endif
 #if CONFIG_HAL_BOARD_SUBTYPE == HAL_BOARD_SUBTYPE_LINUX_BBBMINI
     case RangeFinder_TYPE_BBB_PRU:

@@ -2,6 +2,7 @@
 
 #include "AP_OilEngine.h"
 #include <GCS_MAVLink/GCS.h>
+#include <SRV_Channel/SRV_Channel.h>
 #if CONFIG_HAL_BOARD == HAL_BOARD_PX4
 #include <drivers/drv_input_capture.h>
 #include <drivers/drv_pwm_output.h>

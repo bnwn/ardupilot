@@ -1,5 +1,6 @@
 #include <AP_HAL/AP_HAL.h>
 #include "AC_Sprayer.h"
+#include <SRV_Channel/SRV_Channel.h>
 
 extern const AP_HAL::HAL& hal;
 
@@ -48,6 +49,9 @@ const AP_Param::GroupInfo AC_Sprayer::var_info[] = {
     AP_GROUPEND
 };
 
+bool AC_Sprayer::_sprayer_enable;
+struct AC_Sprayer::sprayer_flags_type AC_Sprayer::_flags;
+
 AC_Sprayer::AC_Sprayer(const AP_InertialNav* inav) :
     _inav(inav),
     _speed_over_min_time(0),
@@ -66,6 +70,7 @@ AC_Sprayer::AC_Sprayer(const AP_InertialNav* inav) :
     _flags.spraying = false;
     _flags.testing = false;
 
+    _sprayer_enable = _enabled.get();
     run(false);
 }
 
@@ -78,7 +83,7 @@ void AC_Sprayer::run(const bool true_false)
 
     // set flag indicate whether spraying is permitted:
     // do not allow running to be set to true if we are currently not enabled
-    _flags.running = true_false && _enabled;
+    _flags.running = true_false && _sprayer_enable;
 
     // turn off the pump and spinner servos if necessary
     if (!_flags.running) {
@@ -99,7 +104,8 @@ void
 AC_Sprayer::update()
 {
     // exit immediately if we are disabled or shouldn't be running
-    if (!_enabled || !running()) {
+    _sprayer_enable = _enabled.get();
+    if (!_sprayer_enable || !running()) {
         run(false);
         return;
     }

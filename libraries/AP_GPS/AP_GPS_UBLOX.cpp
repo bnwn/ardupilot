@@ -996,6 +996,10 @@ AP_GPS_UBLOX::_parse_gps(void)
         _last_vel_time         = _buffer.pvt.itow;
         state.ground_speed     = _buffer.pvt.gspeed*0.001f;          // m/s
         state.ground_course    = wrap_360(_buffer.pvt.head_mot * 1.0e-5f);       // Heading 2D deg * 100000
+        if (_is_dgps) {
+            state.heading = state.ground_course * 100;
+            state.have_heading_accuracy = true;
+        }
         state.have_vertical_velocity = true;
         state.velocity.x = _buffer.pvt.velN * 0.001f;
         state.velocity.y = _buffer.pvt.velE * 0.001f;
@@ -1037,16 +1041,16 @@ AP_GPS_UBLOX::_parse_gps(void)
         _last_vel_time         = _buffer.velned.time;
         state.ground_speed     = _buffer.velned.speed_2d*0.01f;          // m/s
         state.ground_course    = wrap_360(_buffer.velned.heading_2d * 1.0e-5f);       // Heading 2D deg * 100000
-        if (_is_dgps) {
-            state.heading = state.ground_course * 100;
-            state.have_heading_accuracy = true;
-        }
         state.have_vertical_velocity = true;
         state.velocity.x = _buffer.velned.ned_north * 0.01f;
         state.velocity.y = _buffer.velned.ned_east * 0.01f;
         state.velocity.z = _buffer.velned.ned_down * 0.01f;
         state.ground_course = wrap_360(degrees(atan2f(state.velocity.y, state.velocity.x)));
         state.ground_speed = norm(state.velocity.y, state.velocity.x);
+        if (_is_dgps) {
+            state.heading = state.ground_course * 100;
+            state.have_heading_accuracy = true;
+        }
         state.have_speed_accuracy = true;
         state.speed_accuracy = _buffer.velned.speed_accuracy*0.01f;
 #if UBLOX_FAKE_3DLOCK

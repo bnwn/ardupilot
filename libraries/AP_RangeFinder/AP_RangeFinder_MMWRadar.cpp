@@ -26,6 +26,7 @@ AP_RangeFinder_MMWRadar::AP_RangeFinder_MMWRadar(RangeFinder &_ranger, uint8_t i
     _packet_form(0)
 {
     uart = serial_manager.find_serial(AP_SerialManager::SerialProtocol_MMWRadar, instance);
+//    printf ("protocol:%d, instance:%d\n", AP_SerialManager::SerialProtocol_MMWRadar, instance);
     if (uart != nullptr) {
         uint32_t baudrate = serial_manager.find_baudrate(AP_SerialManager::SerialProtocol_MMWRadar, instance);
         printf ("begin mmwradar uart. baudrate is: %d \n", baudrate);
@@ -52,7 +53,6 @@ AP_RangeFinder_Backend *AP_RangeFinder_MMWRadar::detect(RangeFinder &ranger, uin
             printf("mmwradar sensor init success. instance: %d\n", instance);
             return sensor;
         }
-        delete sensor;
     }
 
     return nullptr;
