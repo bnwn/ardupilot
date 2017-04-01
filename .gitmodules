@@ -18,4 +18,4 @@
 	url = git://github.com/ArduPilot/googletest
 [submodule "modules/PX4Firmware"]
 	path = modules/PX4Firmware
-	url = http://nerv.enigmatechs.com:10001/xiaoming/PX4Firmware.git
+	url = git://github.com/ArduPilot/PX4Firmware.git

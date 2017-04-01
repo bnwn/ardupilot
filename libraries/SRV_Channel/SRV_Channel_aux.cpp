@@ -344,7 +344,7 @@ SRV_Channels::move_servo(SRV_Channel::Aux_servo_function_t function,
     v = constrain_float(v, 0.0f, 1.0f);
     for (uint8_t i = 0; i < NUM_SERVO_CHANNELS; i++) {
         if (channels[i].function.get() == function) {
-//            channels[i].set_input(value);
+            channels[i].set_input(value);
             float v2 = channels[i].get_reversed()? (1-v) : v;
             uint16_t pwm = channels[i].servo_min + v2 * (channels[i].servo_max - channels[i].servo_min);
             channels[i].set_output_pwm(pwm);
@@ -788,18 +788,18 @@ void SRV_Channels::upgrade_motors_servo(uint8_t ap_motors_key, uint8_t ap_motors
     }
 }
 
-///*
-// * get servo out value
-// */
-//int32_t SRV_Channels::get_servo(SRV_Channel::Aux_servo_function_t function)
-//{
-//    if (function_assigned(function)) {
-//        for (uint8_t i = 0; i < NUM_SERVO_CHANNELS; i++) {
-//            if (channels[i].function.get() == function) {
-//                return (int32_t)(channels[i].get_input_value());
-//            }
-//        }
-//    }
+/*
+ * get servo out value
+ */
+int32_t SRV_Channels::get_servo(SRV_Channel::Aux_servo_function_t function)
+{
+    if (function_assigned(function)) {
+        for (uint8_t i = 0; i < NUM_SERVO_CHANNELS; i++) {
+            if (channels[i].function.get() == function) {
+                return (int32_t)(channels[i].get_input_value());
+            }
+        }
+    }
 
-//    return 0;
-//}
+    return 0;
+}
