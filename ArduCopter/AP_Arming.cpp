@@ -427,6 +427,8 @@ bool AP_Arming_Copter::pre_arm_gps_checks(bool display_failure)
                     // clarify to user why they need GPS in non-GPS flight mode
                     gcs_send_text(MAV_SEVERITY_CRITICAL,"PreArm: Fence enabled, need 3D Fix");
                 } else {
+                    nav_filter_status filt_status = copter.inertial_nav.get_filter_status();
+                    GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "ABS:%d,PRED:%d", filt_status.flags.horiz_pos_abs, filt_status.flags.pred_horiz_pos_abs);
                     gcs_send_text(MAV_SEVERITY_CRITICAL,"PreArm: Need 3D Fix");
                 }
             }

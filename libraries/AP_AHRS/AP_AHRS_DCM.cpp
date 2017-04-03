@@ -444,13 +444,14 @@ AP_AHRS_DCM::drift_correction_yaw(void)
             float yaw_error_rad = wrap_PI(gps_heading_rad - yaw);
             yaw_error = sinf(yaw_error_rad);
 
-
-            //GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "use DGPS,head:%f", _gps.get_heading() * 0.01f);
+            int16_t yaw_tmp = (int16_t)(_gps.get_heading() * 0.01f);
+            GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "use DGPS,head:%d", yaw_tmp);
 
             if (!_flags.have_initial_yaw ||
                 yaw_deltat > 20 ||
                     fabsf(yaw_error_rad) >= 1.047f) {
                 // reset DCM matrix based on current yaw
+//                GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "use DGPS,head:%d", yaw_tmp);
                 _dcm_matrix.from_euler(roll, pitch, gps_heading_rad);
                 _omega_yaw_P.zero();
                 _flags.have_initial_yaw = true;
@@ -469,6 +470,7 @@ AP_AHRS_DCM::drift_correction_yaw(void)
             // the first compass value, which can be bad
             if (!_flags.have_initial_yaw && _compass->read()) {
                 float heading = _compass->calculate_heading(_dcm_matrix);
+                GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "use compass head:%f", heading);
                 _dcm_matrix.from_euler(roll, pitch, heading);
                 _omega_yaw_P.zero();
                 _flags.have_initial_yaw = true;
