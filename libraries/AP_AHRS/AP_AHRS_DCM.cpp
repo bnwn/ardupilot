@@ -470,7 +470,7 @@ AP_AHRS_DCM::drift_correction_yaw(void)
             // the first compass value, which can be bad
             if (!_flags.have_initial_yaw && _compass->read()) {
                 float heading = _compass->calculate_heading(_dcm_matrix);
-                GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "use compass head:%f", heading);
+//                GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "use compass head:%f", heading);
                 _dcm_matrix.from_euler(roll, pitch, heading);
                 _omega_yaw_P.zero();
                 _flags.have_initial_yaw = true;
