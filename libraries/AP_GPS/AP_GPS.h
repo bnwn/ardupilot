@@ -332,6 +332,8 @@ public:
 
         if (heading_tmp < 0) {
             heading_tmp += 36000;
+        } else if (heading_tmp > 36000) {
+            heading_tmp -= 36000;
         }
 
         return heading_tmp;

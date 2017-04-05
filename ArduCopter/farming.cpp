@@ -13,6 +13,7 @@ void Copter::init_farming()
 void Copter::radio_to_pump_output()
 {
     SRV_Channels::set_aux_channel_default(SRV_Channel::k_sprayer_pump, CH_8);
+    SRV_Channels::set_aux_channel_default(SRV_Channel::k_sprayer_spinner, CH_7);
 }
 
 void Copter::pesticide_remaining_check()
