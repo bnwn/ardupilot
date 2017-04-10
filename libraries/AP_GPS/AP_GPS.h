@@ -328,7 +328,7 @@ public:
 
     // return heading value
     int32_t get_heading(uint8_t instance) const {
-        int32_t heading_tmp = state[instance].heading - _yaw_compensation * 100;
+        int32_t heading_tmp = state[instance].heading - (int32_t)(_yaw_compensation * 100);
 
         if (heading_tmp < 0) {
             heading_tmp += 36000;
@@ -339,7 +339,7 @@ public:
         return heading_tmp;
     }
 
-    int16_t get_heading(void) const {
+    int32_t get_heading(void) const {
         return get_heading(primary_instance);
     }
 
