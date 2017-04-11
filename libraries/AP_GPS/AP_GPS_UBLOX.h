@@ -92,7 +92,7 @@
 class AP_GPS_UBLOX : public AP_GPS_Backend
 {
 public:
-	AP_GPS_UBLOX(AP_GPS &_gps, AP_GPS::GPS_State &_state, AP_HAL::UARTDriver *_port);
+    AP_GPS_UBLOX(AP_GPS &_gps, AP_GPS::GPS_State &_state, AP_HAL::UARTDriver *_port, uint8_t is_dgps);
 
     // Methods
     bool read();
@@ -540,6 +540,7 @@ private:
     AP_GPS::GPS_Status next_fix;
 
     bool _cfg_needs_save;
+    uint8_t _is_dgps;
 
     bool noReceivedHdop;
     

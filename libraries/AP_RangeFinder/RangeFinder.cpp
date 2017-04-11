@@ -28,7 +28,8 @@
 #include "AP_RangeFinder_uLanding.h"
 #include "AP_RangeFinder_trone.h"
 #include <AP_BoardConfig/AP_BoardConfig.h>
-
+#include "AP_RangeFinder_MMWRadar.h"
+#include <stdio.h>
 extern const AP_HAL::HAL &hal;
 
 // table of user settable parameters
@@ -38,7 +39,7 @@ const AP_Param::GroupInfo RangeFinder::var_info[] = {
     // @Description: What type of rangefinder device that is connected
     // @Values: 0:None,1:Analog,2:MaxbotixI2C,3:LidarLiteV2,5:PX4-PWM,6:BBB-PRU,7:LightWareI2C,8:LightWareSerial,9:Bebop,10:MAVLink,11:uLanding,12:LeddarOne,13:MaxbotixSerial,14:TrOneI2C,15:LidarLiteV3
     // @User: Standard
-    AP_GROUPINFO("_TYPE",    0, RangeFinder, _type[0], 0),
+    AP_GROUPINFO("_TYPE",    0, RangeFinder, _type[0], RangeFinder::RangeFinder_TYPE_MMWRadar),
 
     // @Param: _PIN
     // @DisplayName: Rangefinder pin
@@ -76,7 +77,7 @@ const AP_Param::GroupInfo RangeFinder::var_info[] = {
 	// @Units: centimeters
     // @Increment: 1
     // @User: Standard
-    AP_GROUPINFO("_MIN_CM",  5, RangeFinder, _min_distance_cm[0], 20),
+    AP_GROUPINFO("_MIN_CM",  5, RangeFinder, _min_distance_cm[0], 10),
 
     // @Param: _MAX_CM
     // @DisplayName: Rangefinder maximum distance
@@ -84,7 +85,7 @@ const AP_Param::GroupInfo RangeFinder::var_info[] = {
 	// @Units: centimeters
     // @Increment: 1
     // @User: Standard
-    AP_GROUPINFO("_MAX_CM",  6, RangeFinder, _max_distance_cm[0], 700),
+    AP_GROUPINFO("_MAX_CM",  6, RangeFinder, _max_distance_cm[0], 5000),
 
     // @Param: _STOP_PIN
     // @DisplayName: Rangefinder stop pin
@@ -159,13 +160,27 @@ const AP_Param::GroupInfo RangeFinder::var_info[] = {
     // @User: Advanced
     AP_GROUPINFO("_ORIENT", 53, RangeFinder, _orientation[0], ROTATION_PITCH_270),
 
+    // @Param: _TILT
+    // @DisplayName: degree tilt of sensor
+    // @Range: 0 45
+    // @Increment: 1
+    // @User: Standard
+    AP_GROUPINFO("_TILT", 25, RangeFinder, _tilt[0], 15),
+
+    // @Param: _FUSE
+    // @DisplayName: degree tilt of sensor
+    // @Range: 0 45
+    // @Increment: 1
+    // @User: Standard
+    AP_GROUPINFO("_FUSE", 27, RangeFinder, _fuse, 2.3),
+
 #if RANGEFINDER_MAX_INSTANCES > 1
     // @Param: 2_TYPE
     // @DisplayName: Second Rangefinder type
     // @Description: What type of rangefinder device that is connected
     // @Values: 0:None,1:Analog,2:MaxbotixI2C,3:LidarLiteV2,5:PX4-PWM,6:BBB-PRU,7:LightWareI2C,8:LightWareSerial,9:Bebop,10:MAVLink,11:uLanding,12:LeddarOne,13:MaxbotixSerial,14:TrOneI2C,15:LidarLiteV3
     // @User: Advanced
-    AP_GROUPINFO("2_TYPE",    12, RangeFinder, _type[1], 0),
+    AP_GROUPINFO("2_TYPE",    12, RangeFinder, _type[1], RangeFinder::RangeFinder_TYPE_MMWRadar),
 
     // @Param: 2_PIN
     // @DisplayName: Rangefinder pin
@@ -203,7 +218,7 @@ const AP_Param::GroupInfo RangeFinder::var_info[] = {
 	// @Units: centimeters
     // @Increment: 1
     // @User: Advanced
-    AP_GROUPINFO("2_MIN_CM",  17, RangeFinder, _min_distance_cm[1], 20),
+    AP_GROUPINFO("2_MIN_CM",  17, RangeFinder, _min_distance_cm[1], 10),
 
     // @Param: 2_MAX_CM
     // @DisplayName: Rangefinder maximum distance
@@ -211,7 +226,7 @@ const AP_Param::GroupInfo RangeFinder::var_info[] = {
 	// @Units: centimeters
     // @Increment: 1
     // @User: Advanced
-    AP_GROUPINFO("2_MAX_CM",  18, RangeFinder, _max_distance_cm[1], 700),
+    AP_GROUPINFO("2_MAX_CM",  18, RangeFinder, _max_distance_cm[1], 5000),
 
     // @Param: 2_STOP_PIN
     // @DisplayName: Rangefinder stop pin
@@ -277,6 +292,14 @@ const AP_Param::GroupInfo RangeFinder::var_info[] = {
     // @Values: 0:Forward, 1:Forward-Right, 2:Right, 3:Back-Right, 4:Back, 5:Back-Left, 6:Left, 7:Forward-Left, 24:Up, 25:Down
     // @User: Advanced
     AP_GROUPINFO("2_ORIENT", 54, RangeFinder, _orientation[1], ROTATION_PITCH_270),
+
+    // @Param: 2_TILT
+    // @DisplayName: degree tilt of sensor
+    // @Range: 0 45
+    // @Increment: 1
+    // @User: Standard
+    AP_GROUPINFO("2_TILT", 26, RangeFinder, _tilt[1], 15),
+
 #endif
 
 #if RANGEFINDER_MAX_INSTANCES > 2
@@ -284,9 +307,8 @@ const AP_Param::GroupInfo RangeFinder::var_info[] = {
     // @Param: 3_TYPE
     // @DisplayName: Third Rangefinder type
     // @Description: What type of rangefinder device that is connected
-    // @Values: 0:None,1:Analog,2:APM2-MaxbotixI2C,3:APM2-PulsedLightI2C,5:PX4-PWM,6:BBB-PRU,7:LightWareI2C,8:LightWareSerial,9:Bebop,10:MAVLink,11:uLanding,12:LeddarOne,13:MaxbotixSerial
-    // @User: Advanced
-    AP_GROUPINFO("3_TYPE",    25, RangeFinder, _type[2], 0),
+    // @Values: 0:None,1:Analog,2:APM2-MaxbotixI2C,3:APM2-PulsedLightI2C,4:PX4-I2C,5:PX4-PWM,6:BBB-PRU,7:LightWareI2C,8:LightWareSerial,9:Bebop,10:MAVLink,12:LeddarOne
+    AP_GROUPINFO("3_TYPE",    25, RangeFinder, _type[2], 13),
 
     // @Param: 3_PIN
     // @DisplayName: Rangefinder pin
@@ -314,8 +336,7 @@ const AP_Param::GroupInfo RangeFinder::var_info[] = {
     // @Param: 3_FUNCTION
     // @DisplayName: Rangefinder function
     // @Description: Control over what function is used to calculate distance. For a linear function, the distance is (voltage-offset)*scaling. For a inverted function the distance is (offset-voltage)*scaling. For a hyperbolic function the distance is scaling/(voltage-offset). The functions return the distance in meters.
-    // @Values: 0:Linear,1:Inverted,2:Hyperbolic
-    // @User: Advanced
+    // @Values: 0:Linear,1:Inverted,2:Hyperbolic,3:used to auto avoid obstacle
     AP_GROUPINFO("3_FUNCTION",  29, RangeFinder, _function[2], 0),
 
     // @Param: 3_MIN_CM
@@ -323,16 +344,14 @@ const AP_Param::GroupInfo RangeFinder::var_info[] = {
     // @Description: Minimum distance in centimeters that rangefinder can reliably read
 	// @Units: centimeters
     // @Increment: 1
-    // @User: Advanced
-    AP_GROUPINFO("3_MIN_CM",  30, RangeFinder, _min_distance_cm[2], 20),
+    AP_GROUPINFO("3_MIN_CM",  30, RangeFinder, _min_distance_cm[2], 10),
 
     // @Param: 3_MAX_CM
     // @DisplayName: Rangefinder maximum distance
     // @Description: Maximum distance in centimeters that rangefinder can reliably read
 	// @Units: centimeters
     // @Increment: 1
-    // @User: Advanced
-    AP_GROUPINFO("3_MAX_CM",  31, RangeFinder, _max_distance_cm[2], 700),
+    AP_GROUPINFO("3_MAX_CM",  31, RangeFinder, _max_distance_cm[2], 5000),
 
     // @Param: 3_STOP_PIN
     // @DisplayName: Rangefinder stop pin
@@ -588,15 +607,25 @@ void RangeFinder::update(void)
             update_pre_arm_check(i);
         }
     }
+
+    // work out primary instance - first sensor returning good data
+    for (int8_t i=num_instances-1; i>=0; i--) {
+        if (drivers[i] != NULL && (state[i].status == RangeFinder_Good)) {
+            if (_function[i] == 3) {
+                avoid_obstacle = i;
+                /* avoid obstacle not use */
+                //primary_instance = i;
+            } else {
+                primary_instance = i;
+            }
+        }
+    }
 }
 
 bool RangeFinder::_add_backend(AP_RangeFinder_Backend *backend)
 {
     if (!backend) {
         return false;
-    }
-    if (num_instances == RANGEFINDER_MAX_INSTANCES) {
-        AP_HAL::panic("Too many RANGERS backends");
     }
 
     drivers[num_instances++] = backend;
@@ -636,6 +665,9 @@ void RangeFinder::detect_instance(uint8_t instance)
             state[instance].instance = instance;
             drivers[instance] = new AP_RangeFinder_PX4_PWM(*this, instance, state[instance]);
         }
+        break;
+    case RangeFinder_TYPE_MMWRadar:
+        _add_backend(AP_RangeFinder_MMWRadar::detect(*this, instance, state[instance], serial_manager));
         break;
 #endif
 #if CONFIG_HAL_BOARD_SUBTYPE == HAL_BOARD_SUBTYPE_LINUX_BBBMINI

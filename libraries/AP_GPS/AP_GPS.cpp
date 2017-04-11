@@ -34,6 +34,7 @@
 #include "AP_GPS_SIRF.h"
 #include "AP_GPS_UBLOX.h"
 #include "AP_GPS_MAV.h"
+#include "AP_GPS_DRTK.h"
 #include "GPS_Backend.h"
 
 #if HAL_WITH_UAVCAN
@@ -63,10 +64,14 @@ const AP_Param::GroupInfo AP_GPS::var_info[] = {
     // @Param: TYPE
     // @DisplayName: GPS type
     // @Description: GPS type
+<<<<<<< HEAD
     // @Values: 0:None,1:AUTO,2:uBlox,3:MTK,4:MTK19,5:NMEA,6:SiRF,7:HIL,8:SwiftNav,9:UAVCAN,10:SBF,11:GSOF,12:QURT,13:ERB,14:MAV,15:NOVA
+=======
+    // @Values: 0:None,1:AUTO,2:uBlox,3:MTK,4:MTK19,5:NMEA,6:SiRF,7:HIL,8:SwiftNav,9:PX4-UAVCAN,10:SBF,11:GSOF,12:QURT,13:ERB,14:MAV,15:NOVA,16:DRTK
+>>>>>>> 4452b9e9e8918b4f464d916d8e70ba1c5e249031
     // @RebootRequired: True
     // @User: Advanced
-    AP_GROUPINFO("TYPE",    0, AP_GPS, _type[0], 1),
+    AP_GROUPINFO("TYPE",    0, AP_GPS, _type[0], 2),
 
     // @Param: TYPE2
     // @DisplayName: 2nd GPS type
@@ -252,24 +257,29 @@ const AP_Param::GroupInfo AP_GPS::var_info[] = {
     // @User: Advanced
     AP_GROUPINFO("BLEND_TC", 21, AP_GPS, _blend_tc, 10.0f),
 
+    // @Param: USE__YAW
+    // @DisplayName: use GPS calc heading for yaw
+    // @Values: 0:Disables,1:Enable
+    // @User: Enigma
+    AP_GROUPINFO("USE_YAW", 22, AP_GPS, _use_for_yaw, 0),
+
+    // @Param: YAW_COM
+    // @DisplayName: use GPS calc heading for yaw
+    // @Values: 0:Disables,1:Enable
+    // @User: Enigma
+    AP_GROUPINFO("YAW_COM", 23, AP_GPS, _yaw_compensation, 90),
+
     AP_GROUPEND
 };
 
-// constructor
-AP_GPS::AP_GPS()
-{
-    AP_Param::setup_object_defaults(this, var_info);
-}
-
 /// Startup initialisation.
-void AP_GPS::init(DataFlash_Class *dataflash, const AP_SerialManager& serial_manager)
+void AP_GPS::init(DataFlash_Class *dataflash)
 {
     _DataFlash = dataflash;
     primary_instance = 0;
-
     // search for serial ports with gps protocol
-    _port[0] = serial_manager.find_serial(AP_SerialManager::SerialProtocol_GPS, 0);
-    _port[1] = serial_manager.find_serial(AP_SerialManager::SerialProtocol_GPS, 1);
+    _port[0] = _serial_manager.find_serial(AP_SerialManager::SerialProtocol_GPS, 0);
+    _port[1] = _serial_manager.find_serial(AP_SerialManager::SerialProtocol_GPS, 1);
     _last_instance_swap_ms = 0;
 
     // Initialise class variables used to do GPS blending
@@ -393,6 +403,25 @@ void AP_GPS::detect_instance(uint8_t instance)
     struct detect_state *dstate = &detect_state[instance];
     uint32_t now = AP_HAL::millis();
 
+#if BDNST_DRTK_DETECT == 1
+    // use to startup BDNST DRTK
+    uint32_t baudrate_tmp = 0;
+    int8_t index = 0;
+    if (_type[instance] == GPS_TYPE_DRTK &&
+            _port[instance] != nullptr) {
+        baudrate_tmp = _serial_manager.find_baudrate(AP_SerialManager::SerialProtocol_GPS, instance);
+        for (; index<7; index++) {
+           if (baudrate_tmp == _baudrates[index]) {
+               break;
+           }
+        }
+        _broadcast_gps_type("DRTK", instance, index); // baud rate had set by mannual
+        _port[instance]->begin(baudrate_tmp);
+        new_gps = new AP_GPS_DRTK(*this, state[instance], _port[instance]);
+        goto found_gps;
+    }
+#endif
+
     switch (_type[instance]) {
 #if CONFIG_HAL_BOARD == HAL_BOARD_QURT
     case GPS_TYPE_QURT:
@@ -512,7 +541,8 @@ void AP_GPS::detect_instance(uint8_t instance)
              _baudrates[dstate->current_baud] == 115200) &&
             AP_GPS_UBLOX::_detect(dstate->ublox_detect_state, data)) {
             _broadcast_gps_type("u-blox", instance, dstate->current_baud);
-            new_gps = new AP_GPS_UBLOX(*this, state[instance], _port[instance]);
+
+            new_gps = new AP_GPS_UBLOX(*this, state[instance], _port[instance], _use_for_yaw);
         }
 #if !HAL_MINIMIZE_FEATURES
         // we drop the MTK drivers when building a small build as they are so rarely used
@@ -554,12 +584,14 @@ void AP_GPS::detect_instance(uint8_t instance)
         }
     }
 
+#if CONFIG_HAL_BOARD == HAL_BOARD_PX4 || CONFIG_HAL_BOARD == HAL_BOARD_QURT || BDNST_DRTK_DETECT == 1
 found_gps:
     if (new_gps != nullptr) {
         state[instance].status = NO_FIX;
         drivers[instance] = new_gps;
         timing[instance].last_message_time_ms = now;
     }
+#endif
 }
 
 AP_GPS::GPS_Status AP_GPS::highest_supported_status(uint8_t instance) const

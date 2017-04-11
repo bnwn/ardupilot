@@ -1,5 +1,6 @@
 #include <AP_HAL/AP_HAL.h>
 #include "AC_Sprayer.h"
+#include <SRV_Channel/SRV_Channel.h>
 
 extern const AP_HAL::HAL& hal;
 
@@ -11,7 +12,7 @@ const AP_Param::GroupInfo AC_Sprayer::var_info[] = {
     // @Description: Allows you to enable (1) or disable (0) the sprayer
     // @Values: 0:Disabled,1:Enabled
     // @User: Standard
-    AP_GROUPINFO_FLAGS("ENABLE", 0, AC_Sprayer, _enabled, 0, AP_PARAM_FLAG_ENABLE),
+    AP_GROUPINFO_FLAGS("ENABLE", 0, AC_Sprayer, _enabled, 1, AP_PARAM_FLAG_ENABLE),
 
     // @Param: PUMP_RATE
     // @DisplayName: Pump speed
@@ -48,6 +49,9 @@ const AP_Param::GroupInfo AC_Sprayer::var_info[] = {
     AP_GROUPEND
 };
 
+bool AC_Sprayer::_sprayer_enable;
+struct AC_Sprayer::sprayer_flags_type AC_Sprayer::_flags;
+
 AC_Sprayer::AC_Sprayer(const AP_InertialNav* inav) :
     _inav(inav),
     _speed_over_min_time(0),
@@ -63,7 +67,11 @@ AC_Sprayer::AC_Sprayer(const AP_InertialNav* inav) :
         _spinner_pwm.set_and_save(AC_SPRAYER_DEFAULT_SPINNER_PWM);
     }
 
-    // To-Do: ensure that the pump and spinner servo channels are enabled
+    _flags.spraying = false;
+    _flags.testing = false;
+
+    _sprayer_enable = _enabled.get();
+    run(false);
 }
 
 void AC_Sprayer::run(const bool true_false)
@@ -75,7 +83,7 @@ void AC_Sprayer::run(const bool true_false)
 
     // set flag indicate whether spraying is permitted:
     // do not allow running to be set to true if we are currently not enabled
-    _flags.running = true_false && _enabled;
+    _flags.running = true_false && _sprayer_enable;
 
     // turn off the pump and spinner servos if necessary
     if (!_flags.running) {
@@ -96,7 +104,8 @@ void
 AC_Sprayer::update()
 {
     // exit immediately if we are disabled or shouldn't be running
-    if (!_enabled || !running()) {
+    _sprayer_enable = _enabled.get();
+    if (!_sprayer_enable || !running()) {
         run(false);
         return;
     }
@@ -166,4 +175,10 @@ AC_Sprayer::update()
     }else{
         stop_spraying();
     }
+}
+
+void AC_Sprayer::test_pump(uint8_t _ch_flag)
+{
+    SRV_Channels::move_servo(SRV_Channel::k_sprayer_pump, _ch_flag * 5000, 0, 10000);
+    SRV_Channels::set_output_pwm(SRV_Channel::k_sprayer_spinner, _spinner_pwm);
 }

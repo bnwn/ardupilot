@@ -26,7 +26,7 @@
 #define RANGEFINDER_PREARM_ALT_MAX_CM           200
 #define RANGEFINDER_PREARM_REQUIRED_CHANGE_CM   50
 
-class AP_RangeFinder_Backend; 
+class AP_RangeFinder_Backend;
  
 class RangeFinder
 {
@@ -50,9 +50,10 @@ public:
         RangeFinder_TYPE_MAVLink = 10,
         RangeFinder_TYPE_ULANDING= 11,
         RangeFinder_TYPE_LEDDARONE = 12,
-        RangeFinder_TYPE_MBSER  = 13,
-        RangeFinder_TYPE_TRONE  = 14,
-        RangeFinder_TYPE_PLI2CV3= 15,
+        RangeFinder_TYPE_MMWRadar = 13,
+        RangeFinder_TYPE_MBSER  = 14,
+        RangeFinder_TYPE_TRONE  = 15,
+        RangeFinder_TYPE_PLI2CV3= 16
     };
 
     enum RangeFinder_Function {
@@ -75,6 +76,12 @@ public:
         uint16_t               distance_cm; // distance: in cm
         uint16_t               voltage_mv;  // voltage in millivolts,
                                             // if applicable, otherwise 0
+
+        /* for  mmwradar */
+        uint16_t               vel_cm;
+        uint16_t               rcs_cm;
+        uint16_t               snr;
+
         enum RangeFinder_Status status;     // sensor status
         uint8_t                range_valid_count;   // number of consecutive valid readings (maxes out at 10)
         bool                   pre_arm_check;   // true if sensor has passed pre-arm checks
@@ -98,6 +105,8 @@ public:
     AP_Int16 _powersave_range;
     AP_Vector3f _pos_offset[RANGEFINDER_MAX_INSTANCES]; // position offset in body frame
     AP_Int8  _orientation[RANGEFINDER_MAX_INSTANCES];
+    AP_Int8  _tilt[RANGEFINDER_MAX_INSTANCES];
+    AP_Float _fuse;
 
     static const struct AP_Param::GroupInfo var_info[];
     
@@ -133,6 +142,26 @@ public:
         return (instance<num_instances? _RangeFinder_STATE(instance).distance_cm : 0);
     }
     uint16_t distance_cm_orient(enum Rotation orientation) const;
+    uint16_t distance_cm() {
+        return distance_cm(primary_instance);
+    }
+
+    uint8_t service_tilt() const {
+        return service_tilt(primary_instance);
+    }
+    uint8_t service_tilt(uint8_t instance) const {
+        return _tilt[instance].get();
+    }
+
+    void mmwradar_distance(uint8_t instance, int16_t &range_cm, int16_t &rcs_cm, int16_t &snr, int16_t& vel_cm) {
+        range_cm = (int16_t)_RangeFinder_STATE(instance).distance_cm;
+        rcs_cm = (int16_t)_RangeFinder_STATE(instance).rcs_cm;
+        snr = (int16_t)_RangeFinder_STATE(instance).snr;
+        vel_cm = (int16_t)_RangeFinder_STATE(instance).vel_cm;
+    }
+    void mmwradar_distance(int16_t &range_cm, int16_t &rcs_cm, int16_t &snr, int16_t &vel_cm) {
+        mmwradar_distance(avoid_obstacle, range_cm, rcs_cm, snr, vel_cm);
+    }
 
     uint16_t voltage_mv(uint8_t instance) const {
         return _RangeFinder_STATE(instance).voltage_mv;
@@ -143,11 +172,23 @@ public:
         return _max_distance_cm[instance];
     }
     int16_t max_distance_cm_orient(enum Rotation orientation) const;
+    int16_t max_distance_cm() const {
+        return max_distance_cm(primary_instance);
+    }
+    int16_t max_mmwradar_range_cm() const {
+        return max_distance_cm(avoid_obstacle);
+    }
 
     int16_t min_distance_cm(uint8_t instance) const {
         return _min_distance_cm[instance];
     }
     int16_t min_distance_cm_orient(enum Rotation orientation) const;
+    int16_t min_distance_cm() const {
+        return min_distance_cm(primary_instance);
+    }
+    int16_t min_mmwradar_range_cm() const {
+        return min_distance_cm(avoid_obstacle);
+    }
 
     int16_t ground_clearance_cm(uint8_t instance) const {
         return _ground_clearance_cm[instance];
@@ -159,14 +200,35 @@ public:
     RangeFinder_Status status_orient(enum Rotation orientation) const;
 
     // true if sensor is returning data
-    bool has_data(uint8_t instance) const;
     bool has_data_orient(enum Rotation orientation) const;
+    RangeFinder_Status status(void) const {
+        return status(primary_instance);
+    }
+    RangeFinder_Status mmwradar_status(void) const {
+        return status(avoid_obstacle);
+    }
+
+    // true if sensor is returning data
+    bool has_data(uint8_t instance) const;
+    bool has_data() const {
+        return has_data(primary_instance);
+    }
+    bool has_mmwradar_data() const {
+        return has_data(avoid_obstacle);
+    }
 
     // returns count of consecutive good readings
     uint8_t range_valid_count(uint8_t instance) const {
         return _RangeFinder_STATE(instance).range_valid_count;
     }
     uint8_t range_valid_count_orient(enum Rotation orientation) const;
+    uint8_t mmwradar_valid_count() const {
+        return range_valid_count(avoid_obstacle);
+    }
+
+    float fuse_correct() const {
+        return _fuse.get();
+    }
 
     /*
       set an externally estimated terrain height. Used to enable power
@@ -193,6 +255,8 @@ private:
     RangeFinder_State state[RANGEFINDER_MAX_INSTANCES];
     AP_RangeFinder_Backend *drivers[RANGEFINDER_MAX_INSTANCES];
     uint8_t num_instances:3;
+    uint8_t avoid_obstacle:3;
+    uint8_t primary_instance:2;
     float estimated_terrain_height;
     AP_SerialManager &serial_manager;
     Vector3f pos_offset_zero;   // allows returning position offsets of zero for invalid requests

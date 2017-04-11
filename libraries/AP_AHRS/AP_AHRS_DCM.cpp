@@ -3,7 +3,7 @@
  *
  *       AHRS system using DCM matrices
  *
- *       Based on DCM code by Doug Weibel, Jordi Muñoz and Jose Julio. DIYDrones.com
+ *       Based on DCM code by Doug Weibel, Jordi Mu?oz and Jose Julio. DIYDrones.com
  *
  *       Adapted for the general ArduPilot AHRS interface by Andrew Tridgell
 
@@ -22,6 +22,8 @@
  */
 #include "AP_AHRS.h"
 #include <AP_HAL/AP_HAL.h>
+#include <GCS_MAVLink/GCS_MAVLink.h>
+#include <GCS_MAVLink/GCS.h>
 
 extern const AP_HAL::HAL& hal;
 
@@ -274,7 +276,7 @@ AP_AHRS_DCM::renorm(Vector3f const &a, Vector3f &result)
  *  to approximations rather than identities. In effect, the axes in the two frames of reference no
  *  longer describe a rigid body. Fortunately, numerical error accumulates very slowly, so it is a
  *  simple matter to stay ahead of it.
- *  We call the process of enforcing the orthogonality conditions ÒrenormalizationÓ.
+ *  We call the process of enforcing the orthogonality conditions ?renormalization?.
  */
 void
 AP_AHRS_DCM::normalize(void)
@@ -432,7 +434,33 @@ AP_AHRS_DCM::drift_correction_yaw(void)
     float yaw_error;
     float yaw_deltat;
 
-    if (AP_AHRS_DCM::use_compass()) {
+    if (have_gps() && (_gps.status() > 3) && _gps.have_heading_accuracy()) {
+        /*
+         * use gps heading if have heading accuracy
+         */
+        if (_gps.last_fix_time_ms() != _gps_last_update) {
+            yaw_deltat = (_gps.last_fix_time_ms() - _gps_last_update) * 1.0e-3f;
+            _gps_last_update = _gps.last_fix_time_ms();
+            new_value = true;
+            float gps_heading_rad = ToRad(_gps.get_heading() * 0.01f);
+            float yaw_error_rad = wrap_PI(gps_heading_rad - yaw);
+            yaw_error = sinf(yaw_error_rad);
+
+            int16_t yaw_tmp = (int16_t)(_gps.get_heading() * 0.01f);
+            GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "use DGPS,head:%d", yaw_tmp);
+
+            if (!_flags.have_initial_yaw ||
+                yaw_deltat > 20 ||
+                    fabsf(yaw_error_rad) >= 1.047f) {
+                // reset DCM matrix based on current yaw
+//                GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "use DGPS,head:%d", yaw_tmp);
+                _dcm_matrix.from_euler(roll, pitch, gps_heading_rad);
+                _omega_yaw_P.zero();
+                _flags.have_initial_yaw = true;
+                yaw_error = 0;
+            }
+        }
+    } else if (AP_AHRS_DCM::use_compass()) {
         /*
           we are using compass for yaw
          */
@@ -444,6 +472,7 @@ AP_AHRS_DCM::drift_correction_yaw(void)
             // the first compass value, which can be bad
             if (!_flags.have_initial_yaw && _compass->read()) {
                 float heading = _compass->calculate_heading(_dcm_matrix);
+//                GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "use compass head:%f", heading);
                 _dcm_matrix.from_euler(roll, pitch, heading);
                 _omega_yaw_P.zero();
                 _flags.have_initial_yaw = true;
@@ -693,7 +722,7 @@ AP_AHRS_DCM::drift_correction(float deltat)
         // waiting for more data
         return;
     }
-    
+
     bool using_gps_corrections = false;
     float ra_scale = 1.0f/(_ra_deltat*GRAVITY_MSS);
 

@@ -46,6 +46,7 @@ NOINLINE void Copter::send_heartbeat(mavlink_channel_t chan)
     base_mode = MAV_MODE_FLAG_STABILIZE_ENABLED;
     switch (control_mode) {
     case AUTO:
+    case POINT_ATOB:
     case RTL:
     case LOITER:
     case AVOID_ADSB:
@@ -211,13 +212,15 @@ void NOINLINE Copter::send_current_waypoint(mavlink_channel_t chan)
 void NOINLINE Copter::send_rangefinder(mavlink_channel_t chan)
 {
     // exit immediately if rangefinder is disabled
-    if (!rangefinder.has_data_orient(ROTATION_PITCH_270)) {
+    if (!rangefinder.has_data() && !flowmeter.has_data()) {
         return;
     }
     mavlink_msg_rangefinder_send(
             chan,
-            rangefinder.distance_cm_orient(ROTATION_PITCH_270) * 0.01f,
-            rangefinder.voltage_mv_orient(ROTATION_PITCH_270) * 0.001f);
+            rangefinder_state.alt_cm * 0.01f,
+            //rangefinder.voltage_mv() * 0.001f);
+            flowmeter_state.flowrate * 0.01f);
+    //flowmeter.flowrate() * 0.01f);
 }
 #endif
 

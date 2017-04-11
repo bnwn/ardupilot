@@ -43,7 +43,7 @@ extern const AP_HAL::HAL& hal;
  # define Debug(fmt, args ...)
 #endif
 
-AP_GPS_UBLOX::AP_GPS_UBLOX(AP_GPS &_gps, AP_GPS::GPS_State &_state, AP_HAL::UARTDriver *_port) :
+AP_GPS_UBLOX::AP_GPS_UBLOX(AP_GPS &_gps, AP_GPS::GPS_State &_state, AP_HAL::UARTDriver *_port, uint8_t is_dgps) :
     AP_GPS_Backend(_gps, _state, _port),
     _step(0),
     _msg_id(0),
@@ -65,6 +65,7 @@ AP_GPS_UBLOX::AP_GPS_UBLOX(AP_GPS &_gps, AP_GPS::GPS_State &_state, AP_HAL::UART
     _disable_counter(0),
     next_fix(AP_GPS::NO_FIX),
     _cfg_needs_save(false),
+    _is_dgps(is_dgps),
     noReceivedHdop(true),
     havePvtMsg(false)
 {
@@ -995,6 +996,10 @@ AP_GPS_UBLOX::_parse_gps(void)
         _last_vel_time         = _buffer.pvt.itow;
         state.ground_speed     = _buffer.pvt.gspeed*0.001f;          // m/s
         state.ground_course    = wrap_360(_buffer.pvt.head_mot * 1.0e-5f);       // Heading 2D deg * 100000
+        if (_is_dgps) {
+            state.heading = state.ground_course * 100;
+            state.have_heading_accuracy = true;
+        }
         state.have_vertical_velocity = true;
         state.velocity.x = _buffer.pvt.velN * 0.001f;
         state.velocity.y = _buffer.pvt.velE * 0.001f;
@@ -1042,6 +1047,10 @@ AP_GPS_UBLOX::_parse_gps(void)
         state.velocity.z = _buffer.velned.ned_down * 0.01f;
         state.ground_course = wrap_360(degrees(atan2f(state.velocity.y, state.velocity.x)));
         state.ground_speed = norm(state.velocity.y, state.velocity.x);
+        if (_is_dgps) {
+            state.heading = state.ground_course * 100;
+            state.have_heading_accuracy = true;
+        }
         state.have_speed_accuracy = true;
         state.speed_accuracy = _buffer.velned.speed_accuracy*0.01f;
 #if UBLOX_FAKE_3DLOCK

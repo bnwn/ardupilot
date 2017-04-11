@@ -125,5 +125,6 @@ Compass::learn_offsets(void)
             
         // set the new offsets
         _state[k].offset.set(new_offsets);
+        save_offsets(k);
     }
 }
