@@ -128,13 +128,9 @@ const AP_Param::GroupInfo SRV_Channels::var_info[] = {
 SRV_Channels::SRV_Channels(void)
 {
     channels = obj_channels;
-<<<<<<< HEAD
     p_can_servo_bm = &can_servo_bm;
     p_can_esc_bm = &can_esc_bm;
-    
-=======
 
->>>>>>> 4452b9e9e8918b4f464d916d8e70ba1c5e249031
     // set defaults from the parameter table
     AP_Param::setup_object_defaults(this, var_info);
 
