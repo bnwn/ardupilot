@@ -446,8 +446,8 @@ AP_AHRS_DCM::drift_correction_yaw(void)
             float yaw_error_rad = wrap_PI(gps_heading_rad - yaw);
             yaw_error = sinf(yaw_error_rad);
 
-            int16_t yaw_tmp = (int16_t)(_gps.get_heading() * 0.01f);
-            GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "use DGPS,head:%d", yaw_tmp);
+//            int16_t yaw_tmp = (int16_t)(_gps.get_heading() * 0.01f);
+//            GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "use DGPS,head:%d", yaw_tmp);
 
             if (!_flags.have_initial_yaw ||
                 yaw_deltat > 20 ||
