@@ -362,18 +362,19 @@ bool AP_Arming::gps_checks(bool report)
         }
     }
 
-    if ((checks_to_perform & ARMING_CHECK_ALL) || (checks_to_perform & ARMING_CHECK_GPS_CONFIG)) {
-        uint8_t first_unconfigured = gps.first_unconfigured_gps();
-        if (first_unconfigured != AP_GPS::GPS_ALL_CONFIGURED) {
-            if (report) {
-                GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_CRITICAL,
-                                                 "PreArm: GPS %d failing configuration checks",
-                                                  first_unconfigured + 1);
-                gps.broadcast_first_configuration_failure_reason();
-            }
-            return false;
-        }
-    }
+    // do not check gps config
+//    if ((checks_to_perform & ARMING_CHECK_ALL) || (checks_to_perform & ARMING_CHECK_GPS_CONFIG)) {
+//        uint8_t first_unconfigured = gps.first_unconfigured_gps();
+//        if (first_unconfigured != AP_GPS::GPS_ALL_CONFIGURED) {
+//            if (report) {
+//                GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_CRITICAL,
+//                                                 "PreArm: GPS %d failing configuration checks",
+//                                                  first_unconfigured + 1);
+//                gps.broadcast_first_configuration_failure_reason();
+//            }
+//            return false;
+//        }
+//    }
 
     // check GPSs are within 50m of each other and that blending is healthy
     if ((checks_to_perform & ARMING_CHECK_ALL) || (checks_to_perform & ARMING_CHECK_GPS_CONFIG)) {

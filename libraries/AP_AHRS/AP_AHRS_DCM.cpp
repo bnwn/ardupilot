@@ -450,6 +450,7 @@ AP_AHRS_DCM::drift_correction_yaw(void)
 //            GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "use DGPS,head:%d", yaw_tmp);
 
             if (!_flags.have_initial_yaw ||
+                !_flags.have_initial_gps_yaw ||
                 yaw_deltat > 20 ||
                     fabsf(yaw_error_rad) >= 1.047f) {
                 // reset DCM matrix based on current yaw
@@ -457,6 +458,7 @@ AP_AHRS_DCM::drift_correction_yaw(void)
                 _dcm_matrix.from_euler(roll, pitch, gps_heading_rad);
                 _omega_yaw_P.zero();
                 _flags.have_initial_yaw = true;
+                _flags.have_initial_gps_yaw = true;
                 yaw_error = 0;
             }
         }

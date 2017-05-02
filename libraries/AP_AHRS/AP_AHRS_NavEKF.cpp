@@ -132,6 +132,9 @@ void AP_AHRS_NavEKF::update_EKF2(void)
         }
         if (AP_HAL::millis() - start_time_ms > startup_delay_ms || _force_ekf) {
             _ekf2_started = EKF2.InitialiseFilter();
+            if (!_ekf2_started) {
+                GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "ekf2 init failure.");
+            }
             if (_force_ekf) {
                 return;
             }
